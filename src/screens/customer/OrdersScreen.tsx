@@ -1,0 +1,340 @@
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors, Radius, Shadow } from '../../constants/colors';
+import { useLanguageStore } from '../../store/languageStore';
+
+const MOCK_ORDERS = [
+  {
+    id: 'o1',
+    workerName: 'Sari Dewi',
+    workerPhoto: 'https://randomuser.me/api/portraits/women/45.jpg',
+    serviceType: 'helper',
+    date: '2026-04-15', startTime: '09:00', duration: 4,
+    address: 'Jl. Kemang Raya No.12, Jakarta Selatan',
+    totalPrice: 120000, depositPaid: 36000, remaining: 84000,
+    status: 'ongoing' as const,
+  },
+  {
+    id: 'o2',
+    workerName: 'Yanti Kusuma',
+    workerPhoto: 'https://randomuser.me/api/portraits/women/48.jpg',
+    serviceType: 'tutor',
+    date: '2026-04-14', startTime: '15:00', duration: 2,
+    address: 'Jl. Sudirman No.5, Jakarta Pusat',
+    totalPrice: 200000, depositPaid: 60000, remaining: 140000,
+    status: 'awaiting_confirmation' as const,
+  },
+  {
+    id: 'o3',
+    workerName: 'Rina Wulandari',
+    workerPhoto: 'https://randomuser.me/api/portraits/women/63.jpg',
+    serviceType: 'helper',
+    date: '2026-04-10', startTime: '10:00', duration: 3,
+    address: 'Jl. Cilandak KKO No.3, Jakarta Selatan',
+    totalPrice: 75000, depositPaid: 22500, remaining: 0,
+    status: 'completed' as const,
+  },
+  {
+    id: 'o4',
+    workerName: 'Nina Rahayu',
+    workerPhoto: 'https://randomuser.me/api/portraits/women/56.jpg',
+    serviceType: 'tutor',
+    date: '2026-04-08', startTime: '16:00', duration: 2,
+    address: 'Jl. Pondok Indah No.10, Jakarta Selatan',
+    totalPrice: 160000, depositPaid: 48000, remaining: 0,
+    status: 'cancelled' as const,
+  },
+];
+
+export default function OrdersScreen() {
+  const { t } = useLanguageStore();
+  const [tab, setTab] = useState<'active' | 'history'>('active');
+  const [orders, setOrders] = useState(MOCK_ORDERS);
+
+  const STATUS_CONFIG = {
+    pending:               { label: t.orders.pending,        color: Colors.gray      },
+    confirmed:             { label: t.orders.confirmed,      color: Colors.accent    },
+    ongoing:               { label: t.orders.ongoing,        color: Colors.dark      },
+    awaiting_confirmation: { label: t.orders.awaitingConfirm,color: Colors.accent    },
+    completed:             { label: t.orders.completed,      color: Colors.success   },
+    cancelled:             { label: t.orders.cancelled,      color: Colors.grayLight },
+  } as const;
+
+  const TABS = [
+    { key: 'active'  as const, label: t.orders.active },
+    { key: 'history' as const, label: t.orders.history },
+  ];
+
+  const list = tab === 'active'
+    ? orders.filter((o) => ['pending', 'confirmed', 'ongoing', 'awaiting_confirmation'].includes(o.status))
+    : orders.filter((o) => ['completed', 'cancelled'].includes(o.status));
+
+  const confirmCompletion = (orderId: string) => {
+    Alert.alert(
+      t.orders.confirmTitle,
+      t.orders.confirmMsg,
+      [
+        { text: t.orders.notYet, style: 'cancel' },
+        {
+          text: t.orders.yesConfirm,
+          onPress: () => {
+            setOrders((prev) =>
+              prev.map((o) => o.id === orderId ? { ...o, status: 'completed' as const, remaining: 0 } : o)
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <View style={s.root}>
+      {/* Header */}
+      <View style={s.header}>
+        <Text style={s.title}>{t.orders.myOrders}</Text>
+      </View>
+
+      {/* Tabs */}
+      <View style={s.tabsWrap}>
+        <View style={s.tabsRow}>
+          {TABS.map((tb) => (
+            <TouchableOpacity
+              key={tb.key}
+              style={s.tab}
+              onPress={() => setTab(tb.key)}
+              activeOpacity={0.7}
+            >
+              <Text style={[s.tabText, tab === tb.key && s.tabTextActive]}>{tb.label}</Text>
+              {tab === tb.key && <View style={s.tabUnderline} />}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
+        {list.length === 0 ? (
+          <View style={s.empty}>
+            <Ionicons name="file-tray-outline" size={40} color={Colors.grayLight} />
+            <Text style={s.emptyTitle}>{t.orders.noOrders}</Text>
+            <Text style={s.emptyText}>{t.orders.noOrdersDesc}</Text>
+          </View>
+        ) : (
+          list.map((order) => {
+            const cfg = STATUS_CONFIG[order.status];
+            const isAwaitingConfirmation = order.status === 'awaiting_confirmation';
+            const isCompleted = order.status === 'completed';
+            const isCancelled = order.status === 'cancelled';
+
+            return (
+              <TouchableOpacity key={order.id} style={s.card} activeOpacity={0.95}>
+                {/* Awaiting confirmation banner */}
+                {isAwaitingConfirmation && (
+                  <View style={s.confirmBanner}>
+                    <Ionicons name="time-outline" size={14} color={Colors.accent} />
+                    <Text style={s.confirmBannerText}>{t.orders.confirmBannerText}</Text>
+                  </View>
+                )}
+
+                {/* Top: avatar + name + status */}
+                <View style={s.cardTop}>
+                  {order.workerPhoto ? (
+                    <Image source={{ uri: order.workerPhoto }} style={s.avatar} />
+                  ) : (
+                    <View style={[s.avatar, s.avatarFallback]}>
+                      <Ionicons name="person" size={18} color={Colors.grayLight} />
+                    </View>
+                  )}
+                  <View style={s.cardTopMid}>
+                    <Text style={s.workerName}>{order.workerName}</Text>
+                    <Text style={s.serviceType}>
+                      {order.serviceType === 'tutor' ? 'Les Privat' : 'ART'}
+                    </Text>
+                  </View>
+                  <Text style={[s.statusText, { color: cfg.color }]}>{cfg.label}</Text>
+                </View>
+
+                <View style={s.divider} />
+
+                {/* Detail rows */}
+                <View style={s.detailsBlock}>
+                  <View style={s.detailRow}>
+                    <Ionicons name="calendar-outline" size={13} color={Colors.grayLight} />
+                    <Text style={s.detailText}>{order.date} · {order.startTime} · {order.duration} {t.orders.hours}</Text>
+                  </View>
+                  <View style={s.detailRow}>
+                    <Ionicons name="location-outline" size={13} color={Colors.grayLight} />
+                    <Text style={s.detailText} numberOfLines={1}>{order.address}</Text>
+                  </View>
+                </View>
+
+                {/* Deposit breakdown */}
+                <View style={s.depositBlock}>
+                  <View style={s.depositRow}>
+                    <View style={s.depositLabelRow}>
+                      <Ionicons name="shield-checkmark-outline" size={12} color={Colors.accent} />
+                      <Text style={s.depositLabel}>{t.orders.depositPaid}</Text>
+                    </View>
+                    <Text style={s.depositPaid}>Rp {order.depositPaid.toLocaleString('id-ID')}</Text>
+                  </View>
+                  {order.remaining > 0 && (
+                    <View style={s.depositRow}>
+                      <Text style={s.depositLabel}>{t.orders.remainingEscrow}</Text>
+                      <Text style={s.depositRemaining}>Rp {order.remaining.toLocaleString('id-ID')}</Text>
+                    </View>
+                  )}
+                  <View style={[s.depositRow, { borderTopWidth: 1, borderTopColor: Colors.border, paddingTop: 8, marginTop: 4 }]}>
+                    <Text style={s.totalLabel}>{t.orders.total}</Text>
+                    <Text style={s.totalPrice}>Rp {order.totalPrice.toLocaleString('id-ID')}</Text>
+                  </View>
+                </View>
+
+                {/* Action buttons */}
+                {isAwaitingConfirmation && (
+                  <TouchableOpacity
+                    style={s.confirmBtn}
+                    onPress={() => confirmCompletion(order.id)}
+                    activeOpacity={0.85}
+                  >
+                    <Ionicons name="checkmark-circle-outline" size={16} color={Colors.white} />
+                    <Text style={s.confirmBtnText}>{t.orders.confirmWork}</Text>
+                  </TouchableOpacity>
+                )}
+
+                {isCompleted && (
+                  <View style={s.actionRow}>
+                    <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}>
+                      <Ionicons name="star-outline" size={13} color={Colors.accent} />
+                      <Text style={[s.btnSecondaryText, { color: Colors.accent }]}>{t.orders.review}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}>
+                      <Text style={s.btnPrimaryText}>{t.orders.reorder}</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {isCancelled && (
+                  <View style={s.refundNote}>
+                    <Ionicons name="information-circle-outline" size={13} color={Colors.grayLight} />
+                    <Text style={s.refundNoteText}>{t.orders.refundNote}</Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })
+        )}
+        <View style={{ height: 32 }} />
+      </ScrollView>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  root: { flex: 1, backgroundColor: Colors.white },
+
+  header: {
+    paddingTop: 56, paddingBottom: 16, paddingHorizontal: 20,
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1, borderBottomColor: Colors.border,
+  },
+  title: { fontSize: 22, fontWeight: '700', color: Colors.dark },
+
+  tabsWrap: { paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: Colors.border },
+  tabsRow:  { flexDirection: 'row' },
+  tab:      { paddingRight: 28, paddingBottom: 12, paddingTop: 14, position: 'relative' },
+  tabText:  { fontSize: 14, fontWeight: '500', color: Colors.grayLight },
+  tabTextActive:  { color: Colors.dark, fontWeight: '700' },
+  tabUnderline: {
+    position: 'absolute', bottom: -1, left: 0, right: 28,
+    height: 2, backgroundColor: Colors.accent, borderRadius: 1,
+  },
+
+  list: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
+
+  empty: { alignItems: 'center', paddingTop: 72, gap: 10 },
+  emptyTitle:{ fontSize: 16, fontWeight: '500', color: Colors.dark },
+  emptyText: { fontSize: 13, color: Colors.gray },
+
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: Colors.border,
+    padding: 16, marginBottom: 12,
+    overflow: 'hidden',
+    ...Shadow.sm,
+  },
+
+  confirmBanner: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: Colors.accentLight,
+    marginHorizontal: -16, marginTop: -16,
+    paddingHorizontal: 16, paddingVertical: 10,
+    marginBottom: 14,
+    borderBottomWidth: 1, borderBottomColor: Colors.accent + '30',
+  },
+  confirmBannerText: { flex: 1, fontSize: 12, fontWeight: '600', color: Colors.accent },
+
+  cardTop:    { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: { width: 44, height: 44, borderRadius: 22 },
+  avatarFallback: {
+    backgroundColor: Colors.section,
+    borderWidth: 2, borderColor: Colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cardTopMid:  { flex: 1 },
+  workerName:  { fontSize: 14, fontWeight: '700', color: Colors.darkMid, marginBottom: 2 },
+  serviceType: { fontSize: 12, color: Colors.grayLight },
+  statusText:  { fontSize: 12, fontWeight: '700' },
+
+  divider: { height: 1, backgroundColor: Colors.border, marginVertical: 14 },
+
+  detailsBlock: {
+    backgroundColor: Colors.section,
+    borderRadius: Radius.md, paddingHorizontal: 14, paddingVertical: 12,
+    gap: 8, marginBottom: 12,
+  },
+  detailRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  detailText:  { flex: 1, fontSize: 12, color: Colors.gray },
+
+  // Deposit breakdown
+  depositBlock: {
+    gap: 6, marginBottom: 14,
+  },
+  depositRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  depositLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  depositLabel: { fontSize: 12, color: Colors.gray },
+  depositPaid:  { fontSize: 12, fontWeight: '600', color: Colors.dark },
+  depositRemaining: { fontSize: 12, fontWeight: '600', color: Colors.grayLight },
+  totalLabel: { fontSize: 13, color: Colors.gray },
+  totalPrice: { fontSize: 17, fontWeight: '700', color: Colors.dark },
+
+  confirmBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: Colors.accent,
+    borderRadius: Radius.pill, paddingVertical: 13,
+  },
+  confirmBtnText: { fontSize: 14, fontWeight: '700', color: Colors.white },
+
+  actionRow: { flexDirection: 'row', gap: 10 },
+  btnSecondary: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, paddingVertical: 10,
+    borderRadius: Radius.pill,
+    borderWidth: 1, borderColor: Colors.accent + '50',
+    backgroundColor: Colors.accentLight,
+  },
+  btnSecondaryText: { fontSize: 13, fontWeight: '600' },
+  btnPrimary: {
+    flex: 1, alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 10, borderRadius: Radius.pill,
+    backgroundColor: Colors.accent,
+  },
+  btnPrimaryText: { fontSize: 13, fontWeight: '700', color: Colors.white },
+
+  refundNote: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: Colors.section, borderRadius: Radius.sm,
+    paddingHorizontal: 12, paddingVertical: 8,
+  },
+  refundNoteText: { fontSize: 11, color: Colors.gray },
+});

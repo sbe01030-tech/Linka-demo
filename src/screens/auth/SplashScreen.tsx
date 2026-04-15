@@ -1,0 +1,226 @@
+import React, { useEffect, useRef } from 'react';
+import {
+  View, Text, StyleSheet, Animated, Dimensions,
+} from 'react-native';
+import Svg, { Line, Rect, Circle, Ellipse, Path } from 'react-native-svg';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types';
+import { useAuthStore } from '../../store/authStore';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
+
+const { width: W, height: H } = Dimensions.get('window');
+// Scale from design canvas (390 × 844) to actual screen
+const sx = W / 390;
+const sy = H / 844;
+
+const BRAND = '#00C853';
+
+// Network nodes — position in 390×844 canvas
+const NODES = [
+  { id: 1, cx: 460, cy: -30,  r: 220, delay: 0,   opacity: 0.07 },
+  { id: 2, cx: -40, cy: 760,  r: 190, delay: 100,  opacity: 0.09 },
+  { id: 3, cx: -10, cy: 310,  r: 96,  delay: 200,  opacity: 0.14 },
+  { id: 4, cx: 360, cy: 640,  r: 72,  delay: 280,  opacity: 0.11 },
+  { id: 5, cx: 148, cy: 148,  r: 42,  delay: 350,  opacity: 0.18 },
+  { id: 6, cx: 318, cy: 370,  r: 24,  delay: 400,  opacity: 0.22 },
+  { id: 7, cx: 120, cy: 620,  r: 16,  delay: 450,  opacity: 0.16 },
+];
+
+// Network edges connecting nodes
+const EDGES = [
+  { id: 'e1', x1: 460, y1: -30,  x2: 148, y2: 148,  delay: 550 },
+  { id: 'e2', x1: 148, y1: 148,  x2: -10, y2: 310,  delay: 620 },
+  { id: 'e3', x1: 148, y1: 148,  x2: 318, y2: 370,  delay: 670 },
+  { id: 'e4', x1: -10, y1: 310,  x2: -40, y2: 760,  delay: 720 },
+  { id: 'e5', x1: 318, y1: 370,  x2: 360, y2: 640,  delay: 770 },
+  { id: 'e6', x1: 360, y1: 640,  x2: -40, y2: 760,  delay: 820 },
+  { id: 'e7', x1: 120, y1: 620,  x2: 360, y2: 640,  delay: 860 },
+  { id: 'e8', x1: -10, y1: 310,  x2: 120, y2: 620,  delay: 900 },
+  { id: 'e9', x1: 120, y1: 620,  x2: -40, y2: 760,  delay: 940 },
+];
+
+// Animated SVG Line
+const AnimatedLine = Animated.createAnimatedComponent(Line);
+
+export default function SplashScreen({ navigation }: Props) {
+  const { isLoggedIn, user } = useAuthStore();
+
+  // Per-node animated values
+  const nodeScales   = useRef(NODES.map(() => new Animated.Value(0))).current;
+  const nodeOpacity  = useRef(NODES.map(() => new Animated.Value(0))).current;
+  // Per-edge animated values
+  const edgeOpacity  = useRef(EDGES.map(() => new Animated.Value(0))).current;
+  // Logo text
+  const charOpacity  = useRef(new Animated.Value(0)).current;
+  const charY        = useRef(new Animated.Value(20)).current;
+  const textOpacity  = useRef(new Animated.Value(0)).current;
+  const textY        = useRef(new Animated.Value(18)).current;
+
+  useEffect(() => {
+    // Animate each node with a spring
+    NODES.forEach((node, i) => {
+      const delay = node.delay;
+      Animated.parallel([
+        Animated.spring(nodeScales[i], {
+          toValue: 1, delay,
+          speed: 8, bounciness: 14,
+          useNativeDriver: true,
+        }),
+        Animated.timing(nodeOpacity[i], {
+          toValue: 1, delay,
+          duration: 400, useNativeDriver: true,
+        }),
+      ]).start();
+    });
+
+    // Animate each edge
+    EDGES.forEach((edge, i) => {
+      Animated.timing(edgeOpacity[i], {
+        toValue: 0.18, delay: edge.delay,
+        duration: 500, useNativeDriver: true,
+      }).start();
+    });
+
+    // Character slides up
+    Animated.parallel([
+      Animated.timing(charOpacity, { toValue: 1, delay: 600, duration: 700, useNativeDriver: true }),
+      Animated.timing(charY,       { toValue: 0, delay: 600, duration: 700, useNativeDriver: true }),
+    ]).start();
+
+    // Text slides up after nodes appear
+    Animated.parallel([
+      Animated.timing(textOpacity, {
+        toValue: 1, delay: 1000,
+        duration: 600, useNativeDriver: true,
+      }),
+      Animated.timing(textY, {
+        toValue: 0, delay: 1000,
+        duration: 600, useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Navigate after animation completes
+    const timer = setTimeout(
+      () => {
+        if (!isLoggedIn) navigation.replace('Login'); // Onboarding disabled — re-enable with 'Onboarding' when needed
+        else if (user?.role === 'helper' || user?.role === 'tutor') navigation.replace('WorkerTabs');
+        else navigation.replace('CustomerTabs');
+      },
+      3800
+    );
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <View style={s.root}>
+
+      {/* ── White circle nodes ── */}
+      {NODES.map((node, i) => {
+        const diameter = node.r * 2 * sx;
+        return (
+          <Animated.View
+            key={node.id}
+            style={[
+              s.circle,
+              {
+                width:           diameter,
+                height:          diameter,
+                borderRadius:    node.r * sx,
+                left:            node.cx * sx - node.r * sx,
+                top:             node.cy * sy - node.r * sy,
+                backgroundColor: `rgba(255,255,255,${node.opacity})`,
+                opacity:         nodeOpacity[i],
+                transform:       [{ scale: nodeScales[i] }],
+              },
+            ]}
+          />
+        );
+      })}
+
+      {/* ── SVG edge lines (white, low opacity) ── */}
+      <Svg
+        style={StyleSheet.absoluteFillObject}
+        viewBox="0 0 390 844"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        {EDGES.map((edge, i) => (
+          <AnimatedLine
+            key={edge.id}
+            x1={edge.x1} y1={edge.y1}
+            x2={edge.x2} y2={edge.y2}
+            stroke="white"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            opacity={edgeOpacity[i]}
+          />
+        ))}
+      </Svg>
+
+      {/* ── Character ── */}
+      <Animated.View style={{ opacity: charOpacity, transform: [{ translateY: charY }] }}>
+        <Svg width={160 * sx} height={160 * sx} viewBox="0 0 160 160">
+          <Rect x="46" y="100" width="68" height="50" rx="24" fill="white" />
+          <Circle cx="80" cy="74" r="50" fill="white" />
+          <Circle cx="64" cy="72" r="10" fill="#1a1a2e" />
+          <Circle cx="96" cy="72" r="10" fill="#1a1a2e" />
+          <Circle cx="69" cy="67" r="4"  fill="white" />
+          <Circle cx="101" cy="67" r="4" fill="white" />
+          <Ellipse cx="50"  cy="87" rx="12" ry="7" fill="#FFB3C6" fillOpacity="0.5" />
+          <Ellipse cx="110" cy="87" rx="12" ry="7" fill="#FFB3C6" fillOpacity="0.5" />
+          <Path d="M67,92 Q80,104 93,92" stroke="#1a1a2e" strokeWidth="3" strokeLinecap="round" fill="none" />
+          <Circle cx="72" cy="132" r="5" fill="#A8BEFC" />
+          <Circle cx="88" cy="132" r="5" fill="#A8BEFC" />
+          <Line x1="77" y1="132" x2="83" y2="132" stroke="#A8BEFC" strokeWidth="2.5" />
+        </Svg>
+      </Animated.View>
+
+      {/* ── Logo + tagline ── */}
+      <Animated.View
+        style={[
+          s.textWrap,
+          { opacity: textOpacity, transform: [{ translateY: textY }] },
+        ]}
+      >
+        <Text style={s.logo}>Linka</Text>
+        <Text style={s.taglineRow}>Links Make Life</Text>
+      </Animated.View>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: BRAND,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  circle: {
+    position: 'absolute',
+  },
+
+  textWrap: {
+    alignItems: 'center',
+    gap: 0,
+  },
+
+  logo: {
+    fontFamily:    'Nunito_900Black',
+    fontSize:       72,
+    color:         '#FFFFFF',
+    letterSpacing: -0.5,
+    includeFontPadding: false,
+  },
+
+  taglineRow: {
+    fontFamily: 'Nunito_600SemiBold',
+    fontSize:    15,
+    color:      'rgba(255,255,255,0.65)',
+    marginTop:  -14,
+    letterSpacing: 1.5,
+    textAlign: 'center',
+  },
+});
