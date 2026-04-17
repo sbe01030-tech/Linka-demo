@@ -1,11 +1,12 @@
 export type LangCode = 'id' | 'en' | 'ko' | 'zh' | 'ja';
 
-export const LANGUAGES: { code: LangCode; label: string; countryCode: string; color: string; nativeLabel: string }[] = [
-  { code: 'id', label: 'Indonesian', countryCode: 'ID', color: '#CC0001', nativeLabel: 'Bahasa Indonesia' },
-  { code: 'en', label: 'English',    countryCode: 'EN', color: '#3C3B6E', nativeLabel: 'English' },
-  { code: 'ko', label: 'Korean',     countryCode: 'KO', color: '#003478', nativeLabel: '한국어' },
-  { code: 'zh', label: 'Chinese',    countryCode: 'ZH', color: '#DE2910', nativeLabel: '中文' },
-  { code: 'ja', label: 'Japanese',   countryCode: 'JP', color: '#BC002D', nativeLabel: '日本語' },
+// twemoji: codepoint pair for https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/{twemoji}.png
+export const LANGUAGES: { code: LangCode; label: string; countryCode: string; color: string; nativeLabel: string; flag: string; flagCdn: string; twemoji: string }[] = [
+  { code: 'id', label: 'Indonesian', countryCode: 'ID', color: '#CC0001', nativeLabel: 'Bahasa Indonesia', flag: '🇮🇩', flagCdn: 'id', twemoji: '1f1ee-1f1e9' },
+  { code: 'en', label: 'English',    countryCode: 'EN', color: '#3C3B6E', nativeLabel: 'English',          flag: '🇺🇸', flagCdn: 'us', twemoji: '1f1fa-1f1f8' },
+  { code: 'ko', label: 'Korean',     countryCode: 'KO', color: '#003478', nativeLabel: '한국어',            flag: '🇰🇷', flagCdn: 'kr', twemoji: '1f1f0-1f1f7' },
+  { code: 'zh', label: 'Chinese',    countryCode: 'ZH', color: '#DE2910', nativeLabel: '中文',              flag: '🇨🇳', flagCdn: 'cn', twemoji: '1f1e8-1f1f3' },
+  { code: 'ja', label: 'Japanese',   countryCode: 'JP', color: '#BC002D', nativeLabel: '日本語',            flag: '🇯🇵', flagCdn: 'jp', twemoji: '1f1ef-1f1f5' },
 ];
 
 export interface Translations {

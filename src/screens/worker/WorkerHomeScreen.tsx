@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Switch,
-  TouchableOpacity, Image,
+  TouchableOpacity, Image, Alert,
 } from 'react-native';
 import { C1, C2 } from '../../constants/photos';
 import { Ionicons } from '@expo/vector-icons';
@@ -57,9 +57,10 @@ const MOCK_SCHEDULE = [
 
 export default function WorkerHomeScreen() {
   const { user }  = useAuthStore();
-  const { t }     = useLanguageStore();
+  const { t, lang } = useLanguageStore();
   const [isOnline, setIsOnline] = useState(true);
   const [activeServices, setActiveServices] = useState<string[]>(['masak', 'bersih', 'cuci']);
+  const [requests, setRequests] = useState(MOCK_REQUESTS);
 
   const firstName = user?.name?.split(' ')[0] ?? '';
 
@@ -85,7 +86,11 @@ export default function WorkerHomeScreen() {
               <Text style={s.subGreeting}>{t.workerHome.readyHelper}</Text>
             </View>
           </View>
-          <TouchableOpacity style={s.notifBtn}>
+          <TouchableOpacity style={s.notifBtn} onPress={() => Alert.alert(
+            lang === 'ko' ? '알림' : lang === 'en' ? 'Notifications' : 'Notifikasi',
+            lang === 'ko' ? '새 알림이 없습니다.' : lang === 'en' ? 'No new notifications.' : 'Tidak ada notifikasi baru.',
+            [{ text: 'OK' }]
+          )}>
             <Ionicons name="notifications-outline" size={22} color={Colors.grayLight} />
             <View style={s.notifDot} />
           </TouchableOpacity>
@@ -186,7 +191,7 @@ export default function WorkerHomeScreen() {
         </View>
 
         {isOnline ? (
-          MOCK_REQUESTS.map((req) => (
+          requests.map((req) => (
             <View key={req.id} style={s.requestCard}>
               {/* Customer row */}
               <View style={s.reqTop}>
@@ -231,10 +236,28 @@ export default function WorkerHomeScreen() {
 
               {/* Actions */}
               <View style={s.reqActions}>
-                <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}>
+                <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}
+                  onPress={() => Alert.alert(
+                    lang === 'ko' ? '요청 거절' : lang === 'en' ? 'Reject Request' : 'Tolak Permintaan',
+                    lang === 'ko' ? `${req.customerName}의 요청을 거절하시겠습니까?` : lang === 'en' ? `Reject ${req.customerName}'s request?` : `Tolak permintaan dari ${req.customerName}?`,
+                    [
+                      { text: lang === 'ko' ? '아니오' : lang === 'en' ? 'No' : 'Tidak', style: 'cancel' },
+                      { text: lang === 'ko' ? '거절' : lang === 'en' ? 'Reject' : 'Tolak', style: 'destructive',
+                        onPress: () => setRequests((prev) => prev.filter((r) => r.id !== req.id)) },
+                    ]
+                  )}
+                >
                   <Text style={s.btnSecondaryText}>{t.workerHome.reject}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}>
+                <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}
+                  onPress={() => {
+                    Alert.alert(
+                      lang === 'ko' ? '요청 수락' : lang === 'en' ? 'Request Accepted' : 'Permintaan Diterima',
+                      lang === 'ko' ? `${req.customerName}의 요청을 수락했습니다!` : lang === 'en' ? `You accepted ${req.customerName}'s request!` : `Permintaan dari ${req.customerName} diterima!`,
+                      [{ text: 'OK', onPress: () => setRequests((prev) => prev.filter((r) => r.id !== req.id)) }]
+                    );
+                  }}
+                >
                   <Ionicons name="checkmark" size={15} color={Colors.white} />
                   <Text style={s.btnPrimaryText}>{t.workerHome.accept}</Text>
                 </TouchableOpacity>

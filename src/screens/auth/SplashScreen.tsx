@@ -18,13 +18,13 @@ const BRAND = '#00C853';
 
 // Network nodes — position in 390×844 canvas
 const NODES = [
-  { id: 1, cx: 460, cy: -30,  r: 220, delay: 0,   opacity: 0.07 },
-  { id: 2, cx: -40, cy: 760,  r: 190, delay: 100,  opacity: 0.09 },
-  { id: 3, cx: -10, cy: 310,  r: 96,  delay: 200,  opacity: 0.14 },
-  { id: 4, cx: 360, cy: 640,  r: 72,  delay: 280,  opacity: 0.11 },
-  { id: 5, cx: 148, cy: 148,  r: 42,  delay: 350,  opacity: 0.18 },
-  { id: 6, cx: 318, cy: 370,  r: 24,  delay: 400,  opacity: 0.22 },
-  { id: 7, cx: 120, cy: 620,  r: 16,  delay: 450,  opacity: 0.16 },
+  { id: 1, cx: 460, cy: -30,  r: 220, delay: 0,   opacity: 0.22 },
+  { id: 2, cx: -40, cy: 760,  r: 190, delay: 100,  opacity: 0.26 },
+  { id: 3, cx: -10, cy: 310,  r: 96,  delay: 200,  opacity: 0.34 },
+  { id: 4, cx: 360, cy: 640,  r: 72,  delay: 280,  opacity: 0.28 },
+  { id: 5, cx: 148, cy: 148,  r: 42,  delay: 350,  opacity: 0.38 },
+  { id: 6, cx: 318, cy: 370,  r: 24,  delay: 400,  opacity: 0.44 },
+  { id: 7, cx: 120, cy: 620,  r: 16,  delay: 450,  opacity: 0.36 },
 ];
 
 // Network edges connecting nodes

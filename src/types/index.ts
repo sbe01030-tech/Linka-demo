@@ -82,14 +82,20 @@ export type RootStackParamList = {
   RoleSelect: undefined;
   CustomerTabs: undefined;
   WorkerTabs: undefined;
+  WorkerSearch: { serviceType?: 'regular' | 'onetime' };
   WorkerDetail: { workerId: string };
   ChatDetail: { chatId: string; name: string; photo?: string; role: string };
+  CreatePost: undefined;
+  PostDetail: { postId: string; title: string; category: string; author: string; time: string; preview: string; comments: number; likes: number };
+  EditProfile: undefined;
+  HelpFAQ: undefined;
+  Review: { orderId: string; workerName: string; workerPhoto?: string };
 };
 
 export type CustomerTabParamList = {
   Home: undefined;
   Community: undefined;
-  Map: undefined;
+  Map: { expanded?: boolean; serviceType?: 'regular' | 'onetime' } | undefined;
   ChatList: undefined;
   Profile: undefined;
 };

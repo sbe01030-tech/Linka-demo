@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -102,7 +102,11 @@ export default function LoginScreen({ navigation }: Props) {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={s.forgotRow}>
+          <TouchableOpacity style={s.forgotRow} onPress={() => Alert.alert(
+            t.auth.forgotPassword,
+            'Hubungi customer service kami di WhatsApp:\n0812-LINKA-CS',
+            [{ text: 'OK' }]
+          )}>
             <Text style={s.forgot}>{t.auth.forgotPassword}</Text>
           </TouchableOpacity>
 

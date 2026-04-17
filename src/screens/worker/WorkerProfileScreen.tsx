@@ -1,10 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
 import LanguageSelector from '../../components/common/LanguageSelector';
+import { RootStackParamList } from '../../types';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 type MenuIcon =
   | 'create-outline'       | 'car-outline'
@@ -13,9 +18,12 @@ type MenuIcon =
   | 'help-circle-outline';
 
 export default function WorkerProfileScreen() {
+  const navigation = useNavigation<Nav>();
   const { user, logout } = useAuthStore();
-  const { t }            = useLanguageStore();
-  const isDriver         = user?.role === 'tutor';
+  const { t, lang }      = useLanguageStore();
+  const isDriver         = false;
+
+  const COMING_SOON = lang === 'ko' ? '준비 중입니다.' : lang === 'en' ? 'Coming soon.' : 'Segera hadir.';
 
   const STATS = [
     { label: t.workerProfile.totalJobs,  value: `${user?.totalJobs ?? 0}` },
@@ -55,7 +63,7 @@ export default function WorkerProfileScreen() {
           <View style={s.avatar}>
             <Text style={s.avatarInitial}>{initial}</Text>
           </View>
-          <TouchableOpacity style={s.cameraBtn}>
+          <TouchableOpacity style={s.cameraBtn} onPress={() => Alert.alert('', COMING_SOON)}>
             <Ionicons name="camera-outline" size={13} color={Colors.gray} />
           </TouchableOpacity>
         </View>
@@ -97,7 +105,7 @@ export default function WorkerProfileScreen() {
             </View>
           )}
           {/* Secondary: rounded-full border border-gray-200 */}
-          <TouchableOpacity style={s.changeBtn} activeOpacity={0.8}>
+          <TouchableOpacity style={s.changeBtn} activeOpacity={0.8} onPress={() => Alert.alert(t.workerProfile.myRate, COMING_SOON)}>
             <Text style={s.changeBtnText}>{t.workerProfile.change}</Text>
           </TouchableOpacity>
         </View>
@@ -107,7 +115,13 @@ export default function WorkerProfileScreen() {
       <View style={s.menuSection}>
         <View style={s.menuList}>
           {MENU.map((item, i) => (
-            <TouchableOpacity key={i} style={s.menuRow} activeOpacity={0.75}>
+            <TouchableOpacity key={i} style={s.menuRow} activeOpacity={0.75}
+              onPress={() => {
+                if (i === 0) navigation.navigate('EditProfile');
+                else if (i === 5) navigation.navigate('HelpFAQ');
+                else Alert.alert(item.label, COMING_SOON);
+              }}
+            >
               <Ionicons name={item.icon} size={16} color={Colors.grayLight} />
               <Text style={s.menuLabel}>{item.label}</Text>
               <Ionicons name="chevron-forward" size={14} color={Colors.grayLight} />

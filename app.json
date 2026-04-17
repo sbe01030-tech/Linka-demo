@@ -51,6 +51,18 @@
           "locationWhenInUsePermission": "Linka needs location access to show nearby partners."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a79cf953-6804-49ec-bcef-e0824432eb64"
+      }
+    },
+    "owner": "maxpark",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a79cf953-6804-49ec-bcef-e0824432eb64"
+    }
   }
 }

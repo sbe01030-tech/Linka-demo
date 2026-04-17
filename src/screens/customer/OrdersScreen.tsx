@@ -3,7 +3,12 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } fr
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types';
 import { W1, W2, W3, W4 } from '../../constants/photos';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const MOCK_ORDERS = [
   {
@@ -49,6 +54,7 @@ const MOCK_ORDERS = [
 ];
 
 export default function OrdersScreen() {
+  const navigation = useNavigation<Nav>();
   const { t } = useLanguageStore();
   const [tab, setTab] = useState<'active' | 'history'>('active');
   const [orders, setOrders] = useState(MOCK_ORDERS);
@@ -204,11 +210,15 @@ export default function OrdersScreen() {
 
                 {isCompleted && (
                   <View style={s.actionRow}>
-                    <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}>
+                    <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}
+                      onPress={() => navigation.navigate('Review', { orderId: order.id, workerName: order.workerName, workerPhoto: order.workerPhoto })}
+                    >
                       <Ionicons name="star-outline" size={13} color={Colors.accent} />
                       <Text style={[s.btnSecondaryText, { color: Colors.accent }]}>{t.orders.review}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}>
+                    <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}
+                      onPress={() => navigation.navigate('WorkerDetail', { workerId: order.id })}
+                    >
                       <Text style={s.btnPrimaryText}>{t.orders.reorder}</Text>
                     </TouchableOpacity>
                   </View>

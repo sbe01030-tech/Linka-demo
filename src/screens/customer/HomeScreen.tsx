@@ -1,96 +1,22 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Image,
+  TouchableOpacity, Image, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import Svg, { Rect, Circle, Ellipse, Path, Line } from 'react-native-svg';
+import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
 import { Colors, Radius, Shadow } from '../../constants/colors';
-import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3, AVATAR_STACK } from '../../constants/photos';
+import { AVATAR_STACK, W1, W2, W3, W4, W5, W6 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
 import { LangCode } from '../../i18n';
-import { Worker, RootStackParamList, CommunityPost } from '../../types';
+import { RootStackParamList, CommunityPost } from '../../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-// ── Mock data ──────────────────────────────────────────────────
-const MOCK_WORKERS: Worker[] = [
-  {
-    id: 'w1', name: 'Sari Dewi', phone: '0812-3456-7890', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'regular',
-    photo: W1,
-    pricePerHour: 30000, location: 'Kebayoran, Jakarta Selatan',
-    bio: 'ART berpengalaman 10 tahun, ahli memasak dan bersih-bersih rumah.',
-    skills: ['Masak', 'Cuci', 'Setrika', 'Beberes'],
-    isAvailable: true, rating: 5.0, totalJobs: 312, isVerified: true, experienceYears: 10,
-  },
-  {
-    id: 'w2', name: 'Rina Wulandari', phone: '0813-4567-8901', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'regular',
-    photo: W2,
-    pricePerHour: 25000, location: 'Cilandak, Jakarta Selatan',
-    bio: 'Spesialis masak menu sehat & bersih-bersih. Sudah 7 tahun pengalaman.',
-    skills: ['Masak Sehat', 'Beberes', 'Cuci'],
-    isAvailable: true, rating: 4.9, totalJobs: 198, isVerified: true, experienceYears: 7,
-  },
-  {
-    id: 'w3', name: 'Dewi Anggraeni', phone: '0816-7890-1234', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'both',
-    photo: W3,
-    pricePerHour: 28000, location: 'Kemang, Jakarta Selatan',
-    bio: 'Berpengalaman di keluarga dengan anak kecil. Sabar & telaten.',
-    skills: ['Masak', 'Cuci', 'Perawatan Anak'],
-    isAvailable: true, rating: 4.7, totalJobs: 156, isVerified: true, experienceYears: 5,
-  },
-  {
-    id: 'w4', name: 'Fitri Handayani', phone: '0815-6789-0123', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'regular',
-    photo: W4,
-    pricePerHour: 27000, location: 'Fatmawati, Jakarta Selatan',
-    bio: 'Teliti dan jujur. Sudah kerja di 3 keluarga expat. Bisa masak Western & Indonesia.',
-    skills: ['Masak', 'Setrika', 'Beberes'],
-    isAvailable: true, rating: 4.9, totalJobs: 227, isVerified: true, experienceYears: 8,
-  },
-  {
-    id: 'w5', name: 'Indah Lestari', phone: '0817-8901-2345', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'special',
-    photo: W5,
-    pricePerHour: 35000, location: 'Pondok Indah, Jakarta Selatan',
-    bio: 'Spesialis bersih-bersih deep cleaning & pasca renovasi. Cepat dan rapi.',
-    skills: ['Deep Cleaning', 'Beberes', 'Cuci'],
-    isAvailable: true, rating: 4.8, totalJobs: 89, isVerified: true, experienceYears: 3,
-  },
-  {
-    id: 'w6', name: 'Nur Aini Susanti', phone: '0818-9012-3456', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'special',
-    photo: W6,
-    pricePerHour: 40000, location: 'BSD, Tangerang Selatan',
-    bio: 'Jasa catering & masak untuk acara keluarga. Bisa menu pernikahan, arisan, dan ulang tahun.',
-    skills: ['Catering', 'Masak Acara', 'Masak Indonesia'],
-    isAvailable: true, rating: 4.9, totalJobs: 143, isVerified: true, experienceYears: 6,
-  },
-  {
-    id: 'w7', name: 'Siti Rahayu', phone: '0819-0123-4567', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'regular',
-    photo: W7,
-    pricePerHour: 22000, location: 'Ciputat, Tangerang Selatan',
-    bio: 'ART tinggal atau harian. Pengalaman 5 tahun, suka bekerja dengan anak-anak.',
-    skills: ['Masak', 'Cuci', 'Jaga Anak', 'Setrika'],
-    isAvailable: true, rating: 4.6, totalJobs: 178, isVerified: false, experienceYears: 5,
-  },
-  {
-    id: 'w8', name: 'Wulandari Putri', phone: '0820-1234-5678', role: 'helper', serviceType: 'helper',
-    serviceFrequency: 'special',
-    photo: W8,
-    pricePerHour: 45000, location: 'Pamulang, Tangerang Selatan',
-    bio: 'Spesialis setrika & laundry kilat. Baju selesai rapi dalam 1 hari.',
-    skills: ['Setrika', 'Cuci', 'Laundry Kilat'],
-    isAvailable: false, rating: 4.8, totalJobs: 302, isVerified: true, experienceYears: 7,
-  },
-];
 
 function getPreviewPosts(lang: LangCode): CommunityPost[] {
   if (lang === 'ko') return [
@@ -110,18 +36,35 @@ function getPreviewPosts(lang: LangCode): CommunityPost[] {
   ];
 }
 
-const CATEGORY_META = [
-  { id: 'helper',    key: 'catArt',      icon: 'home-outline',                 bg: '#FFF5E6', color: '#F59E0B' },
-  { id: 'cooking',   key: 'catCooking',  icon: 'restaurant-outline',           bg: '#FFF1EC', color: '#F97316' },
-  { id: 'cleaning',  key: 'catCleaning', icon: 'sparkles-outline',             bg: '#ECFDF5', color: '#10B981' },
-  { id: 'custom',    key: 'catCustom',   icon: 'options-outline',              bg: '#FFFBEB', color: '#D97706' },
-  { id: 'tutor',     key: 'catTutor',    icon: 'school-outline',               bg: '#EFF6FF', color: '#3B82F6' },
-  { id: 'homevisit', key: 'catVisit',    icon: 'navigate-circle-outline',      bg: '#F5F3FF', color: '#8B5CF6' },
-  { id: 'english',   key: 'catEnglish',  icon: 'chatbubble-ellipses-outline',  bg: '#F0F9FF', color: '#0EA5E9' },
-  { id: 'more',      key: 'catMore',     icon: 'apps-outline',                 bg: '#F8F8F8', color: '#9CA3AF' },
-] as const;
+const CATEGORY_META: {
+  id: string; key: string; icon: string; gradient: readonly [string, string];
+}[] = [
+  { id: 'helper',    key: 'catArt',      icon: 'home',           gradient: ['#FFF4C2', '#FFE080'] },
+  { id: 'cooking',   key: 'catCooking',  icon: 'restaurant',     gradient: ['#FFD8D4', '#FFAEAA'] },
+  { id: 'cleaning',  key: 'catCleaning', icon: 'sparkles',       gradient: ['#C4F5DC', '#82E4B0'] },
+  { id: 'custom',    key: 'catCustom',   icon: 'settings-sharp', gradient: ['#E4DEFF', '#C4B4FF'] },
+  { id: 'tutor',     key: 'catTutor',    icon: 'book',           gradient: ['#CCE8FF', '#98CCFF'] },
+  { id: 'homevisit', key: 'catVisit',    icon: 'location',       gradient: ['#FFD8EA', '#FFB0CC'] },
+  { id: 'english',   key: 'catEnglish',  icon: 'globe',          gradient: ['#C8F4F2', '#8AE4DF'] },
+  { id: 'more',      key: 'catMore',     icon: 'apps',           gradient: ['#EAEAEF', '#CECEDA'] },
+];
 
 const AVATAR_URLS = AVATAR_STACK;
+
+interface MockWorker {
+  id: string; name: string; photo: string; location: string;
+  rating: number; pricePerHour: number; totalJobs: number;
+  isAvailable: boolean; skills: string[]; isVerified: boolean;
+}
+
+const MOCK_WORKERS: MockWorker[] = [
+  { id:'w1', name:'Sari Dewi',       photo:W1, location:'Kebayoran Baru', rating:5.0, pricePerHour:30000, totalJobs:312, isAvailable:true,  skills:['Beberes','Masak','Cuci'],   isVerified:true  },
+  { id:'w2', name:'Rina Wulandari',  photo:W2, location:'Cilandak',       rating:4.9, pricePerHour:25000, totalJobs:198, isAvailable:true,  skills:['Masak Sehat','Beberes'],    isVerified:true  },
+  { id:'w3', name:'Dewi Anggraeni',  photo:W3, location:'Kemang',         rating:4.7, pricePerHour:28000, totalJobs:143, isAvailable:true,  skills:['Masak','Cuci'],             isVerified:true  },
+  { id:'w4', name:'Fitri Handayani', photo:W4, location:'Fatmawati',      rating:4.9, pricePerHour:27000, totalJobs:227, isAvailable:true,  skills:['Setrika','Beberes'],        isVerified:true  },
+  { id:'w5', name:'Indah Lestari',   photo:W5, location:'Pondok Indah',   rating:4.8, pricePerHour:35000, totalJobs:89,  isAvailable:false, skills:['Deep Cleaning'],            isVerified:true  },
+  { id:'w6', name:'Nur Aini',        photo:W6, location:'BSD City',       rating:4.8, pricePerHour:24000, totalJobs:89,  isAvailable:true,  skills:['Cuci','Setrika'],           isVerified:true  },
+];
 
 // ── Tiny mascot face (chest-level, 36×36) ──────────────────────
 function MascotFace({ size = 36 }: { size?: number }) {
@@ -141,26 +84,16 @@ function MascotFace({ size = 36 }: { size?: number }) {
 }
 
 type ServiceTab = 'regular' | 'special';
-type FilterTab  = 'all' | 'helper';
 
 export default function HomeScreen() {
   const navigation  = useNavigation<Nav>();
   const { user }    = useAuthStore();
   const { t, lang } = useLanguageStore();
-  const [svcTab,    setSvcTab]    = useState<ServiceTab>('regular');
-  const [filterTab, setFilterTab] = useState<FilterTab>('all');
+  const [svcTab, setSvcTab] = useState<ServiceTab>('regular');
 
   const firstName = user?.name?.split(' ')[0] ?? 'Bunda';
   const MOCK_POSTS = getPreviewPosts(lang);
-  const CATEGORIES = CATEGORY_META.map((c) => ({ ...c, label: t.homeNew[c.key] }));
-
-  const filtered = MOCK_WORKERS.filter((w) => {
-    const matchSvc = svcTab === 'regular'
-      ? (w.serviceFrequency === 'regular' || w.serviceFrequency === 'both')
-      : (w.serviceFrequency === 'special' || w.serviceFrequency === 'both');
-    const matchFilter = filterTab === 'all' || w.serviceType === filterTab;
-    return matchSvc && matchFilter;
-  });
+  const CATEGORIES = CATEGORY_META.map((c) => ({ ...c, label: (t.homeNew as any)[c.key] as string }));
 
   return (
     <ScrollView style={s.root} showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
@@ -174,38 +107,66 @@ export default function HomeScreen() {
             <Text style={s.logoText}>Linka</Text>
           </View>
           {/* Location */}
-          <TouchableOpacity style={s.locationChip}>
+          <TouchableOpacity style={s.locationChip} onPress={() => (navigation as any).navigate('Map')}>
             <Ionicons name="location" size={13} color={Colors.accent} />
             <Text style={s.locationText}>{t.homeNew.locationDefault}</Text>
             <Ionicons name="chevron-down" size={12} color={Colors.gray} />
           </TouchableOpacity>
           {/* Bell */}
-          <TouchableOpacity style={s.bellBtn}>
+          <TouchableOpacity style={s.bellBtn} onPress={() => Alert.alert(
+            lang === 'ko' ? '알림' : lang === 'en' ? 'Notifications' : 'Notifikasi',
+            lang === 'ko' ? '새 알림이 없습니다.' : lang === 'en' ? 'No new notifications.' : 'Tidak ada notifikasi baru.',
+            [{ text: 'OK' }]
+          )}>
             <Ionicons name="notifications-outline" size={22} color={Colors.dark} />
             <View style={s.bellDot} />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* ── Service type tabs ── */}
-      <View style={s.svcTabsWrap}>
+      {/* ── Service type buttons ── */}
+      <View style={s.svcBtnWrap}>
         <TouchableOpacity
-          style={[s.svcTab, svcTab === 'regular' && s.svcTabActive]}
-          onPress={() => setSvcTab('regular')}
+          style={[s.svcBtn, svcTab === 'regular' && s.svcBtnActive]}
+          onPress={() => { setSvcTab('regular'); (navigation as any).navigate('Map', { expanded: true, serviceType: 'regular' }); }}
+          activeOpacity={0.75}
         >
           <Ionicons name="calendar-outline" size={15}
-            color={svcTab === 'regular' ? Colors.accent : Colors.grayLight} />
-          <Text style={[s.svcTabText, svcTab === 'regular' && s.svcTabTextActive]}>{t.homeNew.serviceRegular}</Text>
+            color={svcTab === 'regular' ? Colors.accent : Colors.gray} />
+          <Text style={[s.svcBtnText, svcTab === 'regular' && s.svcBtnTextActive]}>{t.homeNew.serviceRegular}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[s.svcTab, svcTab === 'special' && s.svcTabActive]}
-          onPress={() => setSvcTab('special')}
+          style={[s.svcBtn, svcTab === 'special' && s.svcBtnActive]}
+          onPress={() => { setSvcTab('special'); (navigation as any).navigate('Map', { expanded: true, serviceType: 'onetime' }); }}
+          activeOpacity={0.75}
         >
           <Ionicons name="flash-outline" size={15}
-            color={svcTab === 'special' ? Colors.accent : Colors.grayLight} />
-          <Text style={[s.svcTabText, svcTab === 'special' && s.svcTabTextActive]}>{t.homeNew.serviceSpecial}</Text>
+            color={svcTab === 'special' ? Colors.accent : Colors.gray} />
+          <Text style={[s.svcBtnText, svcTab === 'special' && s.svcBtnTextActive]}>{t.homeNew.serviceSpecial}</Text>
         </TouchableOpacity>
       </View>
+
+      {/* ── Find nearby helper banner ── */}
+      <TouchableOpacity
+        style={s.nearbyBanner}
+        activeOpacity={0.88}
+        onPress={() => (navigation as any).navigate('Map')}
+      >
+        <View style={s.nearbyLeft}>
+          <View style={s.nearbyIconWrap}>
+            <Ionicons name="location" size={18} color={Colors.white} />
+          </View>
+          <View>
+            <Text style={s.nearbyTitle}>
+              {lang === 'ko' ? '내 주변 헬퍼 찾기' : lang === 'en' ? 'Find Helpers Nearby' : 'Cari Helper Terdekat'}
+            </Text>
+            <Text style={s.nearbySub}>
+              {lang === 'ko' ? '지도에서 근처 헬퍼를 확인하세요' : lang === 'en' ? 'See helpers on the map' : 'Lihat helper di peta'}
+            </Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
+      </TouchableOpacity>
 
       {/* ── Category grid ── */}
       <View style={s.catSection}>
@@ -214,16 +175,17 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={cat.id}
               style={s.catItem}
-              activeOpacity={0.7}
-              onPress={() => {
-                if (cat.id === 'helper' || cat.id === 'cooking' || cat.id === 'cleaning' || cat.id === 'custom') {
-                  setFilterTab('helper');
-                }
-              }}
+              activeOpacity={0.75}
+              onPress={() => (navigation as any).navigate('Map', { expanded: true })}
             >
-              <View style={[s.catIconWrap, { backgroundColor: cat.bg }]}>
-                <Ionicons name={cat.icon as any} size={24} color={cat.color} />
-              </View>
+              <LinearGradient
+                colors={cat.gradient}
+                start={{ x: 0.15, y: 0 }}
+                end={{ x: 0.85, y: 1 }}
+                style={s.catIconWrap}
+              >
+                <Ionicons name={cat.icon as any} size={24} color="#FFFFFF" />
+              </LinearGradient>
               <Text style={s.catLabel}>{cat.label}</Text>
             </TouchableOpacity>
           ))}
@@ -231,7 +193,7 @@ export default function HomeScreen() {
       </View>
 
       {/* ── Available count bar ── */}
-      <TouchableOpacity style={s.countBar} activeOpacity={0.85}>
+      <TouchableOpacity style={s.countBar} activeOpacity={0.85} onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
         <View style={s.avatarStack}>
           {AVATAR_URLS.map((uri, i) => (
             <Image key={i} source={{ uri }} style={[s.stackAvatar, { marginLeft: i === 0 ? 0 : -10, zIndex: 3 - i }]} />
@@ -241,13 +203,60 @@ export default function HomeScreen() {
         <Ionicons name="chevron-forward" size={16} color={Colors.accent} />
       </TouchableOpacity>
 
+      {/* ── Recommended workers ── */}
+      <View style={s.workerSection}>
+        <View style={s.sectionHeader}>
+          <Text style={s.sectionTitle}>
+            {lang === 'ko' ? '추천 헬퍼' : lang === 'en' ? 'Recommended' : 'Helper Terdekat'}
+          </Text>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
+            <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.workerScroll}>
+          {MOCK_WORKERS.map((w) => (
+            <TouchableOpacity
+              key={w.id}
+              style={s.workerCard}
+              activeOpacity={0.88}
+              onPress={() => navigation.navigate('WorkerDetail', { workerId: w.id })}
+            >
+              <View style={s.workerPhotoWrap}>
+                <Image source={{ uri: w.photo }} style={s.workerPhoto} />
+                <View style={[s.workerAvailDot, { backgroundColor: w.isAvailable ? Colors.success : Colors.grayLight }]} />
+              </View>
+              <View style={s.workerNameRow}>
+                <Text style={s.workerName} numberOfLines={1}>{w.name.split(' ')[0]}</Text>
+                {w.isVerified && <Ionicons name="checkmark-circle" size={12} color={Colors.accent} />}
+              </View>
+              <View style={s.workerLocRow}>
+                <Ionicons name="location-outline" size={10} color={Colors.grayLight} />
+                <Text style={s.workerLoc} numberOfLines={1}>{w.location}</Text>
+              </View>
+              <View style={s.workerSkillsRow}>
+                {w.skills.slice(0, 2).map((sk) => (
+                  <View key={sk} style={s.workerSkillTag}><Text style={s.workerSkillText}>{sk}</Text></View>
+                ))}
+              </View>
+              <View style={s.workerPriceRow}>
+                <Ionicons name="star" size={11} color="#F59E0B" />
+                <Text style={s.workerRating}>{w.rating.toFixed(1)}</Text>
+                <Text style={s.workerPriceDot}>·</Text>
+                <Text style={s.workerPrice}>Rp {(w.pricePerHour / 1000).toFixed(0)}rb</Text>
+                <Text style={s.workerPriceUnit}>/jam</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
       {/* ── Ad card ── */}
       <View style={s.adCard}>
         <View style={s.adBadge}><Text style={s.adBadgeText}>AD</Text></View>
         <View style={s.adContent}>
           <Text style={s.adTitle}>{t.homeNew.adTitle}</Text>
           <Text style={s.adSub}>{t.homeNew.adSub}</Text>
-          <TouchableOpacity style={s.adBtn}>
+          <TouchableOpacity style={s.adBtn} onPress={() => Alert.alert('Linka Pro', lang === 'ko' ? '프리미엄 서비스 준비 중입니다.' : lang === 'en' ? 'Premium service coming soon.' : 'Layanan premium segera hadir.')}>
             <Text style={s.adBtnText}>{t.homeNew.adCta}</Text>
           </TouchableOpacity>
         </View>
@@ -260,12 +269,14 @@ export default function HomeScreen() {
       <View style={s.communitySection}>
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>{t.homeNew.popularPosts}</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Community')}>
             <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
           </TouchableOpacity>
         </View>
         {MOCK_POSTS.map((post) => (
-          <TouchableOpacity key={post.id} style={s.postCard} activeOpacity={0.85}>
+          <TouchableOpacity key={post.id} style={s.postCard} activeOpacity={0.85}
+            onPress={() => navigation.navigate('PostDetail', { postId: post.id, title: post.title, category: post.category, author: post.author, time: post.time, preview: post.preview, comments: post.comments, likes: post.likes })}
+          >
             <View style={s.postTop}>
               <View style={[s.categoryTag, post.category === 'popular' && s.categoryTagHot]}>
                 <Text style={[s.categoryTagText, post.category === 'popular' && s.categoryTagTextHot]}>
@@ -294,128 +305,8 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* ── Filter tabs ── */}
-      <View style={s.filterTabsWrap}>
-        {([
-          { id: 'all',    label: t.homeNew.filterAll },
-          { id: 'helper', label: t.homeNew.filterHelper },
-        ] as { id: FilterTab; label: string }[]).map((tb) => (
-          <TouchableOpacity
-            key={tb.id}
-            style={[s.filterTab, filterTab === tb.id && s.filterTabActive]}
-            onPress={() => setFilterTab(tb.id)}
-          >
-            <Text style={[s.filterTabText, filterTab === tb.id && s.filterTabTextActive]}>
-              {tb.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* ── Partner list ── */}
-      <View style={s.listSection}>
-        <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>
-            {svcTab === 'regular' ? t.homeNew.serviceRegular : t.homeNew.serviceSpecial}
-          </Text>
-          <Text style={s.sectionCount}>{filtered.length} {t.homeNew.activeCount}</Text>
-        </View>
-        {filtered.map((w, i) => (
-          <React.Fragment key={w.id}>
-            <WorkerCard
-              worker={w}
-              onPress={() => navigation.navigate('WorkerDetail', { workerId: w.id })}
-            />
-            {/* Inline ad every 3 cards */}
-            {(i + 1) % 3 === 0 && i < filtered.length - 1 && (
-              <View style={s.inlineAd}>
-                <Text style={s.adBadgeText2}>AD</Text>
-                <Text style={s.inlineAdText}>{t.homeNew.inlineAd}</Text>
-              </View>
-            )}
-          </React.Fragment>
-        ))}
-      </View>
-
       <View style={{ height: 32 }} />
     </ScrollView>
-  );
-}
-
-// ── Worker card ────────────────────────────────────────────────
-function WorkerCard({ worker, onPress }: { worker: Worker; onPress: () => void }) {
-  const { t } = useLanguageStore();
-  const isHelper = worker.serviceType === 'helper';
-  const accentColor = isHelper ? Colors.helperColor : Colors.tutorColor;
-  const accentBg    = isHelper ? Colors.helperLight : Colors.tutorLight;
-  const tags = isHelper ? (worker.skills ?? []) : (worker.subjects ?? []);
-
-  return (
-    <TouchableOpacity style={s.card} activeOpacity={0.93} onPress={onPress}>
-      <View style={s.cardLeft}>
-        {/* Safety badge */}
-        <View style={s.safetyBadge}>
-          <Ionicons name="shield-checkmark" size={10} color={Colors.accent} />
-          <Text style={s.safetyText}>{t.services.insurance}</Text>
-        </View>
-
-        {/* Avatar */}
-        <View style={s.avatarWrap}>
-          {worker.photo ? (
-            <Image source={{ uri: worker.photo }} style={s.avatar} />
-          ) : (
-            <View style={[s.avatar, s.avatarFallback]}>
-              <Ionicons name="person" size={22} color={Colors.grayLight} />
-            </View>
-          )}
-          <View style={[s.availDot, { backgroundColor: worker.isAvailable ? Colors.success : Colors.grayLight }]} />
-        </View>
-      </View>
-
-      <View style={s.cardInfo}>
-        <View style={s.nameRow}>
-          <Text style={s.workerName}>{worker.name}</Text>
-          {worker.isVerified && <Ionicons name="checkmark-circle" size={14} color={Colors.accent} />}
-          <View style={[s.typePill, { backgroundColor: accentBg }]}>
-            <Text style={[s.typePillText, { color: accentColor }]}>
-              {isHelper ? t.services.art : t.services.tutor}
-            </Text>
-          </View>
-        </View>
-
-        <View style={s.locationRow}>
-          <Ionicons name="location-outline" size={11} color={Colors.grayLight} />
-          <Text style={s.locationLabel}>{worker.location}</Text>
-          <Text style={s.dot}>·</Text>
-          <Ionicons name="briefcase-outline" size={11} color={Colors.grayLight} />
-          <Text style={s.locationLabel}>{worker.totalJobs}x</Text>
-        </View>
-
-        {/* Skill tags */}
-        <View style={s.tagsRow}>
-          {tags.slice(0, 3).map((tag) => (
-            <View key={tag} style={s.skillTag}>
-              <Text style={s.skillTagText}>{tag}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={s.cardFooter}>
-          <View style={s.ratingRow}>
-            <Ionicons name="star" size={12} color="#F59E0B" />
-            <Text style={s.ratingVal}>{worker.rating.toFixed(1)}</Text>
-            <Text style={s.ratingCount}>({worker.totalJobs})</Text>
-          </View>
-          <Text style={s.price}>
-            Rp {worker.pricePerHour.toLocaleString('id-ID')}<Text style={s.priceUnit}>{t.home.perHour}</Text>
-          </Text>
-        </View>
-      </View>
-
-      <TouchableOpacity style={s.heartBtn}>
-        <Ionicons name="heart-outline" size={20} color={Colors.grayLight} />
-      </TouchableOpacity>
-    </TouchableOpacity>
   );
 }
 
@@ -444,20 +335,26 @@ const s = StyleSheet.create({
     backgroundColor: Colors.danger, borderWidth: 1.5, borderColor: Colors.white,
   },
 
-  // Service tabs
-  svcTabsWrap: {
-    flexDirection: 'row',
+  // Service buttons
+  svcBtnWrap: {
+    flexDirection: 'row', gap: 10,
     backgroundColor: Colors.white,
+    paddingHorizontal: 16, paddingVertical: 12,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
-  svcTab: {
+  svcBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: 6, paddingVertical: 13,
-    borderBottomWidth: 2, borderBottomColor: 'transparent',
+    gap: 6, paddingVertical: 11,
+    borderRadius: Radius.pill,
+    borderWidth: 1.5, borderColor: Colors.borderMid,
+    backgroundColor: Colors.white,
   },
-  svcTabActive:     { borderBottomColor: Colors.accent },
-  svcTabText:       { fontSize: 14, fontWeight: '500', color: Colors.grayLight },
-  svcTabTextActive: { color: Colors.accent, fontWeight: '700' },
+  svcBtnActive: {
+    borderColor: Colors.accent,
+    backgroundColor: Colors.accentLight,
+  },
+  svcBtnText:       { fontSize: 14, fontWeight: '500', color: Colors.gray },
+  svcBtnTextActive: { color: Colors.accent, fontWeight: '700' },
 
   // Category grid
   catSection: {
@@ -468,15 +365,29 @@ const s = StyleSheet.create({
   catGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   catItem: { width: '25%', alignItems: 'center', marginBottom: 16, gap: 7 },
   catIconWrap: {
-    width: 56, height: 56, borderRadius: 16,
+    width: 56, height: 56, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     elevation: 2,
   },
   catLabel: { fontSize: 11, fontWeight: '500', color: Colors.dark, textAlign: 'center', lineHeight: 15 },
+
+  // Nearby banner
+  nearbyBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: Colors.accentLight,
+    marginHorizontal: 16, marginTop: 10, marginBottom: 2,
+    borderRadius: Radius.lg,
+    paddingHorizontal: 14, paddingVertical: 13,
+    borderWidth: 1, borderColor: Colors.accent + '30',
+  },
+  nearbyLeft:    { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  nearbyIconWrap:{ width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' },
+  nearbyTitle:   { fontSize: 13, fontWeight: '700', color: Colors.dark, marginBottom: 2 },
+  nearbySub:     { fontSize: 11, color: Colors.gray },
 
   // Count bar
   countBar: {
@@ -516,6 +427,34 @@ const s = StyleSheet.create({
   adBtnText: { fontSize: 12, fontWeight: '700', color: Colors.white },
   adMascotWrap: { marginLeft: 8 },
 
+  // Worker section
+  workerSection: {
+    backgroundColor: Colors.white, marginTop: 8,
+    paddingTop: 16, paddingBottom: 8,
+    borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
+  },
+  workerScroll: { paddingHorizontal: 16, gap: 10, paddingBottom: 4 },
+  workerCard: {
+    width: 136, backgroundColor: Colors.white,
+    borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border,
+    padding: 12, gap: 6, ...Shadow.sm,
+  },
+  workerPhotoWrap: { position: 'relative', alignSelf: 'center', marginBottom: 2 },
+  workerPhoto:     { width: 56, height: 56, borderRadius: 28 },
+  workerAvailDot:  { position: 'absolute', bottom: 1, right: 1, width: 11, height: 11, borderRadius: 5.5, borderWidth: 2, borderColor: Colors.white },
+  workerNameRow:   { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  workerName:      { fontSize: 13, fontWeight: '700', color: Colors.dark, flex: 1 },
+  workerLocRow:    { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  workerLoc:       { fontSize: 10, color: Colors.grayLight, flex: 1 },
+  workerSkillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  workerSkillTag:  { backgroundColor: Colors.section, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
+  workerSkillText: { fontSize: 9, color: Colors.gray },
+  workerPriceRow:  { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: 2 },
+  workerRating:    { fontSize: 11, fontWeight: '600', color: Colors.dark },
+  workerPriceDot:  { fontSize: 10, color: Colors.grayLight, marginHorizontal: 2 },
+  workerPrice:     { fontSize: 11, fontWeight: '700', color: Colors.accent },
+  workerPriceUnit: { fontSize: 10, color: Colors.grayLight },
+
   // Community
   communitySection: {
     backgroundColor: Colors.white, marginTop: 8,
@@ -550,88 +489,4 @@ const s = StyleSheet.create({
   postMetaRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   postMetaNum:   { fontSize: 11, color: Colors.grayLight },
 
-  // Filter tabs
-  filterTabsWrap: {
-    flexDirection: 'row', gap: 8,
-    backgroundColor: Colors.white, marginTop: 8,
-    paddingHorizontal: 16, paddingVertical: 12,
-    borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
-  },
-  filterTab: {
-    paddingHorizontal: 14, paddingVertical: 7,
-    borderRadius: Radius.pill, borderWidth: 1, borderColor: Colors.borderMid,
-    backgroundColor: Colors.white,
-  },
-  filterTabActive:     { backgroundColor: Colors.accent, borderColor: Colors.accent },
-  filterTabText:       { fontSize: 13, fontWeight: '500', color: Colors.gray },
-  filterTabTextActive: { color: Colors.white, fontWeight: '700' },
-
-  // List
-  listSection: { paddingHorizontal: 16, paddingTop: 12, gap: 10 },
-
-  // Worker card
-  card: {
-    flexDirection: 'row', gap: 12,
-    backgroundColor: Colors.white,
-    borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border,
-    padding: 14,
-    ...Shadow.sm,
-  },
-  cardLeft:  { alignItems: 'center', gap: 6 },
-  safetyBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 2,
-    backgroundColor: Colors.accentLight,
-    borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2,
-  },
-  safetyText: { fontSize: 9, fontWeight: '700', color: Colors.accent },
-  avatarWrap:   { position: 'relative' },
-  avatar:       { width: 56, height: 56, borderRadius: 28 },
-  avatarFallback: {
-    backgroundColor: Colors.section, borderWidth: 2, borderColor: Colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  availDot: {
-    position: 'absolute', bottom: 1, right: 1,
-    width: 12, height: 12, borderRadius: 6,
-    borderWidth: 2, borderColor: Colors.white,
-  },
-
-  cardInfo: { flex: 1 },
-  nameRow:  { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 4, flexWrap: 'wrap' },
-  workerName: { fontSize: 15, fontWeight: '700', color: Colors.darkMid },
-  typePill:   { borderRadius: Radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
-  typePillText: { fontSize: 10, fontWeight: '700' },
-
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 6 },
-  locationLabel: { fontSize: 11, color: Colors.grayLight },
-  dot: { fontSize: 11, color: Colors.grayLight },
-
-  tagsRow: { flexDirection: 'row', gap: 5, flexWrap: 'wrap', marginBottom: 8 },
-  skillTag: {
-    backgroundColor: Colors.section, borderRadius: 4,
-    paddingHorizontal: 8, paddingVertical: 3,
-  },
-  skillTagText: { fontSize: 11, color: Colors.gray },
-
-  cardFooter:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  ratingRow:   { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  ratingVal:   { fontSize: 13, fontWeight: '600', color: Colors.dark },
-  ratingCount: { fontSize: 11, color: Colors.grayLight },
-  price:       { fontSize: 14, fontWeight: '700', color: Colors.accent },
-  priceUnit:   { fontSize: 11, fontWeight: '400', color: Colors.gray },
-
-  heartBtn: {
-    width: 32, height: 32,
-    alignItems: 'center', justifyContent: 'center',
-  },
-
-  // Inline ad
-  inlineAd: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    backgroundColor: Colors.section, borderRadius: Radius.md,
-    paddingHorizontal: 12, paddingVertical: 10,
-    borderWidth: 1, borderColor: Colors.border,
-  },
-  adBadgeText2: { fontSize: 9, fontWeight: '700', color: Colors.grayLight },
-  inlineAdText: { flex: 1, fontSize: 11, color: Colors.gray, lineHeight: 16 },
 });

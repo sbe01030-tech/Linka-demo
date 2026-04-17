@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  TextInput, KeyboardAvoidingView, Platform, Image,
+  TextInput, KeyboardAvoidingView, Platform, Image, Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -71,7 +71,11 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
           <Text style={s.headerName}>{name}</Text>
           <Text style={[s.headerRole, { color: roleColor }]}>{roleLabel} · {t.chat.online}</Text>
         </View>
-        <TouchableOpacity style={s.callBtn}>
+        <TouchableOpacity style={s.callBtn} onPress={() => Alert.alert(
+          t.chat.title,
+          'Fitur panggilan segera hadir.',
+          [{ text: 'OK' }]
+        )}>
           <Ionicons name="call-outline" size={20} color={Colors.accent} />
         </TouchableOpacity>
       </View>
@@ -115,7 +119,7 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
 
       {/* Input bar */}
       <View style={s.inputBar}>
-        <TouchableOpacity style={s.attachBtn}>
+        <TouchableOpacity style={s.attachBtn} onPress={() => Alert.alert('', 'Fitur lampiran segera hadir.', [{ text: 'OK' }])}>
           <Ionicons name="add-circle-outline" size={24} color={Colors.grayLight} />
         </TouchableOpacity>
         <TextInput

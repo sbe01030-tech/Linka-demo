@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Modal, FlatList, Pressable,
+  Modal, FlatList, Pressable, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { LANGUAGES, LangCode } from '../../i18n';
 import { useLanguageStore } from '../../store/languageStore';
@@ -12,9 +13,14 @@ interface Props {
   variant?: 'button' | 'row';
 }
 
+// Twemoji PNG — renders exactly like emoji but as a real image, works on all devices
+const twemojiUrl = (code: string) =>
+  `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${code}.png`;
+
 export default function LanguageSelector({ variant = 'button' }: Props) {
   const { lang, t, setLang } = useLanguageStore();
   const [visible, setVisible] = useState(false);
+  const insets = useSafeAreaInsets();
   const current = LANGUAGES.find((l) => l.code === lang)!;
 
   const select = (code: LangCode) => { setLang(code); setVisible(false); };
@@ -22,29 +28,24 @@ export default function LanguageSelector({ variant = 'button' }: Props) {
   return (
     <>
       {variant === 'button' ? (
-        // Pill variant — bg-gray-50 rounded-full, used on white header backgrounds
         <TouchableOpacity style={s.pillBtn} onPress={() => setVisible(true)} activeOpacity={0.75}>
-          <Ionicons name="globe-outline" size={13} color={Colors.grayLight} />
+          <Image source={{ uri: twemojiUrl(current.twemoji) }} style={s.pillFlag} />
           <Text style={s.pillCode}>{current.code.toUpperCase()}</Text>
           <Ionicons name="chevron-down" size={10} color={Colors.grayLight} />
         </TouchableOpacity>
       ) : (
-        // Row variant — matches bg-gray-50 rounded-xl menu list item pattern
         <TouchableOpacity style={s.row} onPress={() => setVisible(true)} activeOpacity={0.75}>
           <Ionicons name="globe-outline" size={16} color={Colors.grayLight} />
           <Text style={s.rowLabel}>{t.profile.language}</Text>
-          <View style={[s.flagBadgeSm, { backgroundColor: current.color }]}>
-            <Text style={s.flagCodeSm}>{current.countryCode}</Text>
-          </View>
+          <Image source={{ uri: twemojiUrl(current.twemoji) }} style={s.rowFlag} />
           <Text style={s.rowValue}>{current.nativeLabel}</Text>
           <Ionicons name="chevron-forward" size={14} color={Colors.grayLight} />
         </TouchableOpacity>
       )}
 
-      <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
+      <Modal visible={visible} transparent animationType="slide" onRequestClose={() => setVisible(false)}>
         <Pressable style={s.overlay} onPress={() => setVisible(false)}>
-          <Pressable style={s.sheet} onPress={() => {}}>
-            {/* Handle */}
+          <Pressable style={[s.sheet, { paddingBottom: Math.max(insets.bottom, 24) }]} onPress={() => {}}>
             <View style={s.handle} />
             <Text style={s.sheetTitle}>{t.lang.selectLanguage}</Text>
 
@@ -55,31 +56,29 @@ export default function LanguageSelector({ variant = 'button' }: Props) {
                 const active = item.code === lang;
                 return (
                   <TouchableOpacity
-                    style={s.langItem}
+                    style={[s.langItem, active && s.langItemActive]}
                     onPress={() => select(item.code)}
                     activeOpacity={0.7}
                   >
-                    <View style={[s.flagBadge, { backgroundColor: item.color }]}>
-                      <Text style={s.flagCode}>{item.countryCode}</Text>
-                    </View>
+                    <Image source={{ uri: twemojiUrl(item.twemoji) }} style={s.langFlag} />
                     <View style={{ flex: 1 }}>
-                      {/* text-sm font-bold */}
                       <Text style={[s.langNative, active && s.langNativeActive]}>
                         {item.nativeLabel}
                       </Text>
-                      {/* text-xs text-gray-400 */}
                       <Text style={s.langEnglish}>{item.label}</Text>
                     </View>
-                    {active && (
-                      // Active: rounded-full bg-black checkmark
+                    {active ? (
                       <View style={s.checkCircle}>
-                        <Ionicons name="checkmark" size={13} color={Colors.white} />
+                        <Ionicons name="checkmark" size={14} color={Colors.white} />
                       </View>
+                    ) : (
+                      <View style={s.checkCircleEmpty} />
                     )}
                   </TouchableOpacity>
                 );
               }}
               ItemSeparatorComponent={() => <View style={s.sep} />}
+              scrollEnabled={false}
             />
           </Pressable>
         </Pressable>
@@ -89,58 +88,62 @@ export default function LanguageSelector({ variant = 'button' }: Props) {
 }
 
 const s = StyleSheet.create({
-  // Pill variant: bg-gray-50 rounded-full border border-gray-100
   pillBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: Colors.section,
-    paddingHorizontal: 11, paddingVertical: 7,
+    paddingHorizontal: 10, paddingVertical: 6,
     borderRadius: Radius.pill,
     borderWidth: 1, borderColor: Colors.border,
   },
+  pillFlag: { width: 15, height: 15 },
   pillCode: { fontSize: 12, fontWeight: '600', color: Colors.dark },
 
-  // Row variant — matches the menu-row pattern in Profile screens
   row: {
     flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 16, paddingVertical: 14,
     gap: 12,
   },
   rowLabel: { flex: 1, fontSize: 14, color: Colors.dark, fontWeight: '400' },
+  rowFlag:  { width: 19, height: 19 },
   rowValue: { fontSize: 13, color: Colors.gray, marginRight: 2 },
 
-  // Modal
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: Colors.white,
-    borderTopLeftRadius: 20, borderTopRightRadius: 20,
-    paddingBottom: 44, paddingTop: 12,
+    borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    paddingTop: 12,
     ...Shadow.lg,
   },
   handle: {
     width: 36, height: 4, borderRadius: 2,
-    backgroundColor: Colors.border, alignSelf: 'center', marginBottom: 16,
+    backgroundColor: Colors.border, alignSelf: 'center', marginBottom: 20,
   },
   sheetTitle: {
-    fontSize: 16, fontWeight: '400', color: Colors.dark,
+    fontSize: 16, fontWeight: '600', color: Colors.dark,
     textAlign: 'center', marginBottom: 8, paddingHorizontal: 20,
   },
 
-  // Language items
   langItem: {
-    flexDirection: 'row', alignItems: 'center', gap: 14,
+    flexDirection: 'row', alignItems: 'center', gap: 16,
     paddingHorizontal: 24, paddingVertical: 15,
   },
-  langFlag:   { fontSize: 24 },
-  // text-sm font-bold text-gray-800
-  langNative: { fontSize: 14, fontWeight: '700', color: Colors.darkMid, marginBottom: 1 },
+  langItemActive: {
+    backgroundColor: Colors.accentLight,
+  },
+  langFlag: { width: 28, height: 28 },
+  langNative: { fontSize: 15, fontWeight: '700', color: Colors.darkMid, marginBottom: 2 },
   langNativeActive: { color: Colors.dark },
-  // text-xs text-gray-400
-  langEnglish: { fontSize: 12, color: Colors.grayLight },
-  // rounded-full bg-black
+  langEnglish: { fontSize: 13, color: Colors.grayLight },
+
   checkCircle: {
-    width: 22, height: 22, borderRadius: 11,
+    width: 24, height: 24, borderRadius: 12,
     backgroundColor: Colors.accent,
     alignItems: 'center', justifyContent: 'center',
   },
-  sep: { height: 1, backgroundColor: Colors.border, marginHorizontal: 24 },
+  checkCircleEmpty: {
+    width: 24, height: 24, borderRadius: 12,
+    borderWidth: 1.5, borderColor: Colors.border,
+  },
+
+  sep: { height: 1, backgroundColor: Colors.border, marginLeft: 80 },
 });

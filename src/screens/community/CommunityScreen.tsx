@@ -4,10 +4,14 @@ import {
   TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
 import { LangCode } from '../../i18n';
-import { CommunityPost } from '../../types';
+import { CommunityPost, RootStackParamList } from '../../types';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 type CategoryKey = 'all' | 'popular' | 'chat' | 'tips' | 'ask' | 'announce';
 
@@ -54,6 +58,7 @@ function getPosts(lang: LangCode): PostData[] {
 }
 
 export default function CommunityScreen() {
+  const navigation = useNavigation<Nav>();
   const { t, lang } = useLanguageStore();
   const [activeTab, setActiveTab]  = useState<CategoryKey>('all');
   const [searchText, setSearchText] = useState('');
@@ -86,7 +91,7 @@ export default function CommunityScreen() {
       <View style={s.header}>
         <View style={s.headerRow}>
           <Text style={s.pageTitle}>{t.community.title}</Text>
-          <TouchableOpacity style={s.writeBtn}>
+          <TouchableOpacity style={s.writeBtn} onPress={() => navigation.navigate('CreatePost')}>
             <Ionicons name="pencil" size={14} color={Colors.white} />
             <Text style={s.writeBtnText}>{t.community.writeBtn}</Text>
           </TouchableOpacity>
@@ -140,7 +145,9 @@ export default function CommunityScreen() {
             const showAd = (i + 1) % 4 === 0 && i < filtered.length - 1;
             return (
               <React.Fragment key={post.id}>
-                <TouchableOpacity style={s.postCard} activeOpacity={0.85}>
+                <TouchableOpacity style={s.postCard} activeOpacity={0.85}
+                onPress={() => navigation.navigate('PostDetail', { postId: post.id, title: post.title, category: post.category, author: post.author, time: post.time, preview: post.preview, comments: post.comments, likes: post.likes })}
+              >
                   <View style={s.postTop}>
                     <View style={[s.catTag, { backgroundColor: tagStyle.bg }]}>
                       <Text style={[s.catTagText, { color: tagStyle.color }]}>
@@ -182,7 +189,7 @@ export default function CommunityScreen() {
       </ScrollView>
 
       {/* FAB write button */}
-      <TouchableOpacity style={s.fab} activeOpacity={0.85}>
+      <TouchableOpacity style={s.fab} activeOpacity={0.85} onPress={() => navigation.navigate('CreatePost')}>
         <Ionicons name="create-outline" size={22} color={Colors.white} />
       </TouchableOpacity>
     </View>

@@ -4,7 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../types';
 import { C1, C2, C3 } from '../../constants/photos';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
 const MOCK_WORKER_ORDERS = [
   {
@@ -40,6 +45,7 @@ const MOCK_WORKER_ORDERS = [
 type OrderStatus = 'upcoming' | 'awaiting_customer' | 'completed';
 
 export default function WorkerOrdersScreen() {
+  const navigation = useNavigation<Nav>();
   const { user } = useAuthStore();
   const { t }    = useLanguageStore();
 
@@ -194,7 +200,14 @@ export default function WorkerOrdersScreen() {
                 {/* CTA buttons */}
                 {order.status === 'upcoming' && (
                   <View style={s.actionsRow}>
-                    <TouchableOpacity style={s.chatBtn} activeOpacity={0.8}>
+                    <TouchableOpacity style={s.chatBtn} activeOpacity={0.8}
+                      onPress={() => navigation.navigate('ChatDetail', {
+                        chatId: order.id,
+                        name: order.customerName,
+                        photo: order.customerPhoto,
+                        role: 'customer',
+                      })}
+                    >
                       <Ionicons name="chatbubble-ellipses-outline" size={14} color={Colors.accent} />
                       <Text style={s.chatBtnText}>Chat</Text>
                     </TouchableOpacity>

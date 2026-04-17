@@ -28,6 +28,13 @@ import ChatListScreen   from '../screens/chat/ChatListScreen';
 import ChatDetailScreen from '../screens/chat/ChatDetailScreen';
 import MapScreen        from '../screens/map/MapScreen';
 
+import CreatePostScreen  from '../screens/community/CreatePostScreen';
+import PostDetailScreen  from '../screens/community/PostDetailScreen';
+import EditProfileScreen from '../screens/profile/EditProfileScreen';
+import HelpFAQScreen     from '../screens/help/HelpFAQScreen';
+import ReviewScreen        from '../screens/customer/ReviewScreen';
+import WorkerSearchScreen from '../screens/customer/WorkerSearchScreen';
+
 import { RootStackParamList } from '../types';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -168,16 +175,26 @@ export default function Navigation() {
             <Stack.Screen name="Login"      component={LoginScreen} />
             <Stack.Screen name="Register"   component={RegisterScreen} />
           </>
-        ) : (user?.role === 'helper' || user?.role === 'tutor') ? (
+        ) : user?.role === 'helper' ? (
           <>
-            <Stack.Screen name="WorkerTabs"  component={WorkerTabs} />
-            <Stack.Screen name="ChatDetail"  component={ChatDetailScreen} options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="WorkerTabs"   component={WorkerTabs} />
+            <Stack.Screen name="ChatDetail"   component={ChatDetailScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="EditProfile"  component={EditProfileScreen} options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="HelpFAQ"      component={HelpFAQScreen}     options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="CreatePost"   component={CreatePostScreen}  options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="PostDetail"   component={PostDetailScreen}  options={{ animation: 'slide_from_right' }} />
           </>
         ) : (
           <>
-            <Stack.Screen name="CustomerTabs" component={CustomerTabs} />
-            <Stack.Screen name="WorkerDetail" component={WorkerDetailScreen} options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="CustomerTabs"  component={CustomerTabs} />
+            <Stack.Screen name="WorkerSearch"  component={WorkerSearchScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="WorkerDetail"  component={WorkerDetailScreen}  options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="ChatDetail"   component={ChatDetailScreen}   options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="EditProfile"  component={EditProfileScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="HelpFAQ"      component={HelpFAQScreen}      options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="Review"       component={ReviewScreen}       options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="CreatePost"   component={CreatePostScreen}   options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="PostDetail"   component={PostDetailScreen}   options={{ animation: 'slide_from_right' }} />
           </>
         )}
       </Stack.Navigator>
