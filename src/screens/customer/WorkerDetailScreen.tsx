@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Colors, Radius, Shadow } from '../../constants/colors';
+import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3 } from '../../constants/photos';
 import { RootStackParamList, Worker } from '../../types';
 import { useLanguageStore } from '../../store/languageStore';
 
@@ -15,7 +16,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'WorkerDetail'>;
 const MOCK_WORKERS: Worker[] = [
   {
     id: 'w1', name: 'Sari Dewi', phone: '0812-3456-7890', role: 'helper', serviceType: 'helper',
-    photo: 'https://randomuser.me/api/portraits/women/45.jpg',
+    serviceFrequency: 'regular',
+    photo: W1,
     pricePerHour: 30000, pricePerDay: 200000,
     location: 'Kebayoran, Jakarta Selatan', bio: 'ART berpengalaman 10 tahun. Bisa masak (masakan Indonesia & Western), cuci, setrika, dan beberes. Banyak pengalaman di keluarga dengan anak kecil.',
     skills: ['Masak', 'Cuci', 'Setrika', 'Beberes'],
@@ -23,34 +25,73 @@ const MOCK_WORKERS: Worker[] = [
   },
   {
     id: 'w2', name: 'Rina Wulandari', phone: '0813-4567-8901', role: 'helper', serviceType: 'helper',
-    photo: 'https://randomuser.me/api/portraits/women/63.jpg',
+    serviceFrequency: 'regular',
+    photo: W2,
     pricePerHour: 25000, pricePerDay: 160000,
     location: 'Cilandak, Jakarta Selatan', bio: 'Spesialis masak menu sehat harian dan bersih-bersih. Sudah 7 tahun pengalaman, jujur dan tepat waktu.',
     skills: ['Masak Sehat', 'Beberes', 'Cuci'],
     isAvailable: true, rating: 4.9, totalJobs: 198, isVerified: true, experienceYears: 7,
   },
   {
-    id: 'w3', name: 'Yanti Kusuma', phone: '0814-5678-9012', role: 'tutor', serviceType: 'tutor',
-    photo: 'https://randomuser.me/api/portraits/women/48.jpg',
-    pricePerHour: 100000,
-    location: 'Kemang, Jakarta Selatan', bio: 'Lulusan Universitas Indonesia, jurusan Pendidikan Matematika. Spesialis les privat SD-SMP Matematika & Bahasa Inggris. Metode belajar terstruktur dan menyenangkan.',
-    subjects: ['Matematika', 'Bahasa Inggris', 'IPA'],
-    isAvailable: true, rating: 5.0, totalJobs: 87, isVerified: true, experienceYears: 4,
+    id: 'w3', name: 'Dewi Anggraeni', phone: '0816-7890-1234', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'both',
+    photo: W3,
+    pricePerHour: 28000, pricePerDay: 180000,
+    location: 'Kemang, Jakarta Selatan', bio: 'Berpengalaman di keluarga dengan anak kecil. Sabar & telaten. Bisa masak, cuci, dan jaga anak.',
+    skills: ['Masak', 'Cuci', 'Perawatan Anak'],
+    isAvailable: true, rating: 4.7, totalJobs: 156, isVerified: true, experienceYears: 5,
   },
   {
-    id: 'w4', name: 'Nina Rahayu', phone: '0815-6789-0123', role: 'tutor', serviceType: 'tutor',
-    photo: 'https://randomuser.me/api/portraits/women/56.jpg',
-    pricePerHour: 80000,
-    location: 'Pondok Indah, Jakarta Selatan', bio: 'Spesialis les Speaking & Reading Bahasa Inggris untuk SD-SMP. Metode komunikatif, anak jadi lebih percaya diri berbicara bahasa Inggris.',
-    subjects: ['Bahasa Inggris', 'English Speaking'],
-    isAvailable: true, rating: 4.8, totalJobs: 64, isVerified: true, experienceYears: 3,
+    id: 'w4', name: 'Fitri Handayani', phone: '0815-6789-0123', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'regular',
+    photo: W4,
+    pricePerHour: 27000, pricePerDay: 175000,
+    location: 'Fatmawati, Jakarta Selatan', bio: 'Teliti dan jujur. Sudah kerja di 3 keluarga expat. Bisa masak Western & Indonesia.',
+    skills: ['Masak', 'Setrika', 'Beberes'],
+    isAvailable: true, rating: 4.9, totalJobs: 227, isVerified: true, experienceYears: 8,
+  },
+  {
+    id: 'w5', name: 'Indah Lestari', phone: '0817-8901-2345', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'special',
+    photo: W5,
+    pricePerHour: 35000, pricePerDay: 220000,
+    location: 'Pondok Indah, Jakarta Selatan', bio: 'Spesialis bersih-bersih deep cleaning & pasca renovasi. Cepat dan rapi.',
+    skills: ['Deep Cleaning', 'Beberes', 'Cuci'],
+    isAvailable: true, rating: 4.8, totalJobs: 89, isVerified: true, experienceYears: 3,
+  },
+  {
+    id: 'w6', name: 'Nur Aini Susanti', phone: '0818-9012-3456', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'special',
+    photo: W6,
+    pricePerHour: 40000, pricePerDay: 260000,
+    location: 'BSD, Tangerang Selatan', bio: 'Jasa catering & masak untuk acara keluarga. Bisa menu pernikahan, arisan, dan ulang tahun.',
+    skills: ['Catering', 'Masak Acara', 'Masak Indonesia'],
+    isAvailable: true, rating: 4.9, totalJobs: 143, isVerified: true, experienceYears: 6,
+  },
+  {
+    id: 'w7', name: 'Siti Rahayu', phone: '0819-0123-4567', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'regular',
+    photo: W7,
+    pricePerHour: 22000, pricePerDay: 140000,
+    location: 'Ciputat, Tangerang Selatan', bio: 'ART tinggal atau harian. Pengalaman 5 tahun, suka bekerja dengan anak-anak.',
+    skills: ['Masak', 'Cuci', 'Jaga Anak', 'Setrika'],
+    isAvailable: true, rating: 4.6, totalJobs: 178, isVerified: false, experienceYears: 5,
+  },
+  {
+    id: 'w8', name: 'Wulandari Putri', phone: '0820-1234-5678', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'special',
+    photo: W8,
+    pricePerHour: 45000, pricePerDay: 290000,
+    location: 'Pamulang, Tangerang Selatan', bio: 'Spesialis setrika & laundry kilat. Baju selesai rapi dalam 1 hari.',
+    skills: ['Setrika', 'Cuci', 'Laundry Kilat'],
+    isAvailable: false, rating: 4.8, totalJobs: 302, isVerified: true, experienceYears: 7,
   },
 ];
 
 const MOCK_REVIEWS = [
-  { id: 'r1', name: 'Bunda Wulan', photo: 'https://randomuser.me/api/portraits/women/59.jpg', rating: 5, text: 'Mbak Sari sangat teliti dan bersih sekali masakannya. Pasti akan dipanggil lagi!', date: '2 hari lalu' },
-  { id: 'r2', name: 'Bunda Hana', photo: 'https://randomuser.me/api/portraits/women/41.jpg', rating: 5, text: 'Tepat waktu dan rumah jadi bersih banget. Anak-anak juga suka!', date: '1 minggu lalu' },
-  { id: 'r3', name: 'Bunda Tari', photo: 'https://randomuser.me/api/portraits/women/37.jpg', rating: 4, text: 'Ramah dan profesional. Masakannya enak, keluarga puas.', date: '2 minggu lalu' },
+  { id: 'r1', name: 'Bunda Wulan', photo: C1, rating: 5, text: 'Mbak Sari sangat teliti dan bersih sekali masakannya. Pasti akan dipanggil lagi!', date: '2 hari lalu' },
+  { id: 'r2', name: 'Bunda Hana',  photo: C2, rating: 5, text: 'Tepat waktu dan rumah jadi bersih banget. Anak-anak juga suka!', date: '1 minggu lalu' },
+  { id: 'r3', name: 'Bunda Tari',  photo: C3, rating: 4, text: 'Ramah dan profesional. Masakannya enak, keluarga puas.', date: '2 minggu lalu' },
 ];
 
 export default function WorkerDetailScreen({ navigation, route }: Props) {
@@ -129,7 +170,7 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
                   color={isTutor ? Colors.tutorColor : Colors.helperColor}
                 />
                 <Text style={[s.pillText, { color: isTutor ? Colors.tutorColor : Colors.helperColor }]}>
-                  {isTutor ? 'Les Privat' : 'ART'}
+                  {isTutor ? t.services.tutorFull : t.services.art}
                 </Text>
               </View>
               <View style={s.pill}>
@@ -171,7 +212,7 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
 
         {/* Subjects / Skills */}
         <View style={s.section}>
-          <Text style={s.sectionTitle}>{isTutor ? 'Mata Pelajaran' : t.workerDetail.skills}</Text>
+          <Text style={s.sectionTitle}>{isTutor ? t.services.lesTutor : t.workerDetail.skills}</Text>
           <View style={s.skillsWrap}>
             {(isTutor ? worker.subjects : worker.skills)?.map((item) => (
               <View key={item} style={[s.skillPill, isTutor && s.tutorPill]}>

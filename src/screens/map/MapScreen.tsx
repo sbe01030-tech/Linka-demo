@@ -13,15 +13,16 @@ import { useLanguageStore } from '../../store/languageStore';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../types';
+import { W1, W2, W3, W4, W5, W6, W7, W8, W9, W10 } from '../../constants/photos';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type FilterType = 'all' | 'helper' | 'tutor';
+type FilterType = 'all' | 'helper';
 
 interface Partner {
   id: string;
   name: string;
   firstName: string;
-  type: 'helper' | 'tutor';
+  type: 'helper';
   lat: number;
   lng: number;
   rating: number;
@@ -32,74 +33,92 @@ interface Partner {
   totalJobs: number;
 }
 
-// Titik tengah: Kemang, Jakarta Selatan
-const BASE_LAT = -6.2607;
-const BASE_LNG = 106.8124;
+// Titik tengah: antara Jakarta Selatan dan Tangerang Selatan
+const BASE_LAT = -6.2850;
+const BASE_LNG = 106.7600;
 
 const MOCK_PARTNERS: Partner[] = [
+  // ── Jakarta Selatan ───────────────────────────────────
   {
     id: 'p1', name: 'Sari Dewi', firstName: 'Sari',
     type: 'helper',
     lat: -6.2553, lng: 106.8062,
     rating: 5.0, pricePerHour: 30000, isAvailable: true,
-    photo: 'https://randomuser.me/api/portraits/women/45.jpg',
+    photo: W1,
     location: 'Kebayoran Baru', totalJobs: 312,
   },
   {
     id: 'p2', name: 'Rina Wulandari', firstName: 'Rina',
     type: 'helper',
-    lat: -6.2668, lng: 106.8180,
+    lat: -6.2900, lng: 106.8088,
     rating: 4.9, pricePerHour: 25000, isAvailable: true,
-    photo: 'https://randomuser.me/api/portraits/women/63.jpg',
+    photo: W2,
     location: 'Cilandak', totalJobs: 198,
   },
   {
-    id: 'p3', name: 'Nina Rahayu', firstName: 'Nina',
-    type: 'tutor',
-    lat: -6.2580, lng: 106.7980,
-    rating: 4.8, pricePerHour: 80000, isAvailable: false,
-    photo: 'https://randomuser.me/api/portraits/women/56.jpg',
-    location: 'Pondok Indah', totalJobs: 64,
-  },
-  {
-    id: 'p4', name: 'Yanti Kusuma', firstName: 'Yanti',
-    type: 'tutor',
-    lat: -6.2620, lng: 106.8200,
-    rating: 5.0, pricePerHour: 100000, isAvailable: true,
-    photo: 'https://randomuser.me/api/portraits/women/48.jpg',
-    location: 'Kemang', totalJobs: 87,
-  },
-  {
-    id: 'p5', name: 'Dewi Anggraeni', firstName: 'Dewi',
+    id: 'p3', name: 'Dewi Anggraeni', firstName: 'Dewi',
     type: 'helper',
-    lat: -6.2530, lng: 106.8150,
+    lat: -6.2607, lng: 106.8124,
     rating: 4.7, pricePerHour: 28000, isAvailable: true,
-    photo: 'https://randomuser.me/api/portraits/women/68.jpg',
-    location: 'Menteng', totalJobs: 143,
+    photo: W3,
+    location: 'Kemang', totalJobs: 143,
   },
   {
-    id: 'p6', name: 'Fitri Handayani', firstName: 'Fitri',
+    id: 'p4', name: 'Fitri Handayani', firstName: 'Fitri',
     type: 'helper',
-    lat: -6.2700, lng: 106.8090,
+    lat: -6.2900, lng: 106.7990,
     rating: 4.9, pricePerHour: 27000, isAvailable: true,
-    photo: 'https://randomuser.me/api/portraits/women/75.jpg',
+    photo: W4,
     location: 'Fatmawati', totalJobs: 227,
   },
   {
-    id: 'p7', name: 'Ayu Rahayu', firstName: 'Ayu',
-    type: 'tutor',
-    lat: -6.2640, lng: 106.8250,
-    rating: 4.6, pricePerHour: 75000, isAvailable: true,
-    photo: 'https://randomuser.me/api/portraits/women/52.jpg',
-    location: 'Mampang', totalJobs: 51,
+    id: 'p5', name: 'Indah Lestari', firstName: 'Indah',
+    type: 'helper',
+    lat: -6.2490, lng: 106.8050,
+    rating: 4.8, pricePerHour: 26000, isAvailable: false,
+    photo: W5,
+    location: 'Kebayoran Lama', totalJobs: 178,
+  },
+  // ── Tangerang Selatan ─────────────────────────────────
+  {
+    id: 'p6', name: 'Nurul Hidayah', firstName: 'Nurul',
+    type: 'helper',
+    lat: -6.3122, lng: 106.6622,
+    rating: 4.8, pricePerHour: 24000, isAvailable: true,
+    photo: W6,
+    location: 'BSD City', totalJobs: 89,
   },
   {
-    id: 'p8', name: 'Indah Lestari', firstName: 'Indah',
+    id: 'p7', name: 'Sri Mulyani', firstName: 'Sri',
     type: 'helper',
-    lat: -6.2490, lng: 106.8110,
-    rating: 4.8, pricePerHour: 26000, isAvailable: false,
-    photo: 'https://randomuser.me/api/portraits/women/80.jpg',
-    location: 'Senopati', totalJobs: 178,
+    lat: -6.3050, lng: 106.7200,
+    rating: 4.6, pricePerHour: 23000, isAvailable: true,
+    photo: W7,
+    location: 'Ciputat', totalJobs: 64,
+  },
+  {
+    id: 'p8', name: 'Ratna Sari', firstName: 'Ratna',
+    type: 'helper',
+    lat: -6.3280, lng: 106.6900,
+    rating: 4.9, pricePerHour: 25000, isAvailable: true,
+    photo: W8,
+    location: 'Pamulang', totalJobs: 112,
+  },
+  {
+    id: 'p9', name: 'Wulan Sari', firstName: 'Wulan',
+    type: 'helper',
+    lat: -6.2900, lng: 106.7100,
+    rating: 5.0, pricePerHour: 26000, isAvailable: false,
+    photo: W9,
+    location: 'Pondok Aren', totalJobs: 201,
+  },
+  {
+    id: 'p10', name: 'Mega Putri', firstName: 'Mega',
+    type: 'helper',
+    lat: -6.3333, lng: 106.7167,
+    rating: 4.7, pricePerHour: 22000, isAvailable: true,
+    photo: W10,
+    location: 'Serpong', totalJobs: 77,
   },
 ];
 
@@ -129,7 +148,7 @@ export default function MapScreen() {
 
   const [region, setRegion] = useState<Region>({
     latitude: BASE_LAT, longitude: BASE_LNG,
-    latitudeDelta: 0.04, longitudeDelta: 0.04,
+    latitudeDelta: 0.14, longitudeDelta: 0.14,
   });
   const [locationGranted, setLocationGranted] = useState(false);
   const [loading, setLoading]   = useState(true);
@@ -149,7 +168,7 @@ export default function MapScreen() {
           const { latitude, longitude } = loc.coords;
           setRegion({ latitude, longitude, latitudeDelta: 0.022, longitudeDelta: 0.022 });
         } catch {
-          // 권한은 있지만 위치 못 가져온 경우 홍대 기본값 사용
+          // 권한은 있지만 위치 못 가져온 경우 Jakarta 기본값 사용
         }
       }
       setLoading(false);
@@ -189,8 +208,6 @@ export default function MapScreen() {
     return matchFilter && matchSearch;
   });
 
-  const helpers = filtered.filter(p => p.type === 'helper').length;
-  const tutors  = filtered.filter(p => p.type === 'tutor').length;
 
   const sheetTranslateY = sheetAnim.interpolate({
     inputRange: [0, 1], outputRange: [320, 0],
@@ -199,7 +216,6 @@ export default function MapScreen() {
   const FILTERS: { id: FilterType; label: string; icon: any }[] = [
     { id: 'all',    label: t.mapScreen.filterAll,    icon: 'apps-outline' },
     { id: 'helper', label: t.mapScreen.filterHelper, icon: 'home-outline' },
-    { id: 'tutor',  label: t.mapScreen.filterTutor,  icon: 'school-outline' },
   ];
 
   return (
@@ -293,10 +309,7 @@ export default function MapScreen() {
           {/* Live count chip */}
           <View style={s.countChip}>
             <View style={[s.countDot, { backgroundColor: Colors.helperColor }]} />
-            <Text style={s.countText}>{t.mapScreen.helperLabel} {helpers}</Text>
-            <View style={[s.countSep]} />
-            <View style={[s.countDot, { backgroundColor: Colors.tutorColor }]} />
-            <Text style={s.countText}>{t.mapScreen.tutorLabel} {tutors}</Text>
+            <Text style={s.countText}>{t.mapScreen.helperLabel} {filtered.length}</Text>
           </View>
         </ScrollView>
 
@@ -317,27 +330,27 @@ export default function MapScreen() {
                 <Ionicons name="home" size={16} color={Colors.helperColor} />
               </View>
               <View>
-                <Text style={s.summaryCount}>{helpers}</Text>
+                <Text style={s.summaryCount}>{filtered.length}</Text>
                 <Text style={s.summaryLabel}>{t.mapScreen.helperLabel}</Text>
               </View>
             </View>
 
             <View style={s.summaryDivider} />
 
-            {/* Tutor count */}
+            {/* Available now */}
             <View style={s.summaryItem}>
-              <View style={[s.summaryIconBg, { backgroundColor: Colors.tutorLight }]}>
-                <Ionicons name="school" size={16} color={Colors.tutorColor} />
+              <View style={[s.summaryIconBg, { backgroundColor: '#ECFDF5' }]}>
+                <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
               </View>
               <View>
-                <Text style={s.summaryCount}>{tutors}</Text>
-                <Text style={s.summaryLabel}>{t.mapScreen.tutorLabel}</Text>
+                <Text style={s.summaryCount}>{filtered.filter(p => p.isAvailable).length}</Text>
+                <Text style={s.summaryLabel}>Siap kerja</Text>
               </View>
             </View>
 
             <View style={s.summaryDivider} />
 
-            {/* Nearest */}
+            {/* Location */}
             <View style={s.summaryItem}>
               <View style={[s.summaryIconBg, { backgroundColor: '#EEF2FF' }]}>
                 <Ionicons name="location" size={16} color="#6366F1" />
@@ -367,7 +380,7 @@ export default function MapScreen() {
                 <View style={s.avatarChipInfo}>
                   <Text style={s.avatarChipName} numberOfLines={1}>{p.firstName}</Text>
                   <Text style={s.avatarChipPrice}>
-                    {p.type === 'tutor' ? '📚' : '🏠'} Rp {(p.pricePerHour/1000).toFixed(0)}rb
+                    🏠 Rp {(p.pricePerHour/1000).toFixed(0)}rb
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -398,18 +411,10 @@ export default function MapScreen() {
                 </View>
 
                 <View style={s.sheetTagRow}>
-                  <View style={[s.sheetTypeBadge, {
-                    backgroundColor: selected.type === 'tutor' ? Colors.tutorLight : Colors.helperLight
-                  }]}>
-                    <Ionicons
-                      name={selected.type === 'tutor' ? 'school' : 'home'}
-                      size={11}
-                      color={selected.type === 'tutor' ? Colors.tutorColor : Colors.helperColor}
-                    />
-                    <Text style={[s.sheetTypeText, {
-                      color: selected.type === 'tutor' ? Colors.tutorColor : Colors.helperColor
-                    }]}>
-                      {selected.type === 'tutor' ? t.mapScreen.tutorLabel : t.mapScreen.helperLabel}
+                  <View style={[s.sheetTypeBadge, { backgroundColor: Colors.helperLight }]}>
+                    <Ionicons name="home" size={11} color={Colors.helperColor} />
+                    <Text style={[s.sheetTypeText, { color: Colors.helperColor }]}>
+                      {t.mapScreen.helperLabel}
                     </Text>
                   </View>
 
@@ -431,7 +436,7 @@ export default function MapScreen() {
                   <Ionicons name="star" size={13} color="#F59E0B" />
                   <Text style={s.statValue}>{selected.rating}</Text>
                 </View>
-                <Text style={s.statLabel}>평점</Text>
+                <Text style={s.statLabel}>{t.mapScreen.ratingLabel}</Text>
               </View>
 
               <View style={s.statDivider} />
@@ -447,7 +452,7 @@ export default function MapScreen() {
 
               <View style={s.statItem}>
                 <Text style={s.statValue}>{selected.totalJobs}</Text>
-                <Text style={s.statLabel}>완료 건수</Text>
+                <Text style={s.statLabel}>{t.mapScreen.jobsLabel}</Text>
               </View>
             </View>
 
@@ -463,8 +468,8 @@ export default function MapScreen() {
                 color: selected.isAvailable ? '#065F46' : Colors.grayLight
               }]}>
                 {selected.isAvailable
-                  ? `${selected.firstName} siap bekerja sekarang`
-                  : `${selected.firstName} sedang sibuk saat ini`}
+                  ? t.mapScreen.availableNow.replace('{name}', selected.firstName)
+                  : t.mapScreen.busyNow.replace('{name}', selected.firstName)}
               </Text>
             </View>
 
@@ -480,7 +485,7 @@ export default function MapScreen() {
               }}
             >
               <Text style={s.bookBtnText}>
-                {selected.isAvailable ? 'Pesan Sekarang' : 'Tidak Tersedia'}
+                {selected.isAvailable ? t.mapScreen.bookBtn : t.mapScreen.notAvailableBtn}
               </Text>
               {selected.isAvailable && (
                 <Ionicons name="arrow-forward" size={16} color={Colors.white} />
@@ -495,9 +500,7 @@ export default function MapScreen() {
 
 // ── Photo pin marker ──────────────────────────────────────────────
 function PhotoMarker({ partner, selected }: { partner: Partner; selected: boolean }) {
-  const borderColor = selected
-    ? (partner.type === 'tutor' ? Colors.tutorColor : Colors.helperColor)
-    : Colors.white;
+  const borderColor = selected ? Colors.helperColor : Colors.white;
 
   const size = selected ? 52 : 44;
   const br   = selected ? 26 : 22;
@@ -513,15 +516,8 @@ function PhotoMarker({ partner, selected }: { partner: Partner; selected: boolea
       </View>
 
       {/* Type mini badge — bottom-right of bubble */}
-      <View style={[m.typeBadge, {
-        backgroundColor: partner.type === 'tutor' ? Colors.tutorColor : Colors.helperColor,
-        bottom: 8,
-      }]}>
-        <Ionicons
-          name={partner.type === 'tutor' ? 'school' : 'home'}
-          size={8}
-          color={Colors.white}
-        />
+      <View style={[m.typeBadge, { backgroundColor: Colors.helperColor, bottom: 8 }]}>
+        <Ionicons name="home" size={8} color={Colors.white} />
       </View>
 
       {/* Online dot — top-right */}

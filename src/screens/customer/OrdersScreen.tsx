@@ -3,12 +3,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } fr
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
+import { W1, W2, W3, W4 } from '../../constants/photos';
 
 const MOCK_ORDERS = [
   {
     id: 'o1',
     workerName: 'Sari Dewi',
-    workerPhoto: 'https://randomuser.me/api/portraits/women/45.jpg',
+    workerPhoto: W1,
     serviceType: 'helper',
     date: '2026-04-15', startTime: '09:00', duration: 4,
     address: 'Jl. Kemang Raya No.12, Jakarta Selatan',
@@ -17,18 +18,18 @@ const MOCK_ORDERS = [
   },
   {
     id: 'o2',
-    workerName: 'Yanti Kusuma',
-    workerPhoto: 'https://randomuser.me/api/portraits/women/48.jpg',
-    serviceType: 'tutor',
-    date: '2026-04-14', startTime: '15:00', duration: 2,
-    address: 'Jl. Sudirman No.5, Jakarta Pusat',
-    totalPrice: 200000, depositPaid: 60000, remaining: 140000,
+    workerName: 'Fitri Handayani',
+    workerPhoto: W4,
+    serviceType: 'helper',
+    date: '2026-04-14', startTime: '09:00', duration: 5,
+    address: 'Jl. Fatmawati No.8, Jakarta Selatan',
+    totalPrice: 135000, depositPaid: 40500, remaining: 94500,
     status: 'awaiting_confirmation' as const,
   },
   {
     id: 'o3',
     workerName: 'Rina Wulandari',
-    workerPhoto: 'https://randomuser.me/api/portraits/women/63.jpg',
+    workerPhoto: W2,
     serviceType: 'helper',
     date: '2026-04-10', startTime: '10:00', duration: 3,
     address: 'Jl. Cilandak KKO No.3, Jakarta Selatan',
@@ -37,12 +38,12 @@ const MOCK_ORDERS = [
   },
   {
     id: 'o4',
-    workerName: 'Nina Rahayu',
-    workerPhoto: 'https://randomuser.me/api/portraits/women/56.jpg',
-    serviceType: 'tutor',
-    date: '2026-04-08', startTime: '16:00', duration: 2,
+    workerName: 'Dewi Anggraeni',
+    workerPhoto: W3,
+    serviceType: 'helper',
+    date: '2026-04-08', startTime: '13:00', duration: 4,
     address: 'Jl. Pondok Indah No.10, Jakarta Selatan',
-    totalPrice: 160000, depositPaid: 48000, remaining: 0,
+    totalPrice: 112000, depositPaid: 33600, remaining: 0,
     status: 'cancelled' as const,
   },
 ];

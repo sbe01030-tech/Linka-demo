@@ -4,12 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { C1, C2, C3 } from '../../constants/photos';
 
 const MOCK_WORKER_ORDERS = [
   {
     id: 'wo1',
     customerName: 'Bunda Wulandari',
-    customerPhoto: 'https://randomuser.me/api/portraits/women/59.jpg',
+    customerPhoto: C1,
     date: '2026-04-15', startTime: '09:00', duration: 4,
     address: 'Jl. Kemang Raya No.12, Jakarta Selatan',
     earnings: 120000, depositPaid: 36000, remaining: 84000,
@@ -18,7 +19,7 @@ const MOCK_WORKER_ORDERS = [
   {
     id: 'wo2',
     customerName: 'Bunda Indah',
-    customerPhoto: 'https://randomuser.me/api/portraits/women/41.jpg',
+    customerPhoto: C2,
     date: '2026-04-13', startTime: '10:00', duration: 5,
     address: 'Jl. Fatmawati No.8, Jakarta Selatan',
     earnings: 150000, depositPaid: 45000, remaining: 105000,
@@ -27,7 +28,7 @@ const MOCK_WORKER_ORDERS = [
   {
     id: 'wo3',
     customerName: 'Bunda Tari',
-    customerPhoto: 'https://randomuser.me/api/portraits/women/37.jpg',
+    customerPhoto: C3,
     date: '2026-04-11', startTime: '13:00', duration: 3,
     address: 'Jl. Cipete Raya No.5, Jakarta Selatan',
     earnings: 90000, depositPaid: 27000, remaining: 0,

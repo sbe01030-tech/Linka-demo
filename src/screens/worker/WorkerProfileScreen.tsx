@@ -64,7 +64,7 @@ export default function WorkerProfileScreen() {
         <Text style={s.userPhone}>{user?.phone}</Text>
         <View style={s.roleChip}>
           <Text style={s.roleChipText}>
-            {isDriver ? 'Guru Les Privat' : 'ART'}
+            {isDriver ? t.services.tutorFull : t.services.art}
           </Text>
         </View>
       </View>

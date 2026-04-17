@@ -33,7 +33,10 @@ export default function LanguageSelector({ variant = 'button' }: Props) {
         <TouchableOpacity style={s.row} onPress={() => setVisible(true)} activeOpacity={0.75}>
           <Ionicons name="globe-outline" size={16} color={Colors.grayLight} />
           <Text style={s.rowLabel}>{t.profile.language}</Text>
-          <Text style={s.rowValue}>{current.flag} {current.nativeLabel}</Text>
+          <View style={[s.flagBadgeSm, { backgroundColor: current.color }]}>
+            <Text style={s.flagCodeSm}>{current.countryCode}</Text>
+          </View>
+          <Text style={s.rowValue}>{current.nativeLabel}</Text>
           <Ionicons name="chevron-forward" size={14} color={Colors.grayLight} />
         </TouchableOpacity>
       )}
@@ -56,7 +59,9 @@ export default function LanguageSelector({ variant = 'button' }: Props) {
                     onPress={() => select(item.code)}
                     activeOpacity={0.7}
                   >
-                    <Text style={s.langFlag}>{item.flag}</Text>
+                    <View style={[s.flagBadge, { backgroundColor: item.color }]}>
+                      <Text style={s.flagCode}>{item.countryCode}</Text>
+                    </View>
                     <View style={{ flex: 1 }}>
                       {/* text-sm font-bold */}
                       <Text style={[s.langNative, active && s.langNativeActive]}>

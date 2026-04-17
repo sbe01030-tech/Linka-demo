@@ -12,7 +12,7 @@ import { useLanguageStore } from '../../store/languageStore';
 import LanguageSelector from '../../components/common/LanguageSelector';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
-type DemoIcon = 'person-outline' | 'car-outline' | 'home-outline';
+type DemoIcon = 'person-outline' | 'home-outline';
 
 export default function LoginScreen({ navigation }: Props) {
   const { t } = useLanguageStore();
@@ -23,10 +23,9 @@ export default function LoginScreen({ navigation }: Props) {
   const [showPass, setShowPass] = useState(false);
   const [focused,  setFocused]  = useState<string | null>(null);
 
-  const DEMO: { label: string; phone: string; icon: DemoIcon }[] = [
-    { label: t.auth.customer, phone: '081234567890', icon: 'person-outline' },
-    { label: t.auth.driver,   phone: '081234567891', icon: 'car-outline' },
-    { label: t.auth.helper,   phone: '081234567892', icon: 'home-outline' },
+  const DEMO: { label: string; phone: string; icon: DemoIcon; desc: string }[] = [
+    { label: t.auth.customer, phone: '0812-3456-7890', icon: 'person-outline', desc: t.auth.customerDesc },
+    { label: t.auth.helper,   phone: '0812-3456-7891', icon: 'home-outline',   desc: t.auth.helperDesc },
   ];
 
   return (
@@ -127,7 +126,7 @@ export default function LoginScreen({ navigation }: Props) {
           <View style={s.divLine} />
         </View>
 
-        {/* Demo tiles — rounded-2xl border border-gray-100 */}
+        {/* Demo tiles */}
         <View style={s.demoRow}>
           {DEMO.map((d) => (
             <TouchableOpacity
@@ -136,11 +135,11 @@ export default function LoginScreen({ navigation }: Props) {
               onPress={() => { setPhone(d.phone); setPassword('demo123'); }}
               activeOpacity={0.8}
             >
-              {/* avatar: rounded-full ring-2 ring-gray-100 */}
               <View style={s.demoAvatar}>
-                <Ionicons name={d.icon} size={18} color={Colors.grayLight} />
+                <Ionicons name={d.icon} size={18} color={Colors.accent} />
               </View>
               <Text style={s.demoLabel}>{d.label}</Text>
+              <Text style={s.demoDesc}>{d.desc}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -222,7 +221,8 @@ const s = StyleSheet.create({
     borderWidth: 2, borderColor: Colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  demoLabel: { fontSize: 12, fontWeight: '500', color: Colors.darkMid },
+  demoLabel: { fontSize: 13, fontWeight: '700', color: Colors.dark },
+  demoDesc:  { fontSize: 11, color: Colors.gray, textAlign: 'center', marginTop: 2 },
 
   registerRow: { flexDirection: 'row', justifyContent: 'center', paddingHorizontal: 20 },
   registerText:{ fontSize: 14, color: Colors.gray },

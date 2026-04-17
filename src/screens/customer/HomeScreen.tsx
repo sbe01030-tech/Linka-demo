@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Rect, Circle, Ellipse, Path, Line } from 'react-native-svg';
 import { Colors, Radius, Shadow } from '../../constants/colors';
+import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3, AVATAR_STACK } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
 import { LangCode } from '../../i18n';
@@ -19,7 +20,8 @@ type Nav = NativeStackNavigationProp<RootStackParamList>;
 const MOCK_WORKERS: Worker[] = [
   {
     id: 'w1', name: 'Sari Dewi', phone: '0812-3456-7890', role: 'helper', serviceType: 'helper',
-    photo: 'https://randomuser.me/api/portraits/women/45.jpg',
+    serviceFrequency: 'regular',
+    photo: W1,
     pricePerHour: 30000, location: 'Kebayoran, Jakarta Selatan',
     bio: 'ART berpengalaman 10 tahun, ahli memasak dan bersih-bersih rumah.',
     skills: ['Masak', 'Cuci', 'Setrika', 'Beberes'],
@@ -27,35 +29,66 @@ const MOCK_WORKERS: Worker[] = [
   },
   {
     id: 'w2', name: 'Rina Wulandari', phone: '0813-4567-8901', role: 'helper', serviceType: 'helper',
-    photo: 'https://randomuser.me/api/portraits/women/63.jpg',
+    serviceFrequency: 'regular',
+    photo: W2,
     pricePerHour: 25000, location: 'Cilandak, Jakarta Selatan',
     bio: 'Spesialis masak menu sehat & bersih-bersih. Sudah 7 tahun pengalaman.',
     skills: ['Masak Sehat', 'Beberes', 'Cuci'],
     isAvailable: true, rating: 4.9, totalJobs: 198, isVerified: true, experienceYears: 7,
   },
   {
-    id: 'w3', name: 'Yanti Kusuma', phone: '0814-5678-9012', role: 'tutor', serviceType: 'tutor',
-    photo: 'https://randomuser.me/api/portraits/women/48.jpg',
-    pricePerHour: 100000, location: 'Kemang, Jakarta Selatan',
-    bio: 'Lulusan UI, guru les privat SD-SMP Matematika & Bahasa Inggris.',
-    subjects: ['Matematika', 'Bahasa Inggris', 'IPA'],
-    isAvailable: true, rating: 5.0, totalJobs: 87, isVerified: true, experienceYears: 4,
-  },
-  {
-    id: 'w4', name: 'Nina Rahayu', phone: '0815-6789-0123', role: 'tutor', serviceType: 'tutor',
-    photo: 'https://randomuser.me/api/portraits/women/56.jpg',
-    pricePerHour: 80000, location: 'Pondok Indah, Jakarta Selatan',
-    bio: 'Spesialis les Speaking & Reading Bahasa Inggris untuk SD-SMP.',
-    subjects: ['Bahasa Inggris', 'English Speaking'],
-    isAvailable: true, rating: 4.8, totalJobs: 64, isVerified: true, experienceYears: 3,
-  },
-  {
-    id: 'w5', name: 'Dewi Anggraeni', phone: '0816-7890-1234', role: 'helper', serviceType: 'helper',
-    photo: 'https://randomuser.me/api/portraits/women/68.jpg',
-    pricePerHour: 28000, location: 'Menteng, Jakarta Pusat',
+    id: 'w3', name: 'Dewi Anggraeni', phone: '0816-7890-1234', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'both',
+    photo: W3,
+    pricePerHour: 28000, location: 'Kemang, Jakarta Selatan',
     bio: 'Berpengalaman di keluarga dengan anak kecil. Sabar & telaten.',
     skills: ['Masak', 'Cuci', 'Perawatan Anak'],
-    isAvailable: false, rating: 4.7, totalJobs: 156, isVerified: true, experienceYears: 5,
+    isAvailable: true, rating: 4.7, totalJobs: 156, isVerified: true, experienceYears: 5,
+  },
+  {
+    id: 'w4', name: 'Fitri Handayani', phone: '0815-6789-0123', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'regular',
+    photo: W4,
+    pricePerHour: 27000, location: 'Fatmawati, Jakarta Selatan',
+    bio: 'Teliti dan jujur. Sudah kerja di 3 keluarga expat. Bisa masak Western & Indonesia.',
+    skills: ['Masak', 'Setrika', 'Beberes'],
+    isAvailable: true, rating: 4.9, totalJobs: 227, isVerified: true, experienceYears: 8,
+  },
+  {
+    id: 'w5', name: 'Indah Lestari', phone: '0817-8901-2345', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'special',
+    photo: W5,
+    pricePerHour: 35000, location: 'Pondok Indah, Jakarta Selatan',
+    bio: 'Spesialis bersih-bersih deep cleaning & pasca renovasi. Cepat dan rapi.',
+    skills: ['Deep Cleaning', 'Beberes', 'Cuci'],
+    isAvailable: true, rating: 4.8, totalJobs: 89, isVerified: true, experienceYears: 3,
+  },
+  {
+    id: 'w6', name: 'Nur Aini Susanti', phone: '0818-9012-3456', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'special',
+    photo: W6,
+    pricePerHour: 40000, location: 'BSD, Tangerang Selatan',
+    bio: 'Jasa catering & masak untuk acara keluarga. Bisa menu pernikahan, arisan, dan ulang tahun.',
+    skills: ['Catering', 'Masak Acara', 'Masak Indonesia'],
+    isAvailable: true, rating: 4.9, totalJobs: 143, isVerified: true, experienceYears: 6,
+  },
+  {
+    id: 'w7', name: 'Siti Rahayu', phone: '0819-0123-4567', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'regular',
+    photo: W7,
+    pricePerHour: 22000, location: 'Ciputat, Tangerang Selatan',
+    bio: 'ART tinggal atau harian. Pengalaman 5 tahun, suka bekerja dengan anak-anak.',
+    skills: ['Masak', 'Cuci', 'Jaga Anak', 'Setrika'],
+    isAvailable: true, rating: 4.6, totalJobs: 178, isVerified: false, experienceYears: 5,
+  },
+  {
+    id: 'w8', name: 'Wulandari Putri', phone: '0820-1234-5678', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'special',
+    photo: W8,
+    pricePerHour: 45000, location: 'Pamulang, Tangerang Selatan',
+    bio: 'Spesialis setrika & laundry kilat. Baju selesai rapi dalam 1 hari.',
+    skills: ['Setrika', 'Cuci', 'Laundry Kilat'],
+    isAvailable: false, rating: 4.8, totalJobs: 302, isVerified: true, experienceYears: 7,
   },
 ];
 
@@ -77,22 +110,18 @@ function getPreviewPosts(lang: LangCode): CommunityPost[] {
   ];
 }
 
-const CATEGORIES = [
-  { id: 'helper',    label: 'ART',           icon: 'home',              bg: '#FFFBEB', color: Colors.helperColor },
-  { id: 'cooking',   label: 'Masak/Catering',icon: 'restaurant',        bg: '#FFF0EB', color: '#FF6B35' },
-  { id: 'cleaning',  label: 'Bersih-bersih', icon: 'sparkles',          bg: '#F0FDF4', color: '#22C55E' },
-  { id: 'custom',    label: 'Custom',        icon: 'star',              bg: '#FEF3C7', color: '#F59E0B' },
-  { id: 'tutor',     label: 'Les Privat',    icon: 'book',              bg: '#EEF2FF', color: Colors.tutorColor },
-  { id: 'homevisit', label: 'Kunjungan',     icon: 'pencil',            bg: '#F5F3FF', color: '#7C3AED' },
-  { id: 'english',   label: 'Les Inggris',   icon: 'globe',             bg: '#EFF6FF', color: '#3B82F6' },
-  { id: 'more',      label: 'Lainnya',       icon: 'ellipsis-horizontal',bg: Colors.section, color: Colors.gray },
+const CATEGORY_META = [
+  { id: 'helper',    key: 'catArt',      icon: 'home-outline',                 bg: '#FFF5E6', color: '#F59E0B' },
+  { id: 'cooking',   key: 'catCooking',  icon: 'restaurant-outline',           bg: '#FFF1EC', color: '#F97316' },
+  { id: 'cleaning',  key: 'catCleaning', icon: 'sparkles-outline',             bg: '#ECFDF5', color: '#10B981' },
+  { id: 'custom',    key: 'catCustom',   icon: 'options-outline',              bg: '#FFFBEB', color: '#D97706' },
+  { id: 'tutor',     key: 'catTutor',    icon: 'school-outline',               bg: '#EFF6FF', color: '#3B82F6' },
+  { id: 'homevisit', key: 'catVisit',    icon: 'navigate-circle-outline',      bg: '#F5F3FF', color: '#8B5CF6' },
+  { id: 'english',   key: 'catEnglish',  icon: 'chatbubble-ellipses-outline',  bg: '#F0F9FF', color: '#0EA5E9' },
+  { id: 'more',      key: 'catMore',     icon: 'apps-outline',                 bg: '#F8F8F8', color: '#9CA3AF' },
 ] as const;
 
-const AVATAR_URLS = [
-  'https://randomuser.me/api/portraits/women/44.jpg',
-  'https://randomuser.me/api/portraits/women/65.jpg',
-  'https://randomuser.me/api/portraits/women/22.jpg',
-];
+const AVATAR_URLS = AVATAR_STACK;
 
 // ── Tiny mascot face (chest-level, 36×36) ──────────────────────
 function MascotFace({ size = 36 }: { size?: number }) {
@@ -112,7 +141,7 @@ function MascotFace({ size = 36 }: { size?: number }) {
 }
 
 type ServiceTab = 'regular' | 'special';
-type FilterTab  = 'all' | 'helper' | 'tutor';
+type FilterTab  = 'all' | 'helper';
 
 export default function HomeScreen() {
   const navigation  = useNavigation<Nav>();
@@ -123,10 +152,15 @@ export default function HomeScreen() {
 
   const firstName = user?.name?.split(' ')[0] ?? 'Bunda';
   const MOCK_POSTS = getPreviewPosts(lang);
+  const CATEGORIES = CATEGORY_META.map((c) => ({ ...c, label: t.homeNew[c.key] }));
 
-  const filtered = MOCK_WORKERS.filter((w) =>
-    filterTab === 'all' || w.serviceType === filterTab
-  );
+  const filtered = MOCK_WORKERS.filter((w) => {
+    const matchSvc = svcTab === 'regular'
+      ? (w.serviceFrequency === 'regular' || w.serviceFrequency === 'both')
+      : (w.serviceFrequency === 'special' || w.serviceFrequency === 'both');
+    const matchFilter = filterTab === 'all' || w.serviceType === filterTab;
+    return matchSvc && matchFilter;
+  });
 
   return (
     <ScrollView style={s.root} showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
@@ -182,8 +216,9 @@ export default function HomeScreen() {
               style={s.catItem}
               activeOpacity={0.7}
               onPress={() => {
-                if (cat.id === 'helper') setFilterTab('helper');
-                else if (cat.id === 'tutor') setFilterTab('tutor');
+                if (cat.id === 'helper' || cat.id === 'cooking' || cat.id === 'cleaning' || cat.id === 'custom') {
+                  setFilterTab('helper');
+                }
               }}
             >
               <View style={[s.catIconWrap, { backgroundColor: cat.bg }]}>
@@ -264,7 +299,6 @@ export default function HomeScreen() {
         {([
           { id: 'all',    label: t.homeNew.filterAll },
           { id: 'helper', label: t.homeNew.filterHelper },
-          { id: 'tutor',  label: t.homeNew.filterTutor },
         ] as { id: FilterTab; label: string }[]).map((tb) => (
           <TouchableOpacity
             key={tb.id}
@@ -282,7 +316,7 @@ export default function HomeScreen() {
       <View style={s.listSection}>
         <View style={s.sectionHeader}>
           <Text style={s.sectionTitle}>
-            {filterTab === 'helper' ? t.homeNew.filterHelper : filterTab === 'tutor' ? t.homeNew.filterTutor : t.homeNew.allMitra}
+            {svcTab === 'regular' ? t.homeNew.serviceRegular : t.homeNew.serviceSpecial}
           </Text>
           <Text style={s.sectionCount}>{filtered.length} {t.homeNew.activeCount}</Text>
         </View>
@@ -434,10 +468,15 @@ const s = StyleSheet.create({
   catGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   catItem: { width: '25%', alignItems: 'center', marginBottom: 16, gap: 7 },
   catIconWrap: {
-    width: 54, height: 54, borderRadius: 18,
+    width: 56, height: 56, borderRadius: 16,
     alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.07,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  catLabel: { fontSize: 11, fontWeight: '500', color: Colors.dark, textAlign: 'center' },
+  catLabel: { fontSize: 11, fontWeight: '500', color: Colors.dark, textAlign: 'center', lineHeight: 15 },
 
   // Count bar
   countBar: {

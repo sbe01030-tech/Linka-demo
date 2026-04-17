@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors, Radius, Shadow } from '../../constants/colors';
+import { W1, W2, W3, C1, C2, C3 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
 import { RootStackParamList, ChatThread } from '../../types';
@@ -18,7 +19,7 @@ const CUSTOMER_CHATS: ChatThread[] = [
   {
     id: 'ch1',
     name: 'Sari Dewi',
-    photo: 'https://randomuser.me/api/portraits/women/45.jpg',
+    photo: W1,
     role: 'helper',
     lastMessage: 'Baik bu, saya akan datang jam 9 pagi ya',
     time: '10:32',
@@ -27,20 +28,20 @@ const CUSTOMER_CHATS: ChatThread[] = [
   },
   {
     id: 'ch2',
-    name: 'Yanti Kusuma',
-    photo: 'https://randomuser.me/api/portraits/women/48.jpg',
-    role: 'tutor',
-    lastMessage: 'Materi hari ini sudah saya siapkan, siap belajar!',
+    name: 'Rina Wulandari',
+    photo: W2,
+    role: 'helper',
+    lastMessage: 'Sudah selesai bersih-bersih bu, terima kasih 🙏',
     time: 'Kemarin',
     unread: 0,
     orderId: 'o2',
   },
   {
     id: 'ch3',
-    name: 'Rina Wulandari',
-    photo: 'https://randomuser.me/api/portraits/women/63.jpg',
+    name: 'Dewi Anggraeni',
+    photo: W3,
     role: 'helper',
-    lastMessage: 'Sudah selesai bersih-bersih bu, terima kasih 🙏',
+    lastMessage: 'Besok saya bisa datang jam 8 pagi ya bu',
     time: 'Sen',
     unread: 0,
   },
@@ -51,7 +52,7 @@ const WORKER_CHATS: ChatThread[] = [
   {
     id: 'wch1',
     name: 'Bunda Wulandari',
-    photo: 'https://randomuser.me/api/portraits/women/59.jpg',
+    photo: C1,
     role: 'customer',
     lastMessage: 'Oke, ditunggu ya besok jam 9 pagi',
     time: '10:32',
@@ -61,7 +62,7 @@ const WORKER_CHATS: ChatThread[] = [
   {
     id: 'wch2',
     name: 'Bunda Indah',
-    photo: 'https://randomuser.me/api/portraits/women/41.jpg',
+    photo: C2,
     role: 'customer',
     lastMessage: 'Terima kasih banyak, rumah jadi bersih!',
     time: 'Kemarin',
@@ -71,7 +72,7 @@ const WORKER_CHATS: ChatThread[] = [
   {
     id: 'wch3',
     name: 'Bunda Tari',
-    photo: 'https://randomuser.me/api/portraits/women/37.jpg',
+    photo: C3,
     role: 'customer',
     lastMessage: 'Bisa mulai lebih awal tidak?',
     time: 'Ming',
@@ -84,7 +85,7 @@ export default function ChatListScreen() {
   const { user } = useAuthStore();
   const { t } = useLanguageStore();
 
-  const isWorker = user?.role === 'helper' || user?.role === 'tutor';
+  const isWorker = user?.role === 'helper';
   const chats = isWorker ? WORKER_CHATS : CUSTOMER_CHATS;
   const totalUnread = chats.reduce((sum, c) => sum + c.unread, 0);
 
@@ -138,7 +139,7 @@ export default function ChatListScreen() {
                 {/* Role indicator dot */}
                 <View style={[
                   s.roleDot,
-                  { backgroundColor: chat.role === 'tutor' ? Colors.tutorColor : chat.role === 'helper' ? Colors.helperColor : Colors.gray },
+                  { backgroundColor: chat.role === 'helper' ? Colors.helperColor : Colors.gray },
                 ]} />
               </View>
 

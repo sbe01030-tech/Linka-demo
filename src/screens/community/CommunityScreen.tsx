@@ -128,7 +128,7 @@ export default function CommunityScreen() {
       </View>
 
       {/* Post list */}
-      <ScrollView style={s.list} showsVerticalScrollIndicator={false}>
+      <ScrollView style={s.list} showsVerticalScrollIndicator={false} contentContainerStyle={s.listContent}>
         {filtered.length === 0 ? (
           <View style={s.empty}>
             <Ionicons name="chatbubble-ellipses-outline" size={40} color={Colors.grayLight} />
@@ -137,37 +137,48 @@ export default function CommunityScreen() {
         ) : (
           filtered.map((post, i) => {
             const tagStyle = CATEGORY_COLORS[post.category] ?? { bg: Colors.section, color: Colors.gray };
+            const showAd = (i + 1) % 4 === 0 && i < filtered.length - 1;
             return (
-              <TouchableOpacity key={post.id} style={s.postCard} activeOpacity={0.85}>
-                <View style={s.postTop}>
-                  <View style={[s.catTag, { backgroundColor: tagStyle.bg }]}>
-                    <Text style={[s.catTagText, { color: tagStyle.color }]}>
-                      {catLabel(post.category as CategoryKey)}
-                    </Text>
+              <React.Fragment key={post.id}>
+                <TouchableOpacity style={s.postCard} activeOpacity={0.85}>
+                  <View style={s.postTop}>
+                    <View style={[s.catTag, { backgroundColor: tagStyle.bg }]}>
+                      <Text style={[s.catTagText, { color: tagStyle.color }]}>
+                        {catLabel(post.category as CategoryKey)}
+                      </Text>
+                    </View>
+                    <Text style={s.postTime}>{post.time}</Text>
                   </View>
-                  <Text style={s.postTime}>{post.time}</Text>
-                </View>
 
-                <Text style={s.postTitle}>{post.title}</Text>
-                <Text style={s.postPreview} numberOfLines={2}>{post.preview}</Text>
+                  <Text style={s.postTitle}>{post.title}</Text>
+                  <Text style={s.postPreview} numberOfLines={2}>{post.preview}</Text>
 
-                <View style={s.postFooter}>
-                  <Text style={s.postAuthor}>{post.author}</Text>
-                  <View style={s.metaRow}>
-                    <Ionicons name="chatbubble-outline" size={12} color={Colors.grayLight} />
-                    <Text style={s.metaNum}>{post.comments}</Text>
-                    <Ionicons name="heart-outline" size={12} color={Colors.grayLight} />
-                    <Text style={s.metaNum}>{post.likes}</Text>
+                  <View style={s.postFooter}>
+                    <Text style={s.postAuthor}>{post.author}</Text>
+                    <View style={s.metaRow}>
+                      <Ionicons name="chatbubble-outline" size={12} color={Colors.grayLight} />
+                      <Text style={s.metaNum}>{post.comments}</Text>
+                      <Ionicons name="heart-outline" size={12} color={Colors.grayLight} />
+                      <Text style={s.metaNum}>{post.likes}</Text>
+                    </View>
                   </View>
-                </View>
+                </TouchableOpacity>
 
-                {/* Separator */}
-                {i < filtered.length - 1 && <View style={s.separator} />}
-              </TouchableOpacity>
+                {showAd && (
+                  <TouchableOpacity style={s.adCard} activeOpacity={0.85}>
+                    <View style={s.adBadge}><Text style={s.adBadgeText}>AD</Text></View>
+                    <View style={s.adBody}>
+                      <Text style={s.adTitle}>Linka Asuransi Mitra ✓</Text>
+                      <Text style={s.adSub}>Semua ART Linka sudah terdaftar asuransi ketenagakerjaan. Kerja lebih tenang!</Text>
+                    </View>
+                    <Ionicons name="chevron-forward" size={14} color={Colors.grayLight} />
+                  </TouchableOpacity>
+                )}
+              </React.Fragment>
             );
           })
         )}
-        <View style={{ height: 32 }} />
+        <View style={{ height: 80 }} />
       </ScrollView>
 
       {/* FAB write button */}
@@ -218,10 +229,17 @@ const s = StyleSheet.create({
   tabTextActive: { color: Colors.white, fontWeight: '700' },
 
   list: { flex: 1 },
+  listContent: { paddingHorizontal: 12, paddingTop: 12 },
   empty: { alignItems: 'center', paddingTop: 72, gap: 12 },
   emptyText: { fontSize: 14, color: Colors.gray },
 
-  postCard: { paddingHorizontal: 16, paddingTop: 16 },
+  postCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    borderWidth: 1, borderColor: Colors.border,
+    paddingHorizontal: 14, paddingTop: 14, paddingBottom: 12,
+    marginBottom: 8,
+  },
   postTop:  { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 7 },
   catTag: { borderRadius: 5, paddingHorizontal: 8, paddingVertical: 3 },
   catTagText: { fontSize: 11, fontWeight: '700' },
@@ -230,12 +248,29 @@ const s = StyleSheet.create({
   postTitle:  { fontSize: 15, fontWeight: '600', color: Colors.dark, marginBottom: 5, lineHeight: 22 },
   postPreview:{ fontSize: 13, color: Colors.gray, lineHeight: 19, marginBottom: 10 },
 
-  postFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  postFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   postAuthor: { fontSize: 12, color: Colors.grayLight },
   metaRow:    { flexDirection: 'row', alignItems: 'center', gap: 5 },
   metaNum:    { fontSize: 12, color: Colors.grayLight },
 
-  separator: { height: 1, backgroundColor: Colors.border },
+  // In-feed ad — same card shape, subtly muted tone
+  adCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: '#FAFAFA',
+    borderRadius: 12,
+    borderWidth: 1, borderColor: Colors.border,
+    paddingHorizontal: 14, paddingVertical: 12,
+    marginBottom: 8,
+  },
+  adBadge: {
+    backgroundColor: Colors.section,
+    borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2,
+    alignSelf: 'flex-start',
+  },
+  adBadgeText: { fontSize: 9, fontWeight: '700', color: Colors.grayLight },
+  adBody: { flex: 1, gap: 3 },
+  adTitle: { fontSize: 13, fontWeight: '600', color: Colors.dark },
+  adSub:   { fontSize: 12, color: Colors.gray, lineHeight: 17 },
 
   fab: {
     position: 'absolute', bottom: 24, right: 20,

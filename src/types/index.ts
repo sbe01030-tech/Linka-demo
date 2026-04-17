@@ -16,6 +16,7 @@ export interface User {
 export interface Worker extends User {
   role: 'helper' | 'tutor';
   serviceType: ServiceType;
+  serviceFrequency?: 'regular' | 'special' | 'both';
   pricePerHour: number;
   pricePerDay?: number;
   location: string;
@@ -28,7 +29,7 @@ export interface Worker extends User {
 
 export interface CommunityPost {
   id: string;
-  category: '인기글' | '자유수다' | '육아꿀팁' | '궁금해요';
+  category: 'popular' | 'chat' | 'tips' | 'ask' | 'announce';
   title: string;
   preview: string;
   author: string;

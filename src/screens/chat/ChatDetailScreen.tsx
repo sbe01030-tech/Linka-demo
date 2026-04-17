@@ -42,7 +42,7 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
-  const roleLabel = role === 'tutor' ? '과외 선생님' : role === 'helper' ? t.auth.helper : t.auth.customer;
+  const roleLabel = role === 'tutor' ? t.services.tutorFull : role === 'helper' ? t.auth.helper : t.auth.customer;
   const roleColor = role === 'tutor' ? Colors.tutorColor : role === 'helper' ? Colors.helperColor : Colors.gray;
 
   return (

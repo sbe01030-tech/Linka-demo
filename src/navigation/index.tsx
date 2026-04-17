@@ -46,7 +46,7 @@ function TabIcon({ focused, name }: { focused: boolean; name: any }) {
 function CustomerTabs() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguageStore();
-  const tabH = 52 + insets.bottom;
+  const tabH = 64 + insets.bottom;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -56,7 +56,7 @@ function CustomerTabs() {
           borderTopColor:  Colors.border,
           borderTopWidth:  1,
           height:          tabH,
-          paddingBottom:   insets.bottom + 4,
+          paddingBottom:   insets.bottom + 12,
           paddingTop:      8,
         },
         tabBarActiveTintColor:   Colors.accent,
@@ -102,7 +102,7 @@ function CustomerTabs() {
 function WorkerTabs() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguageStore();
-  const tabH = 52 + insets.bottom;
+  const tabH = 64 + insets.bottom;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -112,7 +112,7 @@ function WorkerTabs() {
           borderTopColor:  Colors.border,
           borderTopWidth:  1,
           height:          tabH,
-          paddingBottom:   insets.bottom + 4,
+          paddingBottom:   insets.bottom + 12,
           paddingTop:      8,
         },
         tabBarActiveTintColor:   Colors.accent,

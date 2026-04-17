@@ -1,11 +1,11 @@
 export type LangCode = 'id' | 'en' | 'ko' | 'zh' | 'ja';
 
-export const LANGUAGES: { code: LangCode; label: string; flag: string; nativeLabel: string }[] = [
-  { code: 'id', label: 'Indonesian', flag: '🇮🇩', nativeLabel: 'Bahasa Indonesia' },
-  { code: 'en', label: 'English',    flag: '🇺🇸', nativeLabel: 'English' },
-  { code: 'ko', label: 'Korean',     flag: '🇰🇷', nativeLabel: '한국어' },
-  { code: 'zh', label: 'Chinese',    flag: '🇨🇳', nativeLabel: '中文' },
-  { code: 'ja', label: 'Japanese',   flag: '🇯🇵', nativeLabel: '日本語' },
+export const LANGUAGES: { code: LangCode; label: string; countryCode: string; color: string; nativeLabel: string }[] = [
+  { code: 'id', label: 'Indonesian', countryCode: 'ID', color: '#CC0001', nativeLabel: 'Bahasa Indonesia' },
+  { code: 'en', label: 'English',    countryCode: 'EN', color: '#3C3B6E', nativeLabel: 'English' },
+  { code: 'ko', label: 'Korean',     countryCode: 'KO', color: '#003478', nativeLabel: '한국어' },
+  { code: 'zh', label: 'Chinese',    countryCode: 'ZH', color: '#DE2910', nativeLabel: '中文' },
+  { code: 'ja', label: 'Japanese',   countryCode: 'JP', color: '#BC002D', nativeLabel: '日本語' },
 ];
 
 export interface Translations {
@@ -43,8 +43,10 @@ export interface Translations {
     demoLogin: string;
     quickLogin: string;
     customer: string;
+    customerDesc: string;
     driver: string;
     helper: string;
+    helperDesc: string;
     iWantTo: string;
     findWorker: string;
     becomeDriver: string;
@@ -153,6 +155,9 @@ export interface Translations {
     goOnline: string;
     hours: string;
     depositHeld: string;
+    scheduleTitle: string;
+    servicesTitle: string;
+    servicesHint: string;
   };
 
   // Worker Orders
@@ -259,6 +264,14 @@ export interface Translations {
     activeCount: string;
     inlineAd: string;
     locationDefault: string;
+    catArt: string;
+    catCooking: string;
+    catCleaning: string;
+    catCustom: string;
+    catTutor: string;
+    catVisit: string;
+    catEnglish: string;
+    catMore: string;
   };
 
   // Community screen
@@ -350,8 +363,10 @@ const id: Translations = {
     demoLogin: 'Login cepat (demo)',
     quickLogin: 'Login cepat (demo)',
     customer: 'Pelanggan',
+    customerDesc: 'Cari & pesan ART',
     driver: 'Driver',
     helper: 'ART',
+    helperDesc: 'Terima order kerja',
     iWantTo: 'Saya ingin...',
     findWorker: 'Cari driver/ART',
     becomeDriver: 'Jadi driver',
@@ -453,6 +468,9 @@ const id: Translations = {
     goOnline: 'Aktifkan status online\nuntuk menerima pesanan',
     hours: 'jam',
     depositHeld: 'Deposit escrow sudah ditahan',
+    scheduleTitle: 'Jadwal Hari Ini',
+    servicesTitle: 'Layanan Saya',
+    servicesHint: 'Tap untuk aktif/nonaktif',
   },
   workerOrders: {
     title: 'Riwayat Pekerjaan',
@@ -543,6 +561,14 @@ const id: Translations = {
     activeCount: 'aktif',
     inlineAd: 'Sudah cek asuransi mitra? Semua mitra Linka sudah terdaftar asuransi.',
     locationDefault: 'Jakarta Selatan, Kebayoran',
+    catArt: 'ART',
+    catCooking: 'Masak/Catering',
+    catCleaning: 'Bersih-bersih',
+    catCustom: 'Custom',
+    catTutor: 'Les Privat',
+    catVisit: 'Kunjungan',
+    catEnglish: 'Les Inggris',
+    catMore: 'Lainnya',
   },
   community: {
     title: 'Komunitas',
@@ -628,8 +654,10 @@ const en: Translations = {
     demoLogin: 'Quick login (demo)',
     quickLogin: 'Quick login (demo)',
     customer: 'Customer',
+    customerDesc: 'Find & book a housekeeper',
     driver: 'Driver',
     helper: 'Housekeeper',
+    helperDesc: 'Receive work orders',
     iWantTo: 'I want to...',
     findWorker: 'Find driver/helper',
     becomeDriver: 'Be a driver',
@@ -730,6 +758,9 @@ const en: Translations = {
     goOnline: 'Go online to\nreceive orders',
     hours: 'hrs',
     depositHeld: 'Escrow deposit held',
+    scheduleTitle: "Today's Schedule",
+    servicesTitle: 'My Services',
+    servicesHint: 'Tap to enable/disable',
   },
   workerOrders: {
     title: 'Work History',
@@ -844,6 +875,14 @@ const en: Translations = {
     activeCount: 'active',
     inlineAd: 'All Linka partners are fully insured for your peace of mind.',
     locationDefault: 'South Jakarta, Kebayoran',
+    catArt: 'Housekeeper',
+    catCooking: 'Cooking',
+    catCleaning: 'Cleaning',
+    catCustom: 'Custom',
+    catTutor: 'Tutoring',
+    catVisit: 'Home Visit',
+    catEnglish: 'English Tutor',
+    catMore: 'More',
   },
   community: {
     title: 'Community',
@@ -905,8 +944,10 @@ const ko: Translations = {
     demoLogin: '빠른 로그인 (데모)',
     quickLogin: '빠른 로그인 (데모)',
     customer: '고객',
+    customerDesc: 'ART 찾기 & 예약',
     driver: '드라이버',
     helper: '가사도우미',
+    helperDesc: '일감 받기',
     iWantTo: '나는...',
     findWorker: '드라이버/도우미 찾기',
     becomeDriver: '드라이버가 되기',
@@ -1007,6 +1048,9 @@ const ko: Translations = {
     goOnline: '주문을 받으려면\n온라인으로 전환하세요',
     hours: '시간',
     depositHeld: '에스크로 보증금 보유',
+    scheduleTitle: '오늘 일정',
+    servicesTitle: '내 서비스',
+    servicesHint: '탭하여 활성화/비활성화',
   },
   workerOrders: {
     title: '작업 내역',
@@ -1121,6 +1165,14 @@ const ko: Translations = {
     activeCount: '명 활동 중',
     inlineAd: '안전보험 가입 여부 확인하셨나요? Linka 파트너는 모두 보험 가입 완료',
     locationDefault: '서울 강남구 삼성동',
+    catArt: '가사도우미',
+    catCooking: '요리/케이터링',
+    catCleaning: '청소',
+    catCustom: '맞춤',
+    catTutor: '과외',
+    catVisit: '방문 서비스',
+    catEnglish: '영어 과외',
+    catMore: '더보기',
   },
   community: {
     title: '커뮤니티',
@@ -1182,8 +1234,10 @@ const zh: Translations = {
     demoLogin: '快速登录（演示）',
     quickLogin: '快速登录（演示）',
     customer: '客户',
+    customerDesc: '查找并预约家政',
     driver: '司机',
     helper: '家政',
+    helperDesc: '接收工作订单',
     iWantTo: '我想要...',
     findWorker: '找司机/家政',
     becomeDriver: '成为司机',
@@ -1284,6 +1338,9 @@ const zh: Translations = {
     goOnline: '上线以\n接受订单',
     hours: '小时',
     depositHeld: '托管保证金已保留',
+    scheduleTitle: '今日日程',
+    servicesTitle: '我的服务',
+    servicesHint: '点击启用/禁用',
   },
   workerOrders: {
     title: '工作记录',
@@ -1398,6 +1455,14 @@ const zh: Translations = {
     activeCount: '位在线',
     inlineAd: '所有Linka合作伙伴均已投保，让您安心无忧。',
     locationDefault: '雅加达南区',
+    catArt: '家政',
+    catCooking: '烹饪/外卖',
+    catCleaning: '清洁',
+    catCustom: '定制',
+    catTutor: '私教',
+    catVisit: '上门服务',
+    catEnglish: '英语辅导',
+    catMore: '更多',
   },
   community: {
     title: '社区',
@@ -1459,8 +1524,10 @@ const ja: Translations = {
     demoLogin: 'クイックログイン（デモ）',
     quickLogin: 'クイックログイン（デモ）',
     customer: 'お客様',
+    customerDesc: 'ヘルパーを探して予約',
     driver: 'ドライバー',
     helper: '家事ヘルパー',
+    helperDesc: '仕事依頼を受け取る',
     iWantTo: '私は...',
     findWorker: 'ドライバー/ヘルパーを探す',
     becomeDriver: 'ドライバーになる',
@@ -1561,6 +1628,9 @@ const ja: Translations = {
     goOnline: 'オンラインにして\n注文を受け付けましょう',
     hours: '時間',
     depositHeld: 'エスクロー保証金を保留中',
+    scheduleTitle: '本日のスケジュール',
+    servicesTitle: '私のサービス',
+    servicesHint: 'タップで有効/無効',
   },
   workerOrders: {
     title: '作業履歴',
@@ -1675,6 +1745,14 @@ const ja: Translations = {
     activeCount: '人稼働中',
     inlineAd: '全Linkaパートナーは保険加入済みです。安心してご利用ください。',
     locationDefault: 'ジャカルタ南部',
+    catArt: '家事代行',
+    catCooking: '料理/ケータリング',
+    catCleaning: '清掃',
+    catCustom: 'カスタム',
+    catTutor: '家庭教師',
+    catVisit: '訪問サービス',
+    catEnglish: '英語レッスン',
+    catMore: 'その他',
   },
   community: {
     title: 'コミュニティ',
