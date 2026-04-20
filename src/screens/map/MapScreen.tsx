@@ -23,7 +23,7 @@ type SortBy   = 'rating' | 'price_low' | 'price_high' | 'reviews';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const EXPANDED_H = SCREEN_H * 0.72;
-const PEEK_H     = 272;
+const PEEK_H     = 240;
 
 interface Partner {
   id: string; name: string; firstName: string;
@@ -150,6 +150,7 @@ export default function MapScreen() {
   const [serviceType, setServiceType]         = useState<SvcType | null>(null);
   const [selectedActivities, setSelectedAct]  = useState<string[]>([]);
   const [verifiedOnly, setVerifiedOnly]        = useState(false);
+  const [availableOnly, setAvailableOnly]      = useState(false);
   const [expLevel, setExpLevel]                = useState<ExpLevel>('all');
   const [sortBy, setSortBy]                    = useState<SortBy>('rating');
 
@@ -221,6 +222,7 @@ export default function MapScreen() {
     if (serviceType === 'regular') list = list.filter((p) => p.serviceFrequency === 'regular' || p.serviceFrequency === 'both');
     else if (serviceType === 'onetime') list = list.filter((p) => p.serviceFrequency === 'special' || p.serviceFrequency === 'both');
 
+    if (availableOnly) list = list.filter((p) => p.isAvailable);
     if (verifiedOnly) list = list.filter((p) => p.isVerified);
     if (expLevel === '1y') list = list.filter((p) => p.experienceYears >= 1);
     else if (expLevel === '3y') list = list.filter((p) => p.experienceYears >= 3);
@@ -239,7 +241,7 @@ export default function MapScreen() {
     else if (sortBy === 'reviews')     list.sort((a, b) => b.totalJobs - a.totalJobs);
 
     return list;
-  }, [search, serviceType, verifiedOnly, expLevel, selectedActivities, sortBy]);
+  }, [search, serviceType, availableOnly, verifiedOnly, expLevel, selectedActivities, sortBy]);
 
   const actActive  = selectedActivities.length > 0;
   const condActive = serviceType !== null;
@@ -356,153 +358,89 @@ export default function MapScreen() {
           <View style={s.handle} />
         </TouchableOpacity>
 
-        {/* ── PEEK CONTENT — Instagram Stories style ── */}
-        {!isExpanded && (
-          <View style={s.peekContent}>
-            {/* Header row */}
-            <View style={s.peekHeaderRow}>
-              <View style={s.peekHeaderLeft}>
-                <Text style={s.peekTitle}>{tx('내 주변 헬퍼', '내 주변 헬퍼', 'Nearby Helpers')}</Text>
-                <View style={s.peekCountBadge}>
-                  <Text style={s.peekCountBadgeText}>{filtered.length}</Text>
-                </View>
+        {/* ── PEEK CONTENT — always visible (header + filters + stories) ── */}
+        <View style={s.peekContent}>
+          {/* Header row */}
+          <View style={s.peekHeaderRow}>
+            <View style={s.peekHeaderLeft}>
+              <Text style={s.peekTitle}>{tx('내 주변 헬퍼', '내 주변 헬퍼', 'Nearby Helpers')}</Text>
+              <View style={s.peekCountBadge}>
+                <Text style={s.peekCountBadgeText}>{filtered.length}</Text>
               </View>
+            </View>
+            {isExpanded ? (
+              <TouchableOpacity style={s.expandCloseBtn} onPress={collapseSheet} activeOpacity={0.7}>
+                <Ionicons name="chevron-down" size={18} color={Colors.gray} />
+              </TouchableOpacity>
+            ) : (
               <TouchableOpacity style={s.peekExpandBtn} onPress={expandSheet} activeOpacity={0.8}>
                 <Ionicons name="list-outline" size={13} color={Colors.white} />
                 <Text style={s.peekExpandText}>{tx('전체보기', '전체보기', 'See all')}</Text>
                 <Ionicons name="chevron-up" size={12} color={Colors.white} />
               </TouchableOpacity>
-            </View>
-
-            {/* Filter chips — peek state */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={s.peekFilterRow}
-            >
-              <TouchableOpacity
-                style={[s.peekChip, actActive && s.peekChipActive]}
-                onPress={() => { setTmpAct(selectedActivities); setShowActModal(true); }}
-                activeOpacity={0.75}
-              >
-                <Ionicons name="construct-outline" size={12} color={actActive ? Colors.white : Colors.gray} />
-                <Text style={[s.peekChipText, actActive && s.peekChipTextActive]}>
-                  {tx('업무 종류', '업무 종류', 'Activities')}{actActive ? ` ·${selectedActivities.length}` : ''}
-                </Text>
-                {actActive && <Ionicons name="close" size={11} color={Colors.white} onTouchEnd={(e) => { e.stopPropagation(); setSelectedAct([]); }} />}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[s.peekChip, condActive && s.peekChipActive]}
-                onPress={() => { setTmpSvc(serviceType); setShowCondModal(true); }}
-                activeOpacity={0.75}
-              >
-                <Ionicons name="calendar-outline" size={12} color={condActive ? Colors.white : Colors.gray} />
-                <Text style={[s.peekChipText, condActive && s.peekChipTextActive]}>
-                  {condActive ? SVC_TYPES.find((sv) => sv.key === serviceType)?.label : tx('업무 조건', '업무 조건', 'Job Type')}
-                </Text>
-                {condActive && <Ionicons name="close" size={11} color={Colors.white} onTouchEnd={(e) => { e.stopPropagation(); setServiceType(null); }} />}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[s.peekChip, wrkActive && s.peekChipActive]}
-                onPress={() => { setTmpVer(verifiedOnly); setTmpExp(expLevel); setShowWrkModal(true); }}
-                activeOpacity={0.75}
-              >
-                <Ionicons name="person-circle-outline" size={12} color={wrkActive ? Colors.white : Colors.gray} />
-                <Text style={[s.peekChipText, wrkActive && s.peekChipTextActive]}>
-                  {tx('헬퍼 조건', '헬퍼 조건', 'Helper')}{wrkActive ? ' ●' : ''}
-                </Text>
-                {wrkActive && <Ionicons name="close" size={11} color={Colors.white} onTouchEnd={(e) => { e.stopPropagation(); setVerifiedOnly(false); setExpLevel('all'); }} />}
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[s.peekChip]}
-                onPress={() => setShowSortModal(true)}
-                activeOpacity={0.75}
-              >
-                <Ionicons name="funnel-outline" size={12} color={Colors.gray} />
-                <Text style={s.peekChipText}>{SORT_OPTIONS.find((o) => o.key === sortBy)?.label}</Text>
-                <Ionicons name="chevron-down" size={11} color={Colors.gray} />
-              </TouchableOpacity>
-            </ScrollView>
-
-            {/* Stories scroll */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={s.storiesRow}
-            >
-              {filtered.map((p) => (
-                <TouchableOpacity
-                  key={p.id}
-                  style={s.storyItem}
-                  activeOpacity={0.82}
-                  onPress={() => showDetail(p)}
-                >
-                  <View style={[s.storyRing, { borderColor: p.isAvailable ? Colors.accent : Colors.gray200 }]}>
-                    <Image source={{ uri: p.photo }} style={s.storyPhoto} />
-                    <View style={[s.storyDot, { backgroundColor: p.isAvailable ? Colors.success : Colors.grayLight }]} />
-                  </View>
-                  <View style={s.storyRatingRow}>
-                    <Ionicons name="star" size={8} color="#F59E0B" />
-                    <Text style={s.storyRating}>{p.rating.toFixed(1)}</Text>
-                  </View>
-                  <Text style={s.storyName} numberOfLines={1}>{p.firstName}</Text>
-                  <Text style={s.storyPrice}>Rp {(p.pricePerHour / 1000).toFixed(0)}rb</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+            )}
           </View>
-        )}
 
-        {/* ── EXPANDED CONTENT ── */}
+          {/* Filter chips */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.peekFilterRow}>
+            <TouchableOpacity style={[s.peekChip, condActive && s.peekChipActive]} onPress={() => { setTmpSvc(serviceType); setShowCondModal(true); }} activeOpacity={0.75}>
+              <Ionicons name="calendar-outline" size={12} color={condActive ? Colors.white : Colors.gray} />
+              <Text style={[s.peekChipText, condActive && s.peekChipTextActive]}>{condActive ? SVC_TYPES.find((sv) => sv.key === serviceType)?.label : tx('정기/단기', '정기/단기', 'Job Type')}</Text>
+              {condActive && <Ionicons name="close" size={11} color={Colors.white} onTouchEnd={(e: any) => { e.stopPropagation(); setServiceType(null); }} />}
+            </TouchableOpacity>
+            <View style={s.peekChipDivider} />
+            <TouchableOpacity style={[s.peekToggleChip, availableOnly && s.peekToggleOn]} onPress={() => setAvailableOnly((v) => !v)} activeOpacity={0.75}>
+              <View style={[s.peekToggleDot, { backgroundColor: availableOnly ? Colors.white : Colors.success }]} />
+              <Text style={[s.peekToggleText, availableOnly && s.peekToggleTextOn]}>{tx('지금 가능', '지금 가능', 'Available')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.peekToggleChip, verifiedOnly && s.peekToggleOn]} onPress={() => setVerifiedOnly((v) => !v)} activeOpacity={0.75}>
+              <Ionicons name="shield-checkmark" size={11} color={verifiedOnly ? Colors.white : Colors.accent} />
+              <Text style={[s.peekToggleText, verifiedOnly && s.peekToggleTextOn]}>{tx('인증', '인증', 'Verified')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.peekToggleChip, expLevel === '5y' && s.peekToggleOn]} onPress={() => setExpLevel((v) => v === '5y' ? 'all' : '5y')} activeOpacity={0.75}>
+              <Ionicons name="star" size={11} color={expLevel === '5y' ? Colors.white : '#F59E0B'} />
+              <Text style={[s.peekToggleText, expLevel === '5y' && s.peekToggleTextOn]}>{tx('경력 5년+', '경력 5년+', '5yr+')}</Text>
+            </TouchableOpacity>
+            <View style={s.peekChipDivider} />
+            <TouchableOpacity style={[s.peekChip, actActive && s.peekChipActive]} onPress={() => { setTmpAct(selectedActivities); setShowActModal(true); }} activeOpacity={0.75}>
+              <Ionicons name="construct-outline" size={12} color={actActive ? Colors.white : Colors.gray} />
+              <Text style={[s.peekChipText, actActive && s.peekChipTextActive]}>{tx('업무 종류', '업무 종류', 'Activities')}{actActive ? ` ·${selectedActivities.length}` : ''}</Text>
+              {actActive && <Ionicons name="close" size={11} color={Colors.white} onTouchEnd={(e: any) => { e.stopPropagation(); setSelectedAct([]); }} />}
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.peekChip, wrkActive && s.peekChipActive]} onPress={() => { setTmpVer(verifiedOnly); setTmpExp(expLevel); setShowWrkModal(true); }} activeOpacity={0.75}>
+              <Ionicons name="person-circle-outline" size={12} color={wrkActive ? Colors.white : Colors.gray} />
+              <Text style={[s.peekChipText, wrkActive && s.peekChipTextActive]}>{tx('헬퍼 조건', '헬퍼 조건', 'Helper')}{wrkActive ? ' ●' : ''}</Text>
+              {wrkActive && <Ionicons name="close" size={11} color={Colors.white} onTouchEnd={(e: any) => { e.stopPropagation(); setVerifiedOnly(false); setExpLevel('all'); }} />}
+            </TouchableOpacity>
+            <TouchableOpacity style={s.peekChip} onPress={() => setShowSortModal(true)} activeOpacity={0.75}>
+              <Ionicons name="funnel-outline" size={12} color={Colors.gray} />
+              <Text style={s.peekChipText}>{SORT_OPTIONS.find((o) => o.key === sortBy)?.label}</Text>
+              <Ionicons name="chevron-down" size={11} color={Colors.gray} />
+            </TouchableOpacity>
+          </ScrollView>
+
+          {/* Stories scroll */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.storiesRow}>
+            {filtered.map((p) => (
+              <TouchableOpacity key={p.id} style={s.storyItem} activeOpacity={0.82} onPress={() => showDetail(p)}>
+                <View style={[s.storyRing, { borderColor: p.isAvailable ? Colors.accent : Colors.gray200 }]}>
+                  <Image source={{ uri: p.photo }} style={s.storyPhoto} />
+                  <View style={[s.storyDot, { backgroundColor: p.isAvailable ? Colors.success : Colors.grayLight }]} />
+                </View>
+                <View style={s.storyRatingRow}>
+                  <Ionicons name="star" size={8} color="#F59E0B" />
+                  <Text style={s.storyRating}>{p.rating.toFixed(1)}</Text>
+                </View>
+                <Text style={s.storyName} numberOfLines={1}>{p.firstName}</Text>
+                <Text style={s.storyPrice}>Rp {(p.pricePerHour / 1000).toFixed(0)}rb</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* ── EXPANDED: 워커 리스트 ── */}
         {isExpanded && (
           <View style={{ flex: 1 }}>
-            {/* Close row */}
-            <View style={s.expandHeader}>
-              <Text style={s.expandHeaderTitle}>
-                {tx('Daftar Helper', '근처 헬퍼', 'Nearby Helpers')}
-              </Text>
-              <TouchableOpacity style={s.expandCloseBtn} onPress={collapseSheet} activeOpacity={0.7}>
-                <Ionicons name="chevron-down" size={18} color={Colors.gray} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Filter chips row */}
-            <View style={s.expandFilterBar}>
-              <TouchableOpacity
-                style={[s.expandChip, actActive && s.expandChipActive]}
-                onPress={() => { setTmpAct(selectedActivities); setShowActModal(true); }}
-              >
-                <Text style={[s.expandChipText, actActive && s.expandChipTextActive]}>
-                  {tx('Jenis Kerja', '원하는 업무', 'Activities')}{actActive ? ` (${selectedActivities.length})` : ''}
-                </Text>
-                <Ionicons name="chevron-down" size={11} color={actActive ? Colors.white : Colors.gray} />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[s.expandChip, condActive && s.expandChipActive]}
-                onPress={() => { setTmpSvc(serviceType); setShowCondModal(true); }}
-              >
-                <Text style={[s.expandChipText, condActive && s.expandChipTextActive]}>
-                  {condActive ? SVC_TYPES.find((s) => s.key === serviceType)?.label : tx('Kondisi Kerja', '업무 조건', 'Job Type')}
-                </Text>
-                <Ionicons name="chevron-down" size={11} color={condActive ? Colors.white : Colors.gray} />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[s.expandChip, wrkActive && s.expandChipActive]}
-                onPress={() => { setTmpVer(verifiedOnly); setTmpExp(expLevel); setShowWrkModal(true); }}
-              >
-                <Text style={[s.expandChipText, wrkActive && s.expandChipTextActive]}>
-                  {tx('Kondisi Helper', '헬퍼 조건', 'Helper')}{wrkActive ? ' ●' : ''}
-                </Text>
-                <Ionicons name="chevron-down" size={11} color={wrkActive ? Colors.white : Colors.gray} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Sort + count */}
             <View style={s.expandSortRow}>
               <Text style={s.expandCount}>
                 <Text style={s.expandCountNum}>{filtered.length}</Text>
@@ -514,8 +452,6 @@ export default function MapScreen() {
                 <Ionicons name="chevron-down" size={11} color={Colors.gray} />
               </TouchableOpacity>
             </View>
-
-            {/* Worker list */}
             <FlatList
               data={filtered}
               keyExtractor={(p) => p.id}
@@ -842,6 +778,13 @@ const s = StyleSheet.create({
   peekChipActive:   { backgroundColor:Colors.accent, borderColor:Colors.accent },
   peekChipText:     { fontSize:12, fontWeight:'500', color:Colors.gray },
   peekChipTextActive:{ color:Colors.white, fontWeight:'600' },
+  // Peek on/off toggle chips
+  peekToggleChip:   { flexDirection:'row', alignItems:'center', gap:4, paddingHorizontal:10, paddingVertical:6, borderRadius:Radius.pill, borderWidth:1, borderColor:Colors.borderMid, backgroundColor:Colors.white },
+  peekToggleOn:     { backgroundColor:Colors.accent, borderColor:Colors.accent },
+  peekToggleDot:    { width:7, height:7, borderRadius:4 },
+  peekToggleText:   { fontSize:12, fontWeight:'500', color:Colors.gray },
+  peekToggleTextOn: { color:Colors.white, fontWeight:'600' },
+  peekChipDivider:  { width:1, height:18, backgroundColor:Colors.border, marginHorizontal:2 },
 
   // Stories
   storiesRow:    { paddingHorizontal:16, gap:14, paddingBottom:2 },

@@ -3,11 +3,21 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, Image, Alert,
 } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
+const CAT_ICONS: Record<string, any> = {
+  helper:    require('../../../assets/icons/cat_helper.png'),
+  cooking:   require('../../../assets/icons/cat_cooking.png'),
+  cleaning:  require('../../../assets/icons/cat_cleaning.png'),
+  custom:    require('../../../assets/icons/cat_custom.png'),
+  tutor:     require('../../../assets/icons/cat_tutor.png'),
+  homevisit: require('../../../assets/icons/cat_homevisit.png'),
+  english:   require('../../../assets/icons/cat_english.png'),
+  more:      require('../../../assets/icons/cat_more.png'),
+};
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { AVATAR_STACK, W1, W2, W3, W4, W5, W6 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
@@ -37,16 +47,16 @@ function getPreviewPosts(lang: LangCode): CommunityPost[] {
 }
 
 const CATEGORY_META: {
-  id: string; key: string; icon: string; gradient: readonly [string, string];
+  id: string; key: string; bgColor: string;
 }[] = [
-  { id: 'helper',    key: 'catArt',      icon: 'home',           gradient: ['#FFF4C2', '#FFE080'] },
-  { id: 'cooking',   key: 'catCooking',  icon: 'restaurant',     gradient: ['#FFD8D4', '#FFAEAA'] },
-  { id: 'cleaning',  key: 'catCleaning', icon: 'sparkles',       gradient: ['#C4F5DC', '#82E4B0'] },
-  { id: 'custom',    key: 'catCustom',   icon: 'settings-sharp', gradient: ['#E4DEFF', '#C4B4FF'] },
-  { id: 'tutor',     key: 'catTutor',    icon: 'book',           gradient: ['#CCE8FF', '#98CCFF'] },
-  { id: 'homevisit', key: 'catVisit',    icon: 'location',       gradient: ['#FFD8EA', '#FFB0CC'] },
-  { id: 'english',   key: 'catEnglish',  icon: 'globe',          gradient: ['#C8F4F2', '#8AE4DF'] },
-  { id: 'more',      key: 'catMore',     icon: 'apps',           gradient: ['#EAEAEF', '#CECEDA'] },
+  { id: 'helper',    key: 'catArt',      bgColor: '#FFF3C0' },
+  { id: 'cooking',   key: 'catCooking',  bgColor: '#FFD8D4' },
+  { id: 'cleaning',  key: 'catCleaning', bgColor: '#C4F5DC' },
+  { id: 'custom',    key: 'catCustom',   bgColor: '#E4DEFF' },
+  { id: 'tutor',     key: 'catTutor',    bgColor: '#CCE8FF' },
+  { id: 'homevisit', key: 'catVisit',    bgColor: '#FFD8EA' },
+  { id: 'english',   key: 'catEnglish',  bgColor: '#C8F4F2' },
+  { id: 'more',      key: 'catMore',     bgColor: '#EAEAEF' },
 ];
 
 const AVATAR_URLS = AVATAR_STACK;
@@ -178,14 +188,9 @@ export default function HomeScreen() {
               activeOpacity={0.75}
               onPress={() => (navigation as any).navigate('Map', { expanded: true })}
             >
-              <LinearGradient
-                colors={cat.gradient}
-                start={{ x: 0.15, y: 0 }}
-                end={{ x: 0.85, y: 1 }}
-                style={s.catIconWrap}
-              >
-                <Ionicons name={cat.icon as any} size={24} color="#FFFFFF" />
-              </LinearGradient>
+              <View style={[s.catIconWrap, { backgroundColor: cat.bgColor }]}>
+                <Image source={CAT_ICONS[cat.id]} style={s.catIconImg} resizeMode="contain" />
+              </View>
               <Text style={s.catLabel}>{cat.label}</Text>
             </TouchableOpacity>
           ))}
@@ -359,20 +364,22 @@ const s = StyleSheet.create({
   // Category grid
   catSection: {
     backgroundColor: Colors.white, marginTop: 8,
-    paddingVertical: 20, paddingHorizontal: 16,
+    paddingTop: 20, paddingBottom: 12, paddingHorizontal: 16,
     borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
   },
   catGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  catItem: { width: '25%', alignItems: 'center', marginBottom: 16, gap: 7 },
+  catItem: { width: '25%', alignItems: 'center', marginBottom: 18, gap: 8 },
   catIconWrap: {
-    width: 56, height: 56, borderRadius: 14,
+    width: 66, height: 66, borderRadius: 33,
     alignItems: 'center', justifyContent: 'center',
+    overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.07,
     shadowRadius: 4,
     elevation: 2,
   },
+  catIconImg: { width: 65, height: 65, marginTop: 9 },
   catLabel: { fontSize: 11, fontWeight: '500', color: Colors.dark, textAlign: 'center', lineHeight: 15 },
 
   // Nearby banner
@@ -433,7 +440,7 @@ const s = StyleSheet.create({
     paddingTop: 16, paddingBottom: 8,
     borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
   },
-  workerScroll: { paddingHorizontal: 16, gap: 10, paddingBottom: 4 },
+  workerScroll: { paddingHorizontal: 16, gap: 10, paddingBottom: 4, paddingTop: 10 },
   workerCard: {
     width: 136, backgroundColor: Colors.white,
     borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border,
