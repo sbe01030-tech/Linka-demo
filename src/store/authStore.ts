@@ -7,6 +7,7 @@ interface AuthState {
   isLoading: boolean;
   login: (phone: string, password: string) => Promise<void>;
   register: (name: string, phone: string, password: string, role: UserRole) => Promise<void>;
+  quickStart: (role: UserRole) => void;
   logout: () => void;
   setUser: (user: User) => void;
 }
@@ -41,6 +42,21 @@ export const useAuthStore = create<AuthState>((set) => ({
       isVerified: false,
     };
     set({ user: newUser, isLoggedIn: true, isLoading: false });
+  },
+
+  quickStart: (role: UserRole) => {
+    const defaultName =
+      role === 'customer' ? 'Bunda'
+      : role === 'driver' ? 'Driver'
+      : 'Helper';
+    const guestUser: User = {
+      id: Date.now().toString(),
+      name: defaultName,
+      phone: '',
+      role,
+      isVerified: false,
+    };
+    set({ user: guestUser, isLoggedIn: true });
   },
 
   logout: () => set({ user: null, isLoggedIn: false }),

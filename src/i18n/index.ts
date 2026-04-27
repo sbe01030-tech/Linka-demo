@@ -1,11 +1,12 @@
 export type LangCode = 'id' | 'en' | 'ko' | 'zh' | 'ja';
 
 // twemoji: codepoint pair for https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/{twemoji}.png
-export const LANGUAGES: { code: LangCode; label: string; countryCode: string; color: string; nativeLabel: string; flag: string; flagCdn: string; twemoji: string }[] = [
+// disabled: true 는 선택지에서 숨김 (번역 데이터는 유지 — 나중에 활성화 가능)
+export const LANGUAGES: { code: LangCode; label: string; countryCode: string; color: string; nativeLabel: string; flag: string; flagCdn: string; twemoji: string; disabled?: boolean }[] = [
   { code: 'id', label: 'Indonesian', countryCode: 'ID', color: '#CC0001', nativeLabel: 'Bahasa Indonesia', flag: '🇮🇩', flagCdn: 'id', twemoji: '1f1ee-1f1e9' },
   { code: 'en', label: 'English',    countryCode: 'EN', color: '#3C3B6E', nativeLabel: 'English',          flag: '🇺🇸', flagCdn: 'us', twemoji: '1f1fa-1f1f8' },
   { code: 'ko', label: 'Korean',     countryCode: 'KO', color: '#003478', nativeLabel: '한국어',            flag: '🇰🇷', flagCdn: 'kr', twemoji: '1f1f0-1f1f7' },
-  { code: 'zh', label: 'Chinese',    countryCode: 'ZH', color: '#DE2910', nativeLabel: '中文',              flag: '🇨🇳', flagCdn: 'cn', twemoji: '1f1e8-1f1f3' },
+  { code: 'zh', label: 'Chinese',    countryCode: 'ZH', color: '#DE2910', nativeLabel: '中文',              flag: '🇨🇳', flagCdn: 'cn', twemoji: '1f1e8-1f1f3', disabled: true },
   { code: 'ja', label: 'Japanese',   countryCode: 'JP', color: '#BC002D', nativeLabel: '日本語',            flag: '🇯🇵', flagCdn: 'jp', twemoji: '1f1ef-1f1f5' },
 ];
 
@@ -273,6 +274,12 @@ export interface Translations {
     catVisit: string;
     catEnglish: string;
     catMore: string;
+    catChildcare: string;
+    catErrand: string;
+    catDriverDesignated: string;
+    catDriverDaily: string;
+    catDriverHourly: string;
+    catDriverAirport: string;
   };
 
   // Community screen
@@ -331,6 +338,136 @@ export interface Translations {
     confirmBook: string;
     bookSuccess: string;
     bookSuccessMsg: string;
+  };
+
+  // Register wizard
+  register: {
+    pageTitle: string;
+    titleRole: string; titleService: string; titleCondition: string; titleProfile: string; titleAccount: string;
+    stepService: string; stepCondition: string; stepProfile: string; stepAccount: string;
+    roleQuestion: string; roleSubtitle: string;
+    roleCustomerLabel: string; roleCustomerSub: string;
+    roleHelperLabel: string; roleHelperSub: string;
+    roleTutorLabel: string; roleTutorSub: string;
+    serviceQuestion: string; serviceTip: string;
+    rateTitle: string; rateChangeNote: string; rateUnit: string; rateAverage: string;
+    areaTitle: string; areaSub: string;
+    workTypeTitle: string; scheduleTitle: string;
+    introTitle: string; introSub: string;
+    photoCount: string; photoHint: string; photoTip: string;
+    bioTitle: string; templateHint: string;
+    tabExperience: string; tabPersonality: string; tabSkill: string;
+    templateSelect: string;
+    accountTitleHelper: string; accountTitleCustomer: string;
+    accountSubHelper: string; accountSubCustomer: string;
+    labelName: string; labelPhone: string; labelPassword: string;
+    namePlaceholder: string; phonePlaceholder: string; passwordPlaceholder: string;
+    next: string; finish: string; skip: string;
+    // service chip labels
+    artCooking: string; artCleaning: string; artLaundry: string;
+    artOrganizing: string; artChildcare: string; artShopping: string;
+    artSpecialCooking: string; artGardening: string;
+    tutorMath: string; tutorScience: string; tutorEnglish: string;
+    tutorMandarin: string; tutorCivics: string; tutorArts: string;
+    tutorCoding: string; tutorSports: string;
+    // work type & schedule
+    wtRegularLabel: string; wtRegularSub: string;
+    wtOnceLabel: string; wtOnceSub: string;
+    wtLiveinLabel: string; wtLiveinSub: string;
+    scMorningLabel: string; scMorningSub: string;
+    scAfternoonLabel: string; scAfternoonSub: string;
+    scEveningLabel: string; scEveningSub: string;
+    scFlexLabel: string; scFlexSub: string;
+    // bio
+    bioPlaceholder: string;
+    bioTpl0: string; bioTpl1: string; bioTpl2: string; bioTpl3: string;
+    bioTpl4: string; bioTpl5: string; bioTpl6: string; bioTpl7: string;
+    bioTpl8: string; bioTpl9: string; bioTpl10: string; bioTpl11: string;
+    // account bottom
+    hasAccount: string; loginLink: string;
+    termsNote: string; termsAnd: string; termsTerms: string; termsPrivacy: string;
+    // new titles / steps
+    titleTerms: string;
+    stepTerms: string;
+    stepCustService: string;
+    stepCustArea: string;
+    // customer phase 1 — service wants
+    custServiceQuestion: string;
+    custServiceTip: string;
+    custArt: string;
+    custTutor: string;
+    // customer phase 2 — area (reuses areaTitle/areaSub)
+    // terms phase inline
+    termsOverview: string;
+    termsAgreeAll: string;
+    termsItem1: string;
+    termsItem2: string;
+    termsItem3: string;
+    termsItem4: string;
+    termsViewLabel: string;
+    // Driver role
+    roleDriverLabel: string; roleDriverSub: string;
+    // Driver registration
+    driverSkillTitle: string; driverSkillSub: string;
+    driverLicenseTitle: string; driverLicenseSub: string;
+    driverServiceTitle: string; driverServiceSub: string;
+    driverAreaTitle: string; driverAreaSub: string;
+    // drivable vehicle types (what drivers can operate)
+    vehSedan: string; vehSuv: string; vehMpv: string; vehVan: string; vehManualStick: string;
+    drivableTypesLabel: string; drivableTypesSub: string;
+    // transmission
+    transmissionLabel: string;
+    transAuto: string; transManual: string; transBoth: string;
+    // driver service kinds (designated-driver model)
+    dsvDesignated: string; dsvDesignatedSub: string;
+    dsvDaily: string; dsvDailySub: string;
+    dsvHourly: string; dsvHourlySub: string;
+    dsvCommute: string; dsvCommuteSub: string;
+    dsvAirport: string; dsvAirportSub: string;
+    dsvIntercity: string; dsvIntercitySub: string;
+    dsvEvent: string; dsvEventSub: string;
+    // driver fields
+    driverExperience: string;
+    driverLicenseClass: string;
+    // step labels
+    stepDriverSkill: string; stepDriverLicense: string;
+    stepDriverService: string; stepDriverArea: string;
+  };
+
+  // Linka 온도 리뷰 시스템
+  linkaTemp: {
+    title: string;              // "Linka 온도"
+    tagline: string;            // "친절함의 따뜻함을 측정해요"
+    currentTemp: string;        // "현재 온도"
+    averageTemp: string;        // "평균"
+    basedOn: string;            // "N명의 리뷰 기준"
+    giveTemp: string;           // "온도 주기"
+    // review tags (positive)
+    tagFriendly: string; tagOnTime: string; tagClean: string;
+    tagSkilled: string; tagCareful: string; tagPatient: string;
+    tagWarmVibes: string; tagCommunicative: string;
+    // review tags (negative)
+    tagLate: string; tagRushed: string; tagCold: string;
+    tagUnclean: string; tagNotSkilled: string;
+    // result messages
+    tempUp: string;             // "+0.8°C"
+    tempDown: string;           // "-0.5°C"
+    freeTextTitle: string;      // "한마디 남기기 (선택)"
+    freeTextPlaceholder: string;
+    submitReview: string;
+    thanksTitle: string;        // "리뷰 감사합니다!"
+    thanksSub: string;
+  };
+
+  // 이 달의 헬퍼/드라이버
+  monthlyAward: {
+    title: string;              // "이 달의"
+    helperOfMonth: string;      // "이 달의 헬퍼"
+    driverOfMonth: string;      // "이 달의 드라이버"
+    winnerBadge: string;        // "MVP"
+    period: string;             // "2026년 4월"
+    reasonPrefix: string;       // "이유:"
+    seeAll: string;
   };
 }
 
@@ -553,7 +690,7 @@ const id: Translations = {
     adTitle: 'Voucher Diskon 20% 🎁',
     adSub: 'Daftar sekarang, langsung dapat diskon!',
     adCta: 'Ambil Voucher',
-    popularPosts: 'Postingan Populer 🔥',
+    popularPosts: 'Postingan Populer',
     seeAll: 'Lihat Semua',
     filterAll: 'Semua',
     filterHelper: 'ART',
@@ -570,6 +707,12 @@ const id: Translations = {
     catVisit: 'Kunjungan',
     catEnglish: 'Les Inggris',
     catMore: 'Lainnya',
+    catChildcare: 'Pengasuh Anak',
+    catErrand: 'Titip/Jasa',
+    catDriverDesignated: 'Sopir Pengganti',
+    catDriverDaily: 'Sopir Harian',
+    catDriverHourly: 'Sopir Per Jam',
+    catDriverAirport: 'Sopir Bandara',
   },
   community: {
     title: 'Komunitas',
@@ -622,6 +765,113 @@ const id: Translations = {
     confirmBook: 'Pesan Sekarang',
     bookSuccess: 'Berhasil!',
     bookSuccessMsg: 'Pesanan Anda telah dibuat. Mitra akan segera merespon.',
+  },
+  register: {
+    pageTitle: 'Daftar Akun',
+    titleRole: 'Daftar Akun', titleService: 'Pilih Layanan', titleCondition: 'Kondisi Kerja', titleProfile: 'Info Profil', titleAccount: 'Buat Akun',
+    stepService: 'Layanan', stepCondition: 'Kondisi', stepProfile: 'Profil', stepAccount: 'Akun',
+    roleQuestion: 'Saya ingin…', roleSubtitle: 'Pilih peran kamu di Linka',
+    roleCustomerLabel: 'Mencari Asisten', roleCustomerSub: 'Temukan ART, guru les, atau asisten rumah tangga terpercaya di sekitar kamu',
+    roleHelperLabel: 'Jadi ART / Asisten Rumah', roleHelperSub: 'Masak, bersih-bersih, jaga anak — cari pelanggan di dekat rumahmu',
+    roleTutorLabel: 'Jadi Guru Les', roleTutorSub: 'Ajar berbagai mata pelajaran dan mulai menghasilkan dari rumah',
+    serviceQuestion: 'Layanan apa yang bisa kamu lakukan?', serviceTip: 'Semakin banyak layanan, semakin besar peluang mendapat orderan!',
+    rateTitle: 'Tarif per jam yang kamu inginkan', rateChangeNote: 'Bisa diubah kapan saja di profil', rateUnit: '/ jam', rateAverage: 'Rata-rata ART di Jakarta: Rp 25.000–40.000/jam',
+    areaTitle: 'Wilayah kerja (maks. 3 pilihan)', areaSub: 'Pilih area yang bisa kamu jangkau',
+    workTypeTitle: 'Tipe kerja yang diinginkan', scheduleTitle: 'Waktu yang bisa kamu bekerja',
+    introTitle: 'Perkenalkan diri kamu', introSub: 'Bisa diubah kapan saja di profil',
+    photoCount: 'foto', photoHint: 'Tambah foto kerja atau wajah', photoTip: 'Profil dengan foto mendapat 3× lebih banyak orderan!',
+    bioTitle: 'Tentang kamu', templateHint: 'Ketuk kalimat di bawah untuk ditambahkan otomatis',
+    tabExperience: 'Pengalaman', tabPersonality: 'Sifat & Sikap', tabSkill: 'Kemampuan',
+    templateSelect: 'Pilih',
+    accountTitleHelper: 'Hampir selesai!', accountTitleCustomer: 'Buat akun kamu',
+    accountSubHelper: 'Isi data akun untuk mulai menerima orderan', accountSubCustomer: 'Daftar dan mulai cari asisten terbaik',
+    labelName: 'Nama lengkap', labelPhone: 'Nomor HP / WhatsApp', labelPassword: 'Buat password',
+    namePlaceholder: 'Masukkan nama lengkap', phonePlaceholder: '08xx-xxxx-xxxx', passwordPlaceholder: 'Min. 6 karakter',
+    next: 'Lanjutkan', finish: 'Daftar Sekarang', skip: 'Lewati',
+    artCooking: 'Masak', artCleaning: 'Bersih-bersih', artLaundry: 'Cuci & Setrika',
+    artOrganizing: 'Beberes', artChildcare: 'Jaga Anak', artShopping: 'Belanja',
+    artSpecialCooking: 'Masak Spesial', artGardening: 'Berkebun',
+    tutorMath: 'Matematika', tutorScience: 'IPA / Sains', tutorEnglish: 'Bahasa Inggris',
+    tutorMandarin: 'Mandarin', tutorCivics: 'PKN', tutorArts: 'Seni / Musik',
+    tutorCoding: 'Coding', tutorSports: 'Olahraga',
+    wtRegularLabel: 'Reguler', wtRegularSub: 'Jadwal tetap setiap minggu',
+    wtOnceLabel: 'Sekali / Singkat', wtOnceSub: 'Satu hari atau beberapa hari',
+    wtLiveinLabel: 'Tinggal', wtLiveinSub: 'Tinggal di rumah majikan',
+    scMorningLabel: 'Pagi', scMorningSub: '07:00 – 12:00',
+    scAfternoonLabel: 'Siang', scAfternoonSub: '12:00 – 17:00',
+    scEveningLabel: 'Sore', scEveningSub: '17:00 – 21:00',
+    scFlexLabel: 'Fleksibel', scFlexSub: 'Sesuai kesepakatan',
+    bioPlaceholder: 'Contoh: Halo! Saya ART berpengalaman 3 tahun.\nSuka masak masakan Indonesia dan rajin bersih-bersih.',
+    bioTpl0: 'Berpengalaman 3+ tahun sebagai ART di Jakarta.', bioTpl1: 'Pernah bekerja di 5+ keluarga yang berbeda.',
+    bioTpl2: 'Berpengalaman menjaga anak balita dan memasak.', bioTpl3: 'Lulusan pelatihan ART profesional.',
+    bioTpl4: 'Jujur, teliti, dan bertanggung jawab.', bioTpl5: 'Tepat waktu dan dapat diandalkan.',
+    bioTpl6: 'Ramah, sabar, dan mudah bergaul.', bioTpl7: 'Menjaga kebersihan dan kerapihan rumah.',
+    bioTpl8: 'Bisa masak masakan Indonesia berbagai daerah.', bioTpl9: 'Mahir menggunakan mesin cuci dan setrika.',
+    bioTpl10: 'Bisa membuat minuman dan kue sederhana.', bioTpl11: 'Terampil membersihkan semua sudut rumah.',
+    hasAccount: 'Sudah punya akun?', loginLink: 'Masuk',
+    termsNote: 'Dengan mendaftar, kamu menyetujui', termsAnd: 'dan',
+    termsTerms: 'Syarat & Ketentuan', termsPrivacy: 'Kebijakan Privasi',
+    titleTerms: 'Syarat & Ketentuan',
+    stepTerms: 'Syarat', stepCustService: 'Kebutuhan', stepCustArea: 'Lokasi',
+    custServiceQuestion: 'Layanan apa yang kamu butuhkan?',
+    custServiceTip: 'Pilih semua yang kamu butuhkan. Bisa diubah kapan saja.',
+    custArt: 'ART / Asisten Rumah', custTutor: 'Guru Les / Tutor',
+    termsOverview: 'Linka adalah platform penghubung antara pelanggan dan mitra independen. PT Linka Indonesia tidak bertanggung jawab atas hasil, kualitas, atau perselisihan antara pengguna dan mitra.',
+    termsAgreeAll: 'Setujui semua syarat & ketentuan',
+    termsItem1: '(Wajib) Syarat & Ketentuan Penggunaan',
+    termsItem2: '(Wajib) Kebijakan Privasi & Penggunaan Data',
+    termsItem3: '(Wajib) Persetujuan Berbagi Data ke Pihak Ketiga',
+    termsItem4: '(Opsional) Terima notifikasi promo & komunitas',
+    termsViewLabel: 'Lihat',
+    roleDriverLabel: 'Saya Sopir', roleDriverSub: 'Mengemudikan mobil pelanggan',
+    driverSkillTitle: 'Kemampuan Mengemudi', driverSkillSub: 'Beri tahu mobil apa yang bisa Anda kemudikan',
+    driverLicenseTitle: 'Verifikasi SIM', driverLicenseSub: 'Upload foto SIM untuk verifikasi keamanan',
+    driverServiceTitle: 'Jenis Layanan', driverServiceSub: 'Pilih jenis layanan mengemudi yang Anda tawarkan',
+    driverAreaTitle: 'Area Operasional', driverAreaSub: 'Pilih area Anda siap beroperasi',
+    vehSedan: 'Sedan', vehSuv: 'SUV', vehMpv: 'MPV', vehVan: 'Van', vehManualStick: 'Manual (Kopling)',
+    drivableTypesLabel: 'Tipe Kendaraan yang Bisa Dikemudikan',
+    drivableTypesSub: 'Pilih semua tipe mobil yang Anda kuasai',
+    transmissionLabel: 'Transmisi',
+    transAuto: 'Matic', transManual: 'Manual', transBoth: 'Keduanya',
+    dsvDesignated: 'Sopir Pengganti', dsvDesignatedSub: 'Antar pulang setelah acara/minum',
+    dsvDaily: 'Sopir Harian', dsvDailySub: 'Mengemudi mobil customer sehari penuh',
+    dsvHourly: 'Sopir Per Jam', dsvHourlySub: 'Mengemudi sesuai jam yang dibutuhkan',
+    dsvCommute: 'Sopir Rutin', dsvCommuteSub: 'Antar-jemput kantor/sekolah rutin',
+    dsvAirport: 'Antar Jemput Bandara', dsvAirportSub: 'Mengemudi mobil customer ke/dari bandara',
+    dsvIntercity: 'Antar Kota', dsvIntercitySub: 'Perjalanan jauh antar kota',
+    dsvEvent: 'Sopir Acara', dsvEventSub: 'Pernikahan, acara keluarga, dll',
+    driverExperience: 'Pengalaman Mengemudi (tahun)',
+    driverLicenseClass: 'Kelas SIM',
+    stepDriverSkill: 'Kemampuan', stepDriverLicense: 'SIM',
+    stepDriverService: 'Layanan', stepDriverArea: 'Area',
+  },
+  linkaTemp: {
+    title: 'Suhu Linka',
+    tagline: 'Ukur kehangatan pelayanan',
+    currentTemp: 'Suhu Sekarang',
+    averageTemp: 'Rata-rata',
+    basedOn: 'Dari {n} review',
+    giveTemp: 'Beri Suhu',
+    tagFriendly: 'Ramah', tagOnTime: 'Tepat waktu', tagClean: 'Bersih',
+    tagSkilled: 'Terampil', tagCareful: 'Hati-hati', tagPatient: 'Sabar',
+    tagWarmVibes: 'Hangat', tagCommunicative: 'Komunikatif',
+    tagLate: 'Terlambat', tagRushed: 'Terburu-buru', tagCold: 'Dingin',
+    tagUnclean: 'Kurang bersih', tagNotSkilled: 'Kurang terampil',
+    tempUp: '+{n}°C', tempDown: '-{n}°C',
+    freeTextTitle: 'Tulis pesan (opsional)',
+    freeTextPlaceholder: 'Bagikan pengalamanmu...',
+    submitReview: 'Kirim Review',
+    thanksTitle: 'Terima kasih reviewnya!',
+    thanksSub: 'Review kamu membantu komunitas Linka',
+  },
+  monthlyAward: {
+    title: 'Terbaik bulan ini',
+    helperOfMonth: 'Helper Bulan Ini',
+    driverOfMonth: 'Driver Bulan Ini',
+    winnerBadge: 'MVP',
+    period: 'April 2026',
+    reasonPrefix: 'Alasan:',
+    seeAll: 'Lihat semua',
   },
 };
 
@@ -867,7 +1117,7 @@ const en: Translations = {
     adTitle: '20% Discount Voucher 🎁',
     adSub: 'Sign up now for an instant discount!',
     adCta: 'Get Voucher',
-    popularPosts: 'Popular Posts 🔥',
+    popularPosts: 'Popular Posts',
     seeAll: 'See All',
     filterAll: 'All',
     filterHelper: 'Housekeeper',
@@ -884,6 +1134,12 @@ const en: Translations = {
     catVisit: 'Home Visit',
     catEnglish: 'English Tutor',
     catMore: 'More',
+    catChildcare: 'Childcare',
+    catErrand: 'Errands',
+    catDriverDesignated: 'Designated',
+    catDriverDaily: 'Daily Chauffeur',
+    catDriverHourly: 'Hourly',
+    catDriverAirport: 'Airport',
   },
   community: {
     title: 'Community',
@@ -912,6 +1168,113 @@ const en: Translations = {
     perHour: '/ hr',
     ratingLabel: 'Rating',
     jobsLabel: 'Done',
+  },
+  register: {
+    pageTitle: 'Create Account',
+    titleRole: 'Create Account', titleService: 'Choose Services', titleCondition: 'Work Conditions', titleProfile: 'Profile Info', titleAccount: 'Create Account',
+    stepService: 'Services', stepCondition: 'Conditions', stepProfile: 'Profile', stepAccount: 'Account',
+    roleQuestion: 'I want to…', roleSubtitle: 'Choose your role in Linka',
+    roleCustomerLabel: 'Find an Assistant', roleCustomerSub: 'Find trusted housekeepers, tutors, or home assistants near you',
+    roleHelperLabel: 'Become a Housekeeper', roleHelperSub: 'Cook, clean, babysit — find clients near your home',
+    roleTutorLabel: 'Become a Tutor', roleTutorSub: 'Teach various subjects and start earning from home',
+    serviceQuestion: 'What services can you offer?', serviceTip: 'More services = more chances to get orders!',
+    rateTitle: 'Your desired hourly rate', rateChangeNote: 'Can be changed anytime in your profile', rateUnit: '/ hr', rateAverage: 'Average helpers in Jakarta: Rp 25,000–40,000/hr',
+    areaTitle: 'Work area (max. 3 choices)', areaSub: 'Select areas you can reach',
+    workTypeTitle: 'Preferred work type', scheduleTitle: 'Hours you can work',
+    introTitle: 'Introduce yourself', introSub: 'Can be changed anytime in your profile',
+    photoCount: 'photos', photoHint: 'Add work or face photos', photoTip: 'Profiles with photos get 3× more orders!',
+    bioTitle: 'About you', templateHint: 'Tap a sentence below to add it automatically',
+    tabExperience: 'Experience', tabPersonality: 'Personality', tabSkill: 'Skills',
+    templateSelect: 'Select',
+    accountTitleHelper: 'Almost done!', accountTitleCustomer: 'Create your account',
+    accountSubHelper: 'Fill in account details to start receiving orders', accountSubCustomer: 'Register and start finding the best assistant',
+    labelName: 'Full name', labelPhone: 'Phone / WhatsApp', labelPassword: 'Create password',
+    namePlaceholder: 'Enter your full name', phonePlaceholder: '08xx-xxxx-xxxx', passwordPlaceholder: 'Min. 6 characters',
+    next: 'Continue', finish: 'Register Now', skip: 'Skip',
+    artCooking: 'Cooking', artCleaning: 'Cleaning', artLaundry: 'Laundry & Ironing',
+    artOrganizing: 'Tidying Up', artChildcare: 'Childcare', artShopping: 'Grocery Shopping',
+    artSpecialCooking: 'Special Cooking', artGardening: 'Gardening',
+    tutorMath: 'Mathematics', tutorScience: 'Science', tutorEnglish: 'English',
+    tutorMandarin: 'Mandarin', tutorCivics: 'Civics', tutorArts: 'Arts & Music',
+    tutorCoding: 'Coding', tutorSports: 'Sports',
+    wtRegularLabel: 'Regular', wtRegularSub: 'Fixed weekly schedule',
+    wtOnceLabel: 'One-time / Short', wtOnceSub: 'One day or a few days',
+    wtLiveinLabel: 'Live-in', wtLiveinSub: "Live at the employer's home",
+    scMorningLabel: 'Morning', scMorningSub: '07:00 – 12:00',
+    scAfternoonLabel: 'Afternoon', scAfternoonSub: '12:00 – 17:00',
+    scEveningLabel: 'Evening', scEveningSub: '17:00 – 21:00',
+    scFlexLabel: 'Flexible', scFlexSub: 'By agreement',
+    bioPlaceholder: 'Example: Hi! I am a housekeeper with 3 years of experience.\nI enjoy cooking and keeping homes clean.',
+    bioTpl0: 'Over 3 years of experience as a housekeeper in Jakarta.', bioTpl1: 'Worked with 5+ different families.',
+    bioTpl2: 'Experienced in childcare and cooking.', bioTpl3: 'Graduate of a professional housekeeper training program.',
+    bioTpl4: 'Honest, thorough, and responsible.', bioTpl5: 'Punctual and reliable.',
+    bioTpl6: 'Friendly, patient, and easy-going.', bioTpl7: 'Committed to keeping the home clean and tidy.',
+    bioTpl8: 'Can cook various regional Indonesian dishes.', bioTpl9: 'Skilled with washing machines and ironing.',
+    bioTpl10: 'Can make simple drinks and pastries.', bioTpl11: 'Skilled at cleaning every corner of the house.',
+    hasAccount: 'Already have an account?', loginLink: 'Log in',
+    termsNote: 'By registering, you agree to our', termsAnd: 'and',
+    termsTerms: 'Terms & Conditions', termsPrivacy: 'Privacy Policy',
+    titleTerms: 'Terms & Conditions',
+    stepTerms: 'Terms', stepCustService: 'Needs', stepCustArea: 'Location',
+    custServiceQuestion: 'What services do you need?',
+    custServiceTip: 'Select all that apply. You can change this later.',
+    custArt: 'Home Assistant / ART', custTutor: 'Private Tutor',
+    termsOverview: 'Linka connects customers with independent partners. PT Linka Indonesia is not responsible for outcomes, quality, or disputes between users and partners.',
+    termsAgreeAll: 'Agree to all terms & conditions',
+    termsItem1: '(Required) Terms of Service',
+    termsItem2: '(Required) Privacy Policy & Data Use',
+    termsItem3: '(Required) Consent to Share Data with Third Parties',
+    termsItem4: '(Optional) Receive promo & community notifications',
+    termsViewLabel: 'View',
+    roleDriverLabel: "I'm a Driver", roleDriverSub: "Drive customers' cars for them",
+    driverSkillTitle: 'Driving Skills', driverSkillSub: "Tell us what vehicles you can drive",
+    driverLicenseTitle: 'License Verification', driverLicenseSub: 'Upload your driving license for verification',
+    driverServiceTitle: 'Service Types', driverServiceSub: 'Pick driving services you want to offer',
+    driverAreaTitle: 'Operating Area', driverAreaSub: 'Where are you available to drive?',
+    vehSedan: 'Sedan', vehSuv: 'SUV', vehMpv: 'MPV', vehVan: 'Van', vehManualStick: 'Manual (stick)',
+    drivableTypesLabel: 'Vehicle Types You Can Drive',
+    drivableTypesSub: 'Pick all types you can handle',
+    transmissionLabel: 'Transmission',
+    transAuto: 'Automatic', transManual: 'Manual', transBoth: 'Both',
+    dsvDesignated: 'Designated Driver', dsvDesignatedSub: 'Drive customer home after events/drinks',
+    dsvDaily: 'Daily Chauffeur', dsvDailySub: "Drive customer's car for a full day",
+    dsvHourly: 'Hourly Chauffeur', dsvHourlySub: 'Drive by the hour as needed',
+    dsvCommute: 'Commute Driver', dsvCommuteSub: 'Regular office/school drop-offs',
+    dsvAirport: 'Airport Transfer', dsvAirportSub: "Drive customer's car to/from airport",
+    dsvIntercity: 'Intercity', dsvIntercitySub: 'Long-distance trips between cities',
+    dsvEvent: 'Event Driver', dsvEventSub: 'Weddings, family events, etc',
+    driverExperience: 'Driving Experience (years)',
+    driverLicenseClass: 'License Class',
+    stepDriverSkill: 'Skills', stepDriverLicense: 'License',
+    stepDriverService: 'Services', stepDriverArea: 'Area',
+  },
+  linkaTemp: {
+    title: 'Linka Temperature',
+    tagline: 'Measures the warmth of care',
+    currentTemp: 'Current Temp',
+    averageTemp: 'Average',
+    basedOn: 'Based on {n} reviews',
+    giveTemp: 'Give Temperature',
+    tagFriendly: 'Friendly', tagOnTime: 'On time', tagClean: 'Clean',
+    tagSkilled: 'Skilled', tagCareful: 'Careful', tagPatient: 'Patient',
+    tagWarmVibes: 'Warm vibes', tagCommunicative: 'Communicative',
+    tagLate: 'Late', tagRushed: 'Rushed', tagCold: 'Cold',
+    tagUnclean: 'Not clean', tagNotSkilled: 'Not skilled',
+    tempUp: '+{n}°C', tempDown: '-{n}°C',
+    freeTextTitle: 'Leave a note (optional)',
+    freeTextPlaceholder: 'Share your experience...',
+    submitReview: 'Submit Review',
+    thanksTitle: 'Thanks for your review!',
+    thanksSub: 'Your feedback helps the Linka community',
+  },
+  monthlyAward: {
+    title: 'Top of the Month',
+    helperOfMonth: 'Helper of the Month',
+    driverOfMonth: 'Driver of the Month',
+    winnerBadge: 'MVP',
+    period: 'April 2026',
+    reasonPrefix: 'Why:',
+    seeAll: 'See all',
   },
 };
 
@@ -1157,7 +1520,7 @@ const ko: Translations = {
     adTitle: '첫 예약 20% 할인 쿠폰 🎁',
     adSub: '지금 가입하면 첫 서비스 즉시 할인',
     adCta: '쿠폰 받기',
-    popularPosts: '실시간 인기글 🔥',
+    popularPosts: '실시간 인기글',
     seeAll: '전체보기',
     filterAll: '전체',
     filterHelper: '가사도우미',
@@ -1174,6 +1537,12 @@ const ko: Translations = {
     catVisit: '방문 서비스',
     catEnglish: '영어 과외',
     catMore: '더보기',
+    catChildcare: '육아도우미',
+    catErrand: '심부름',
+    catDriverDesignated: '대리운전',
+    catDriverDaily: '일일 기사',
+    catDriverHourly: '시간제 기사',
+    catDriverAirport: '공항 기사',
   },
   community: {
     title: '커뮤니티',
@@ -1202,6 +1571,113 @@ const ko: Translations = {
     perHour: '/ 시간',
     ratingLabel: '평점',
     jobsLabel: '완료',
+  },
+  register: {
+    pageTitle: '계정 만들기',
+    titleRole: '계정 만들기', titleService: '서비스 선택', titleCondition: '근무 조건', titleProfile: '프로필 정보', titleAccount: '계정 만들기',
+    stepService: '서비스', stepCondition: '조건', stepProfile: '프로필', stepAccount: '계정',
+    roleQuestion: '저는…', roleSubtitle: 'Linka에서 역할을 선택하세요',
+    roleCustomerLabel: '도우미 찾기', roleCustomerSub: '주변의 믿을 수 있는 가사도우미, 과외선생님, 어시스턴트를 찾으세요',
+    roleHelperLabel: '가사도우미 되기', roleHelperSub: '요리, 청소, 육아 — 근처에서 고객을 찾아보세요',
+    roleTutorLabel: '과외 선생님 되기', roleTutorSub: '다양한 과목을 가르치고 집에서 수입을 시작하세요',
+    serviceQuestion: '어떤 서비스를 제공할 수 있나요?', serviceTip: '서비스가 많을수록 주문 받을 기회가 늘어납니다!',
+    rateTitle: '원하는 시간당 요금', rateChangeNote: '프로필에서 언제든지 변경 가능', rateUnit: '/ 시간', rateAverage: '자카르타 평균: Rp 25,000–40,000/시간',
+    areaTitle: '근무 지역 (최대 3개)', areaSub: '이동 가능한 지역을 선택하세요',
+    workTypeTitle: '원하는 근무 유형', scheduleTitle: '일할 수 있는 시간대',
+    introTitle: '자기소개', introSub: '프로필에서 언제든지 변경 가능',
+    photoCount: '장', photoHint: '작업 사진이나 얼굴 사진 추가', photoTip: '사진이 있는 프로필은 주문을 3배 더 받습니다!',
+    bioTitle: '나에 대해', templateHint: '아래 문장을 탭하면 자동으로 추가됩니다',
+    tabExperience: '경력', tabPersonality: '성격', tabSkill: '능력',
+    templateSelect: '선택',
+    accountTitleHelper: '거의 다 됐어요!', accountTitleCustomer: '계정을 만드세요',
+    accountSubHelper: '주문을 받기 위해 계정 정보를 입력하세요', accountSubCustomer: '가입하고 최고의 도우미를 찾아보세요',
+    labelName: '이름', labelPhone: '전화번호 / 카카오', labelPassword: '비밀번호 만들기',
+    namePlaceholder: '이름을 입력하세요', phonePlaceholder: '010-xxxx-xxxx', passwordPlaceholder: '최소 6자리',
+    next: '다음', finish: '지금 가입하기', skip: '건너뛰기',
+    artCooking: '요리', artCleaning: '청소', artLaundry: '세탁·다림질',
+    artOrganizing: '정리정돈', artChildcare: '육아', artShopping: '장보기',
+    artSpecialCooking: '특식 조리', artGardening: '원예',
+    tutorMath: '수학', tutorScience: '과학', tutorEnglish: '영어',
+    tutorMandarin: '중국어', tutorCivics: '시민교육', tutorArts: '예술·음악',
+    tutorCoding: '코딩', tutorSports: '체육',
+    wtRegularLabel: '정기 근무', wtRegularSub: '매주 고정 스케줄',
+    wtOnceLabel: '단기·일회성', wtOnceSub: '하루 또는 며칠',
+    wtLiveinLabel: '입주', wtLiveinSub: '고용주 집 거주',
+    scMorningLabel: '오전', scMorningSub: '07:00 – 12:00',
+    scAfternoonLabel: '오후', scAfternoonSub: '12:00 – 17:00',
+    scEveningLabel: '저녁', scEveningSub: '17:00 – 21:00',
+    scFlexLabel: '유연 근무', scFlexSub: '협의 후 결정',
+    bioPlaceholder: '예: 안녕하세요! 3년 경력의 가정도우미입니다.\n인도네시아 요리와 청소를 좋아합니다.',
+    bioTpl0: '자카르타에서 3년 이상 가정도우미 경력.', bioTpl1: '5개 이상의 가정에서 근무한 경험.',
+    bioTpl2: '영·유아 돌봄 및 요리 경험 풍부.', bioTpl3: '전문 가정도우미 교육 과정 수료.',
+    bioTpl4: '정직하고 꼼꼼하며 책임감 강함.', bioTpl5: '시간을 잘 지키고 믿을 수 있음.',
+    bioTpl6: '친절하고 인내심 있으며 사교적.', bioTpl7: '집을 항상 깨끗하고 정돈된 상태로 유지.',
+    bioTpl8: '인도네시아 각 지역 음식 요리 가능.', bioTpl9: '세탁기 사용 및 다림질 숙련.',
+    bioTpl10: '간단한 음료·간식 제조 가능.', bioTpl11: '집안 구석구석 청소 능숙.',
+    hasAccount: '이미 계정이 있으신가요?', loginLink: '로그인',
+    termsNote: '가입하면 다음에 동의하는 것입니다', termsAnd: '및',
+    termsTerms: '이용약관', termsPrivacy: '개인정보처리방침',
+    titleTerms: '이용약관 동의',
+    stepTerms: '약관', stepCustService: '서비스', stepCustArea: '위치',
+    custServiceQuestion: '어떤 서비스가 필요하신가요?',
+    custServiceTip: '필요한 서비스를 모두 선택하세요. 나중에 변경할 수 있습니다.',
+    custArt: '가사도우미 (ART)', custTutor: '과외·튜터',
+    termsOverview: 'Linka는 고객과 독립 파트너를 연결하는 플랫폼입니다. PT Linka Indonesia는 사용자와 파트너 간의 결과, 품질 또는 분쟁에 대해 책임을 지지 않습니다.',
+    termsAgreeAll: '약관 전체 동의',
+    termsItem1: '(필수) 서비스 이용약관',
+    termsItem2: '(필수) 개인정보 처리방침 및 수집·이용 동의',
+    termsItem3: '(필수) 개인정보 제3자 제공 동의',
+    termsItem4: '(선택) 이벤트·혜택 및 알림 수신',
+    termsViewLabel: '보기',
+    roleDriverLabel: '드라이버예요', roleDriverSub: '고객 차량을 대신 운전해드릴게요',
+    driverSkillTitle: '운전 능력', driverSkillSub: '운전 가능한 차종과 변속기를 알려주세요',
+    driverLicenseTitle: '면허증 인증', driverLicenseSub: '안전한 운행을 위해 면허증을 인증해주세요',
+    driverServiceTitle: '서비스 유형', driverServiceSub: '제공할 운전 서비스를 선택해주세요',
+    driverAreaTitle: '운행 지역', driverAreaSub: '운행 가능한 지역을 선택해주세요',
+    vehSedan: '세단', vehSuv: 'SUV', vehMpv: 'MPV', vehVan: '밴', vehManualStick: '수동 (스틱)',
+    drivableTypesLabel: '운전 가능한 차종',
+    drivableTypesSub: '운전해본 경험이 있는 차종을 모두 선택해주세요',
+    transmissionLabel: '변속기',
+    transAuto: '오토', transManual: '수동', transBoth: '둘 다',
+    dsvDesignated: '대리운전', dsvDesignatedSub: '행사·회식 후 안전 귀가',
+    dsvDaily: '일일 기사', dsvDailySub: '고객 차량으로 하루 종일 운전',
+    dsvHourly: '시간제 기사', dsvHourlySub: '필요한 시간만큼 운전',
+    dsvCommute: '출퇴근 기사', dsvCommuteSub: '정기적인 출퇴근·등하교 운전',
+    dsvAirport: '공항 픽업/샌딩', dsvAirportSub: '고객 차량으로 공항 이동',
+    dsvIntercity: '도시간 이동', dsvIntercitySub: '장거리 도시간 운전',
+    dsvEvent: '행사 기사', dsvEventSub: '결혼식·가족 행사 기사',
+    driverExperience: '운전 경력 (년)',
+    driverLicenseClass: '면허 종류',
+    stepDriverSkill: '능력', stepDriverLicense: '면허',
+    stepDriverService: '서비스', stepDriverArea: '지역',
+  },
+  linkaTemp: {
+    title: 'Linka 온도',
+    tagline: '친절함의 따뜻함을 측정해요',
+    currentTemp: '현재 온도',
+    averageTemp: '평균',
+    basedOn: '리뷰 {n}건 기준',
+    giveTemp: '온도 주기',
+    tagFriendly: '친절해요', tagOnTime: '시간 엄수', tagClean: '깔끔해요',
+    tagSkilled: '실력 있어요', tagCareful: '세심해요', tagPatient: '인내심',
+    tagWarmVibes: '따뜻해요', tagCommunicative: '소통 잘해요',
+    tagLate: '늦었어요', tagRushed: '서둘러요', tagCold: '차가워요',
+    tagUnclean: '덜 깔끔해요', tagNotSkilled: '실력 아쉬워요',
+    tempUp: '+{n}°C', tempDown: '-{n}°C',
+    freeTextTitle: '한마디 남기기 (선택)',
+    freeTextPlaceholder: '경험을 공유해주세요...',
+    submitReview: '리뷰 보내기',
+    thanksTitle: '리뷰 감사합니다!',
+    thanksSub: '여러분의 리뷰는 Linka 커뮤니티에 큰 도움이 됩니다',
+  },
+  monthlyAward: {
+    title: '이 달의',
+    helperOfMonth: '이 달의 헬퍼',
+    driverOfMonth: '이 달의 드라이버',
+    winnerBadge: 'MVP',
+    period: '2026년 4월',
+    reasonPrefix: '이유:',
+    seeAll: '전체 보기',
   },
 };
 
@@ -1447,7 +1923,7 @@ const zh: Translations = {
     adTitle: '首次预约八折优惠 🎁',
     adSub: '立即注册，马上享受优惠！',
     adCta: '领取优惠券',
-    popularPosts: '热门帖子 🔥',
+    popularPosts: '热门帖子',
     seeAll: '查看全部',
     filterAll: '全部',
     filterHelper: '家政',
@@ -1464,6 +1940,12 @@ const zh: Translations = {
     catVisit: '上门服务',
     catEnglish: '英语辅导',
     catMore: '更多',
+    catChildcare: '育儿助手',
+    catErrand: '跑腿服务',
+    catDriverDesignated: '代驾',
+    catDriverDaily: '日间司机',
+    catDriverHourly: '小时司机',
+    catDriverAirport: '机场司机',
   },
   community: {
     title: '社区',
@@ -1492,6 +1974,113 @@ const zh: Translations = {
     perHour: '/ 小时',
     ratingLabel: '评分',
     jobsLabel: '完成',
+  },
+  register: {
+    pageTitle: '创建账户',
+    titleRole: '创建账户', titleService: '选择服务', titleCondition: '工作条件', titleProfile: '个人信息', titleAccount: '创建账户',
+    stepService: '服务', stepCondition: '条件', stepProfile: '资料', stepAccount: '账户',
+    roleQuestion: '我想…', roleSubtitle: '在 Linka 选择你的角色',
+    roleCustomerLabel: '寻找助手', roleCustomerSub: '在附近找到可靠的家政、家教或家庭助理',
+    roleHelperLabel: '成为家政人员', roleHelperSub: '做饭、打扫、照顾孩子 — 在附近找客户',
+    roleTutorLabel: '成为家教', roleTutorSub: '教授各种科目，开始在家赚钱',
+    serviceQuestion: '你能提供哪些服务？', serviceTip: '服务越多，获得订单的机会越大！',
+    rateTitle: '你期望的时薪', rateChangeNote: '可随时在个人资料中更改', rateUnit: '/ 小时', rateAverage: '雅加达平均: Rp 25,000–40,000/小时',
+    areaTitle: '工作区域（最多3个）', areaSub: '选择你能到达的区域',
+    workTypeTitle: '偏好的工作类型', scheduleTitle: '可工作的时间段',
+    introTitle: '介绍你自己', introSub: '可随时在个人资料中更改',
+    photoCount: '张照片', photoHint: '添加工作照或正面照', photoTip: '有照片的资料订单量多3倍！',
+    bioTitle: '关于我', templateHint: '点击下方句子自动添加',
+    tabExperience: '经验', tabPersonality: '性格', tabSkill: '技能',
+    templateSelect: '选择',
+    accountTitleHelper: '快完成了！', accountTitleCustomer: '创建你的账户',
+    accountSubHelper: '填写账户信息以开始接单', accountSubCustomer: '注册并开始寻找最佳助手',
+    labelName: '全名', labelPhone: '手机号 / WhatsApp', labelPassword: '创建密码',
+    namePlaceholder: '输入你的全名', phonePlaceholder: '08xx-xxxx-xxxx', passwordPlaceholder: '最少6个字符',
+    next: '继续', finish: '立即注册', skip: '跳过',
+    artCooking: '烹饪', artCleaning: '清洁', artLaundry: '洗衣熨烫',
+    artOrganizing: '整理收纳', artChildcare: '照顾孩子', artShopping: '购物',
+    artSpecialCooking: '特色烹饪', artGardening: '园艺',
+    tutorMath: '数学', tutorScience: '理科', tutorEnglish: '英语',
+    tutorMandarin: '普通话', tutorCivics: '公民教育', tutorArts: '艺术/音乐',
+    tutorCoding: '编程', tutorSports: '体育',
+    wtRegularLabel: '定期工作', wtRegularSub: '每周固定排班',
+    wtOnceLabel: '一次性/短期', wtOnceSub: '一天或几天',
+    wtLiveinLabel: '住家', wtLiveinSub: '住在雇主家中',
+    scMorningLabel: '早上', scMorningSub: '07:00 – 12:00',
+    scAfternoonLabel: '下午', scAfternoonSub: '12:00 – 17:00',
+    scEveningLabel: '傍晚', scEveningSub: '17:00 – 21:00',
+    scFlexLabel: '灵活', scFlexSub: '按协议',
+    bioPlaceholder: '示例：您好！我是有3年经验的家政员。\n擅长烹饪和家居清洁。',
+    bioTpl0: '在雅加达担任家政超过3年。', bioTpl1: '曾在5个以上家庭工作。',
+    bioTpl2: '有育儿和烹饪经验。', bioTpl3: '毕业于专业家政培训课程。',
+    bioTpl4: '诚实、细心、负责任。', bioTpl5: '守时可靠。',
+    bioTpl6: '友好、耐心、容易相处。', bioTpl7: '保持家居整洁干净。',
+    bioTpl8: '会做各地印尼菜肴。', bioTpl9: '擅长使用洗衣机和熨烫。',
+    bioTpl10: '会制作简单饮料和糕点。', bioTpl11: '擅长清洁家中每个角落。',
+    hasAccount: '已有账号？', loginLink: '登录',
+    termsNote: '注册即表示您同意', termsAnd: '和',
+    termsTerms: '服务条款', termsPrivacy: '隐私政策',
+    titleTerms: '服务条款同意',
+    stepTerms: '条款', stepCustService: '需求', stepCustArea: '位置',
+    custServiceQuestion: '您需要什么服务？',
+    custServiceTip: '选择所有适用项，之后可以更改。',
+    custArt: '家政员（ART）', custTutor: '家教/辅导',
+    termsOverview: 'Linka连接客户与独立合作伙伴。PT Linka Indonesia不对用户与合作伙伴之间的结果、质量或纠纷承担责任。',
+    termsAgreeAll: '同意全部条款',
+    termsItem1: '（必填）服务使用条款',
+    termsItem2: '（必填）隐私政策及数据使用',
+    termsItem3: '（必填）同意向第三方共享数据',
+    termsItem4: '（可选）接收促销和社区通知',
+    termsViewLabel: '查看',
+    roleDriverLabel: '我是司机', roleDriverSub: '代替客户驾驶其车辆',
+    driverSkillTitle: '驾驶能力', driverSkillSub: '告诉我们你能驾驶的车型',
+    driverLicenseTitle: '驾照验证', driverLicenseSub: '为确保安全，请上传驾照照片',
+    driverServiceTitle: '服务类型', driverServiceSub: '选择你愿意提供的驾驶服务',
+    driverAreaTitle: '运营区域', driverAreaSub: '选择可运营的区域',
+    vehSedan: '轿车', vehSuv: 'SUV', vehMpv: 'MPV', vehVan: '面包车', vehManualStick: '手动挡',
+    drivableTypesLabel: '可驾驶车型',
+    drivableTypesSub: '选择你擅长驾驶的所有车型',
+    transmissionLabel: '变速器',
+    transAuto: '自动挡', transManual: '手动挡', transBoth: '都可以',
+    dsvDesignated: '代驾', dsvDesignatedSub: '聚会后安全送客回家',
+    dsvDaily: '日间司机', dsvDailySub: '全天驾驶客户车辆',
+    dsvHourly: '小时司机', dsvHourlySub: '按小时提供驾驶',
+    dsvCommute: '通勤司机', dsvCommuteSub: '定期上下班/上下学接送',
+    dsvAirport: '机场接送', dsvAirportSub: '驾驶客户车辆往返机场',
+    dsvIntercity: '跨城出行', dsvIntercitySub: '长距离跨城驾驶',
+    dsvEvent: '活动司机', dsvEventSub: '婚礼、家庭活动等',
+    driverExperience: '驾驶经验（年）',
+    driverLicenseClass: '驾照类别',
+    stepDriverSkill: '能力', stepDriverLicense: '驾照',
+    stepDriverService: '服务', stepDriverArea: '区域',
+  },
+  linkaTemp: {
+    title: 'Linka温度',
+    tagline: '测量服务的温暖度',
+    currentTemp: '当前温度',
+    averageTemp: '平均',
+    basedOn: '基于 {n} 条评价',
+    giveTemp: '给予温度',
+    tagFriendly: '友善', tagOnTime: '准时', tagClean: '整洁',
+    tagSkilled: '娴熟', tagCareful: '细心', tagPatient: '耐心',
+    tagWarmVibes: '温暖', tagCommunicative: '沟通好',
+    tagLate: '迟到', tagRushed: '匆忙', tagCold: '冷淡',
+    tagUnclean: '不够干净', tagNotSkilled: '不够熟练',
+    tempUp: '+{n}°C', tempDown: '-{n}°C',
+    freeTextTitle: '留言（可选）',
+    freeTextPlaceholder: '分享你的体验...',
+    submitReview: '提交评价',
+    thanksTitle: '感谢你的评价！',
+    thanksSub: '你的反馈帮助了 Linka 社区',
+  },
+  monthlyAward: {
+    title: '本月之最',
+    helperOfMonth: '本月助手',
+    driverOfMonth: '本月司机',
+    winnerBadge: 'MVP',
+    period: '2026年4月',
+    reasonPrefix: '理由:',
+    seeAll: '查看全部',
   },
 };
 
@@ -1737,7 +2326,7 @@ const ja: Translations = {
     adTitle: '初回予約20%オフクーポン 🎁',
     adSub: '今すぐ登録してすぐに割引！',
     adCta: 'クーポンをもらう',
-    popularPosts: '人気投稿 🔥',
+    popularPosts: '人気投稿',
     seeAll: '全て見る',
     filterAll: 'すべて',
     filterHelper: 'ヘルパー',
@@ -1754,6 +2343,12 @@ const ja: Translations = {
     catVisit: '訪問サービス',
     catEnglish: '英語レッスン',
     catMore: 'その他',
+    catChildcare: '育児サポート',
+    catErrand: 'お使い代行',
+    catDriverDesignated: '代行運転',
+    catDriverDaily: '日給ドライバー',
+    catDriverHourly: '時間制ドライバー',
+    catDriverAirport: '空港送迎',
   },
   community: {
     title: 'コミュニティ',
@@ -1782,6 +2377,113 @@ const ja: Translations = {
     perHour: '/ 時間',
     ratingLabel: '評価',
     jobsLabel: '完了',
+  },
+  register: {
+    pageTitle: 'アカウント作成',
+    titleRole: 'アカウント作成', titleService: 'サービス選択', titleCondition: '勤務条件', titleProfile: 'プロフィール情報', titleAccount: 'アカウント作成',
+    stepService: 'サービス', stepCondition: '条件', stepProfile: 'プロフィール', stepAccount: 'アカウント',
+    roleQuestion: '私は…', roleSubtitle: 'Linkaでの役割を選んでください',
+    roleCustomerLabel: 'アシスタントを探す', roleCustomerSub: '近くの信頼できる家政婦、家庭教師、家庭アシスタントを見つけましょう',
+    roleHelperLabel: '家政婦になる', roleHelperSub: '料理・掃除・育児 — 自宅近くでお客様を探しましょう',
+    roleTutorLabel: '家庭教師になる', roleTutorSub: '様々な科目を教えて、自宅から収入を得ましょう',
+    serviceQuestion: '提供できるサービスは何ですか？', serviceTip: 'サービスが多いほど注文が来やすくなります！',
+    rateTitle: '希望の時給', rateChangeNote: 'プロフィールでいつでも変更できます', rateUnit: '/ 時間', rateAverage: 'ジャカルタ平均: Rp 25,000–40,000/時間',
+    areaTitle: '勤務エリア（最大3つ）', areaSub: '対応できるエリアを選択してください',
+    workTypeTitle: '希望の勤務形態', scheduleTitle: '働ける時間帯',
+    introTitle: '自己紹介', introSub: 'プロフィールでいつでも変更できます',
+    photoCount: '枚の写真', photoHint: '仕事や顔写真を追加する', photoTip: '写真ありのプロフィールは注文が3倍多くなります！',
+    bioTitle: '自己PR', templateHint: '下の文章をタップすると自動追加されます',
+    tabExperience: '経験', tabPersonality: '性格', tabSkill: 'スキル',
+    templateSelect: '選択',
+    accountTitleHelper: 'もう少しで完了！', accountTitleCustomer: 'アカウントを作成する',
+    accountSubHelper: '注文を受けるためにアカウント情報を入力してください', accountSubCustomer: '登録して最高のアシスタントを探しましょう',
+    labelName: '氏名', labelPhone: '電話番号 / WhatsApp', labelPassword: 'パスワードを作成',
+    namePlaceholder: '氏名を入力してください', phonePlaceholder: '08xx-xxxx-xxxx', passwordPlaceholder: '最低6文字',
+    next: '次へ', finish: '今すぐ登録', skip: 'スキップ',
+    artCooking: '料理', artCleaning: '清掃', artLaundry: '洗濯・アイロン',
+    artOrganizing: '片付け', artChildcare: '育児', artShopping: '買い物',
+    artSpecialCooking: '特別料理', artGardening: 'ガーデニング',
+    tutorMath: '数学', tutorScience: '理科', tutorEnglish: '英語',
+    tutorMandarin: '中国語', tutorCivics: '公民', tutorArts: '芸術・音楽',
+    tutorCoding: 'プログラミング', tutorSports: '体育',
+    wtRegularLabel: '定期勤務', wtRegularSub: '毎週固定スケジュール',
+    wtOnceLabel: '単発・短期', wtOnceSub: '1日または数日',
+    wtLiveinLabel: '住み込み', wtLiveinSub: '雇用主宅に居住',
+    scMorningLabel: '午前', scMorningSub: '07:00 – 12:00',
+    scAfternoonLabel: '午後', scAfternoonSub: '12:00 – 17:00',
+    scEveningLabel: '夕方', scEveningSub: '17:00 – 21:00',
+    scFlexLabel: 'フレックス', scFlexSub: '要相談',
+    bioPlaceholder: '例：こんにちは！3年の経験を持つ家政婦です。\n料理と掃除が得意です。',
+    bioTpl0: 'ジャカルタで家政婦として3年以上の経験。', bioTpl1: '5軒以上の家庭で勤務した経験。',
+    bioTpl2: '育児・料理の経験が豊富。', bioTpl3: '専門的な家政婦研修を修了。',
+    bioTpl4: '誠実で丁寧、責任感が強い。', bioTpl5: '時間を守り、信頼できる。',
+    bioTpl6: '親切で忍耐力があり、コミュニケーション上手。', bioTpl7: '家の清潔と整頓を心がける。',
+    bioTpl8: 'インドネシア各地の料理ができる。', bioTpl9: '洗濯機の使用とアイロンが得意。',
+    bioTpl10: '簡単な飲み物やお菓子を作れる。', bioTpl11: '家の隅々まで掃除が得意。',
+    hasAccount: 'すでにアカウントをお持ちですか？', loginLink: 'ログイン',
+    termsNote: '登録することで以下に同意します', termsAnd: 'と',
+    termsTerms: '利用規約', termsPrivacy: 'プライバシーポリシー',
+    titleTerms: '利用規約の同意',
+    stepTerms: '規約', stepCustService: 'サービス', stepCustArea: 'エリア',
+    custServiceQuestion: 'どんなサービスが必要ですか？',
+    custServiceTip: '必要なサービスを全て選択してください。後で変更できます。',
+    custArt: '家事ヘルパー（ART）', custTutor: '家庭教師',
+    termsOverview: 'Linkaはお客様と独立したパートナーを繋ぐプラットフォームです。PT Linka Indonesiaはユーザーとパートナー間の結果、品質、紛争については責任を負いません。',
+    termsAgreeAll: '全ての利用規約に同意',
+    termsItem1: '（必須）サービス利用規約',
+    termsItem2: '（必須）プライバシーポリシー・個人情報利用',
+    termsItem3: '（必須）第三者への個人情報提供に同意',
+    termsItem4: '（任意）イベント・特典・通知受信',
+    termsViewLabel: '見る',
+    roleDriverLabel: 'ドライバーです', roleDriverSub: 'お客様の車を代わりに運転します',
+    driverSkillTitle: '運転スキル', driverSkillSub: '運転可能な車種を教えてください',
+    driverLicenseTitle: '免許証認証', driverLicenseSub: '安全運行のため免許証をアップロードしてください',
+    driverServiceTitle: 'サービス種別', driverServiceSub: '提供する運転サービスを選択してください',
+    driverAreaTitle: '運行エリア', driverAreaSub: '運行可能なエリアを選択してください',
+    vehSedan: 'セダン', vehSuv: 'SUV', vehMpv: 'MPV', vehVan: 'バン', vehManualStick: 'マニュアル（MT）',
+    drivableTypesLabel: '運転可能な車種',
+    drivableTypesSub: '運転できる車種をすべて選択してください',
+    transmissionLabel: 'トランスミッション',
+    transAuto: 'オートマ', transManual: 'マニュアル', transBoth: '両方',
+    dsvDesignated: '代行運転', dsvDesignatedSub: '会食後など安全に帰宅',
+    dsvDaily: '日給ドライバー', dsvDailySub: 'お客様の車で1日中運転',
+    dsvHourly: '時間制ドライバー', dsvHourlySub: '必要な時間だけ運転',
+    dsvCommute: '通勤ドライバー', dsvCommuteSub: '定期的な送迎',
+    dsvAirport: '空港送迎', dsvAirportSub: 'お客様の車で空港まで運転',
+    dsvIntercity: '都市間移動', dsvIntercitySub: '長距離都市間運転',
+    dsvEvent: 'イベントドライバー', dsvEventSub: '結婚式・家族行事など',
+    driverExperience: '運転経験（年）',
+    driverLicenseClass: '免許の種類',
+    stepDriverSkill: 'スキル', stepDriverLicense: '免許',
+    stepDriverService: 'サービス', stepDriverArea: 'エリア',
+  },
+  linkaTemp: {
+    title: 'Linka温度',
+    tagline: 'サービスの温かさを計測',
+    currentTemp: '現在の温度',
+    averageTemp: '平均',
+    basedOn: '{n}件のレビュー基準',
+    giveTemp: '温度を付ける',
+    tagFriendly: '親切', tagOnTime: '時間厳守', tagClean: 'きれい',
+    tagSkilled: '熟練', tagCareful: '丁寧', tagPatient: '忍耐',
+    tagWarmVibes: '温かい', tagCommunicative: 'コミュ上手',
+    tagLate: '遅刻', tagRushed: '慌ただしい', tagCold: '冷たい',
+    tagUnclean: 'やや不潔', tagNotSkilled: 'スキル不足',
+    tempUp: '+{n}°C', tempDown: '-{n}°C',
+    freeTextTitle: 'ひとこと（任意）',
+    freeTextPlaceholder: '体験をシェアしてください...',
+    submitReview: 'レビューを送信',
+    thanksTitle: 'レビューありがとうございます！',
+    thanksSub: 'あなたのレビューは Linka コミュニティに役立ちます',
+  },
+  monthlyAward: {
+    title: '今月のベスト',
+    helperOfMonth: '今月のヘルパー',
+    driverOfMonth: '今月のドライバー',
+    winnerBadge: 'MVP',
+    period: '2026年4月',
+    reasonPrefix: '理由:',
+    seeAll: 'すべて見る',
   },
 };
 

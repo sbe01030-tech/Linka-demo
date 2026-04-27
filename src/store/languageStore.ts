@@ -8,7 +8,7 @@ interface LanguageState {
 }
 
 export const useLanguageStore = create<LanguageState>((set) => ({
-  lang: 'id',
-  t: translations['id'],
+  lang: 'ko',
+  t: translations['ko'],
   setLang: (lang: LangCode) => set({ lang, t: translations[lang] }),
 }));

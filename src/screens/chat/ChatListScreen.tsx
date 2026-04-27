@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { W1, W2, W3, C1, C2, C3 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
@@ -84,6 +85,7 @@ export default function ChatListScreen() {
   const navigation = useNavigation<Nav>();
   const { user } = useAuthStore();
   const { t } = useLanguageStore();
+  const insets = useSafeAreaInsets();
 
   const isWorker = user?.role === 'helper';
   const chats = isWorker ? WORKER_CHATS : CUSTOMER_CHATS;
@@ -101,7 +103,7 @@ export default function ChatListScreen() {
   return (
     <View style={s.root}>
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <View style={s.headerRow}>
           <Text style={s.pageTitle}>{t.chat.title}</Text>
           {totalUnread > 0 && (
@@ -182,7 +184,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingBottom: 16, paddingHorizontal: 20,
+    paddingBottom: 16, paddingHorizontal: 20,
     backgroundColor: Colors.white,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },

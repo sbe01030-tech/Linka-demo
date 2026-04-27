@@ -5,19 +5,10 @@ import {
 } from 'react-native';
 import { C1, C2 } from '../../constants/photos';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
-
-// ── Layanan yang ART bisa tawarkan ──────────────────────────────
-const ART_SERVICES = [
-  { id: 'masak',    icon: 'restaurant-outline',  label: 'Masak',      color: '#FF6B35', bg: '#FFF0EB' },
-  { id: 'bersih',   icon: 'sparkles-outline',     label: 'Bersih-bersih', color: '#22C55E', bg: '#F0FDF4' },
-  { id: 'cuci',     icon: 'water-outline',        label: 'Cuci',       color: '#3B82F6', bg: '#EFF6FF' },
-  { id: 'setrika',  icon: 'shirt-outline',        label: 'Setrika',    color: '#8B5CF6', bg: '#F5F3FF' },
-  { id: 'beberes',  icon: 'home-outline',         label: 'Beberes',    color: Colors.helperColor, bg: '#FFFBEB' },
-  { id: 'anak',     icon: 'heart-outline',        label: 'Jaga Anak',  color: '#EC4899', bg: '#FDF2F8' },
-] as const;
 
 // ── Mock order requests ─────────────────────────────────────────
 const MOCK_REQUESTS = [
@@ -58,51 +49,66 @@ const MOCK_SCHEDULE = [
 export default function WorkerHomeScreen() {
   const { user }  = useAuthStore();
   const { t, lang } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [isOnline, setIsOnline] = useState(true);
-  const [activeServices, setActiveServices] = useState<string[]>(['masak', 'bersih', 'cuci']);
   const [requests, setRequests] = useState(MOCK_REQUESTS);
 
   const firstName = user?.name?.split(' ')[0] ?? '';
-
-  const toggleService = (id: string) => {
-    setActiveServices((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
-  };
+  const isDriver  = user?.role === 'driver';
 
   return (
-    <ScrollView style={s.root} showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
-
+    <ScrollView
+      style={s.root}
+      showsVerticalScrollIndicator={false}
+      stickyHeaderIndices={[0]}
+    >
       {/* ── Sticky header ── */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 15 }]}>
         <View style={s.headerTop}>
           <View style={s.headerLeft}>
-            <View style={s.artBadge}>
-              <Ionicons name="home" size={12} color={Colors.white} />
-              <Text style={s.artBadgeText}>ART</Text>
+            <View style={[s.artBadge, isDriver && { backgroundColor: '#3B82F6' }]}>
+              <Ionicons name={isDriver ? 'car' : 'home'} size={11} color={Colors.white} />
+              <Text style={s.artBadgeText}>{isDriver ? 'DRIVER' : 'ART'}</Text>
             </View>
             <View>
-              <Text style={s.greeting}>Halo, {firstName} 👋</Text>
-              <Text style={s.subGreeting}>{t.workerHome.readyHelper}</Text>
+              <Text style={s.greeting}>Halo, {firstName}</Text>
+              <Text style={s.subGreeting}>
+                {isDriver
+                  ? (lang === 'ko' ? '오늘도 안전운전 부탁드려요' : lang === 'en' ? 'Drive safely today' : 'Selamat berkendara aman hari ini')
+                  : t.workerHome.readyHelper}
+              </Text>
             </View>
           </View>
-          <TouchableOpacity style={s.notifBtn} onPress={() => Alert.alert(
-            lang === 'ko' ? '알림' : lang === 'en' ? 'Notifications' : 'Notifikasi',
-            lang === 'ko' ? '새 알림이 없습니다.' : lang === 'en' ? 'No new notifications.' : 'Tidak ada notifikasi baru.',
-            [{ text: 'OK' }]
-          )}>
+          <TouchableOpacity
+            style={s.notifBtn}
+            onPress={() =>
+              Alert.alert(
+                lang === 'ko' ? '알림' : lang === 'en' ? 'Notifications' : 'Notifikasi',
+                lang === 'ko' ? '새 알림이 없습니다.' : lang === 'en' ? 'No new notifications.' : 'Tidak ada notifikasi baru.',
+                [{ text: 'OK' }],
+              )
+            }
+          >
             <Ionicons name="notifications-outline" size={22} color={Colors.grayLight} />
             <View style={s.notifDot} />
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Online toggle */}
+      {/* ── Online toggle ── */}
+      <View style={s.toggleWrap}>
         <View style={[s.toggleCard, isOnline && s.toggleCardOnline]}>
           <View style={s.toggleLeft}>
-            <View style={[s.statusDot, { backgroundColor: isOnline ? Colors.success : Colors.grayLight }]} />
+            <View style={[s.statusPulse, isOnline && s.statusPulseOn]}>
+              <View style={[s.statusDot, { backgroundColor: isOnline ? Colors.accent : Colors.grayLight }]} />
+            </View>
             <View>
-              <Text style={s.toggleTitle}>{isOnline ? t.workerHome.online : t.workerHome.offline}</Text>
-              <Text style={s.toggleSub}>{isOnline ? t.workerHome.onlineDesc : t.workerHome.offlineDesc}</Text>
+              <Text style={s.toggleTitle}>
+                {isOnline ? t.workerHome.online : t.workerHome.offline}
+              </Text>
+              <Text style={s.toggleSub}>
+                {isOnline ? t.workerHome.onlineDesc : t.workerHome.offlineDesc}
+              </Text>
             </View>
           </View>
           <Switch
@@ -114,21 +120,30 @@ export default function WorkerHomeScreen() {
         </View>
       </View>
 
-      {/* ── Stats ── */}
-      <View style={s.statsCard}>
-        {[
-          { label: t.workerHome.todayEarnings, value: 'Rp 210rb' },
-          { label: t.workerHome.todayJobs,     value: '2 order' },
-          { label: t.workerHome.rating,         value: `⭐ ${user?.rating ?? '4.8'}` },
-        ].map((stat, i, arr) => (
-          <React.Fragment key={stat.label}>
-            <View style={s.statCol}>
-              <Text style={s.statValue}>{stat.value}</Text>
-              <Text style={s.statLabel}>{stat.label}</Text>
+      {/* ── Earnings hero card ── */}
+      <View style={s.heroCard}>
+        <View style={s.heroLeft}>
+          <Text style={s.heroLabel}>{t.workerHome.todayEarnings}</Text>
+          <Text style={s.heroValue}>Rp 210.000</Text>
+          <View style={s.heroTrend}>
+            <Ionicons name="trending-up" size={12} color="rgba(255,255,255,0.8)" />
+            <Text style={s.heroTrendText}>+Rp 30rb vs kemarin</Text>
+          </View>
+        </View>
+        <View style={s.heroRight}>
+          <View style={s.heroStat}>
+            <Text style={s.heroStatValue}>2</Text>
+            <Text style={s.heroStatLabel}>{t.workerHome.todayJobs}</Text>
+          </View>
+          <View style={s.heroStatDivider} />
+          <View style={s.heroStat}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
+              <Ionicons name="star" size={14} color="#F59E0B" />
+              <Text style={s.heroStatValue}>{user?.rating ?? '4.8'}</Text>
             </View>
-            {i < arr.length - 1 && <View style={s.statDivider} />}
-          </React.Fragment>
-        ))}
+            <Text style={s.heroStatLabel}>{t.workerHome.rating}</Text>
+          </View>
+        </View>
       </View>
 
       {/* ── Today's schedule ── */}
@@ -136,9 +151,17 @@ export default function WorkerHomeScreen() {
         <Text style={s.sectionTitle}>{t.workerHome.scheduleTitle}</Text>
         <View style={s.scheduleCard}>
           {MOCK_SCHEDULE.map((item, i) => (
-            <View key={item.id} style={[s.scheduleRow, i < MOCK_SCHEDULE.length - 1 && s.scheduleRowBorder]}>
+            <View
+              key={item.id}
+              style={[
+                s.scheduleRow,
+                i < MOCK_SCHEDULE.length - 1 && s.scheduleRowBorder,
+              ]}
+            >
               <View style={[s.scheduleTimeBadge, item.done && s.scheduleTimeDone]}>
-                <Text style={[s.scheduleTime, item.done && s.scheduleTimeDoneText]}>{item.time}</Text>
+                <Text style={[s.scheduleTime, item.done && s.scheduleTimeDoneText]}>
+                  {item.time}
+                </Text>
               </View>
               <View style={s.scheduleInfo}>
                 <Text style={s.scheduleCustomer}>{item.customer}</Text>
@@ -154,38 +177,13 @@ export default function WorkerHomeScreen() {
         </View>
       </View>
 
-      {/* ── My services ── */}
-      <View style={s.section}>
-        <View style={s.sectionHeaderRow}>
-          <Text style={s.sectionTitle}>{t.workerHome.servicesTitle}</Text>
-          <Text style={s.sectionHint}>{t.workerHome.servicesHint}</Text>
-        </View>
-        <View style={s.servicesGrid}>
-          {ART_SERVICES.map((svc) => {
-            const active = activeServices.includes(svc.id);
-            return (
-              <TouchableOpacity
-                key={svc.id}
-                style={[s.svcChip, active && { backgroundColor: svc.bg, borderColor: svc.color + '60' }]}
-                onPress={() => toggleService(svc.id)}
-                activeOpacity={0.75}
-              >
-                <Ionicons name={svc.icon as any} size={16} color={active ? svc.color : Colors.grayLight} />
-                <Text style={[s.svcLabel, active && { color: svc.color }]}>{svc.label}</Text>
-                {active && <View style={[s.svcActiveDot, { backgroundColor: svc.color }]} />}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
-
       {/* ── Incoming requests ── */}
       <View style={s.section}>
         <View style={s.sectionHeaderRow}>
           <Text style={s.sectionTitle}>{t.workerHome.incomingRequests}</Text>
           {isOnline && (
             <View style={s.badge}>
-              <Text style={s.badgeText}>{MOCK_REQUESTS.length}</Text>
+              <Text style={s.badgeText}>{requests.length}</Text>
             </View>
           )}
         </View>
@@ -198,9 +196,13 @@ export default function WorkerHomeScreen() {
                 <Image source={{ uri: req.customerPhoto }} style={s.reqAvatar} />
                 <View style={{ flex: 1 }}>
                   <Text style={s.reqName}>{req.customerName}</Text>
-                  <Text style={s.reqMeta}>{req.date} · {req.startTime} · {req.duration} {t.workerHome.hours}</Text>
+                  <Text style={s.reqMeta}>
+                    {req.date} · {req.startTime} · {req.duration} {t.workerHome.hours}
+                  </Text>
                 </View>
-                <Text style={s.reqPrice}>Rp {(req.totalPrice / 1000).toFixed(0)}rb</Text>
+                <Text style={s.reqPrice}>
+                  Rp {(req.totalPrice / 1000).toFixed(0)}rb
+                </Text>
               </View>
 
               {/* Service tags */}
@@ -236,27 +238,50 @@ export default function WorkerHomeScreen() {
 
               {/* Actions */}
               <View style={s.reqActions}>
-                <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}
-                  onPress={() => Alert.alert(
-                    lang === 'ko' ? '요청 거절' : lang === 'en' ? 'Reject Request' : 'Tolak Permintaan',
-                    lang === 'ko' ? `${req.customerName}의 요청을 거절하시겠습니까?` : lang === 'en' ? `Reject ${req.customerName}'s request?` : `Tolak permintaan dari ${req.customerName}?`,
-                    [
-                      { text: lang === 'ko' ? '아니오' : lang === 'en' ? 'No' : 'Tidak', style: 'cancel' },
-                      { text: lang === 'ko' ? '거절' : lang === 'en' ? 'Reject' : 'Tolak', style: 'destructive',
-                        onPress: () => setRequests((prev) => prev.filter((r) => r.id !== req.id)) },
-                    ]
-                  )}
+                <TouchableOpacity
+                  style={s.btnSecondary}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    Alert.alert(
+                      lang === 'ko' ? '요청 거절' : lang === 'en' ? 'Reject Request' : 'Tolak Permintaan',
+                      lang === 'ko'
+                        ? `${req.customerName}의 요청을 거절하시겠습니까?`
+                        : lang === 'en'
+                        ? `Reject ${req.customerName}'s request?`
+                        : `Tolak permintaan dari ${req.customerName}?`,
+                      [
+                        { text: lang === 'ko' ? '아니오' : lang === 'en' ? 'No' : 'Tidak', style: 'cancel' },
+                        {
+                          text: lang === 'ko' ? '거절' : lang === 'en' ? 'Reject' : 'Tolak',
+                          style: 'destructive',
+                          onPress: () => setRequests((prev) => prev.filter((r) => r.id !== req.id)),
+                        },
+                      ],
+                    )
+                  }
                 >
                   <Text style={s.btnSecondaryText}>{t.workerHome.reject}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}
-                  onPress={() => {
+                <TouchableOpacity
+                  style={s.btnPrimary}
+                  activeOpacity={0.85}
+                  onPress={() =>
                     Alert.alert(
                       lang === 'ko' ? '요청 수락' : lang === 'en' ? 'Request Accepted' : 'Permintaan Diterima',
-                      lang === 'ko' ? `${req.customerName}의 요청을 수락했습니다!` : lang === 'en' ? `You accepted ${req.customerName}'s request!` : `Permintaan dari ${req.customerName} diterima!`,
-                      [{ text: 'OK', onPress: () => setRequests((prev) => prev.filter((r) => r.id !== req.id)) }]
-                    );
-                  }}
+                      lang === 'ko'
+                        ? `${req.customerName}의 요청을 수락했습니다!`
+                        : lang === 'en'
+                        ? `You accepted ${req.customerName}'s request!`
+                        : `Permintaan dari ${req.customerName} diterima!`,
+                      [
+                        {
+                          text: 'OK',
+                          onPress: () =>
+                            setRequests((prev) => prev.filter((r) => r.id !== req.id)),
+                        },
+                      ],
+                    )
+                  }
                 >
                   <Ionicons name="checkmark" size={15} color={Colors.white} />
                   <Text style={s.btnPrimaryText}>{t.workerHome.accept}</Text>
@@ -272,136 +297,149 @@ export default function WorkerHomeScreen() {
         )}
       </View>
 
-      <View style={{ height: 32 }} />
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
 
+const AMBER = Colors.accent;
+
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F5F5F5' },
 
-  // Header
+  // ── Header ──
   header: {
     backgroundColor: Colors.white,
-    paddingTop: 52, paddingHorizontal: 20, paddingBottom: 14,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
   },
   headerTop:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   artBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
-    backgroundColor: Colors.helperColor,
+    backgroundColor: AMBER,
     borderRadius: Radius.pill,
     paddingHorizontal: 10, paddingVertical: 5,
   },
   artBadgeText: { fontSize: 11, fontWeight: '800', color: Colors.white },
   greeting:    { fontSize: 18, fontWeight: '700', color: Colors.dark },
   subGreeting: { fontSize: 12, color: Colors.gray, marginTop: 1 },
-  notifBtn:    { width: 36, height: 36, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  notifBtn: {
+    width: 36, height: 36,
+    alignItems: 'center', justifyContent: 'center',
+    position: 'relative',
+  },
   notifDot: {
     position: 'absolute', top: 7, right: 7,
     width: 7, height: 7, borderRadius: 4,
-    backgroundColor: Colors.danger, borderWidth: 1.5, borderColor: Colors.white,
+    backgroundColor: Colors.danger,
+    borderWidth: 1.5, borderColor: Colors.white,
   },
 
+  // ── Online toggle ──
+  toggleWrap: { paddingHorizontal: 16, paddingTop: 14, paddingBottom: 4 },
   toggleCard: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: Colors.section, borderRadius: Radius.lg,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
     paddingHorizontal: 16, paddingVertical: 14,
-    borderWidth: 1, borderColor: Colors.border,
+    borderWidth: 1.5, borderColor: Colors.border,
   },
   toggleCardOnline: { borderColor: Colors.accent + '40', backgroundColor: Colors.accentLight },
-  toggleLeft:  { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  statusDot:   { width: 8, height: 8, borderRadius: 4 },
-  toggleTitle: { fontSize: 14, fontWeight: '600', color: Colors.dark },
+  toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  statusPulse: {
+    width: 28, height: 28, borderRadius: 14,
+    alignItems: 'center', justifyContent: 'center',
+    backgroundColor: Colors.section,
+  },
+  statusPulseOn: { backgroundColor: Colors.accent + '20' },
+  statusDot: { width: 10, height: 10, borderRadius: 5 },
+  toggleTitle: { fontSize: 14, fontWeight: '700', color: Colors.dark },
   toggleSub:   { fontSize: 12, color: Colors.gray, marginTop: 1 },
 
-  // Stats
-  statsCard: {
+  // ── Earnings hero ──
+  heroCard: {
+    marginHorizontal: 16, marginTop: 10,
+    backgroundColor: AMBER,
+    borderRadius: Radius.xl,
+    padding: 20,
     flexDirection: 'row',
-    backgroundColor: Colors.white,
-    marginTop: 8,
-    borderBottomWidth: 1, borderBottomColor: Colors.border,
-    paddingVertical: 16,
+    alignItems: 'center',
+    ...Shadow.md,
   },
-  statCol:     { flex: 1, alignItems: 'center', gap: 4 },
-  statDivider: { width: 1, backgroundColor: Colors.border, marginVertical: 4 },
-  statValue:   { fontSize: 16, fontWeight: '700', color: Colors.dark },
-  statLabel:   { fontSize: 11, color: Colors.gray, textAlign: 'center' },
+  heroLeft: { flex: 1 },
+  heroLabel: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.75)', marginBottom: 4 },
+  heroValue: { fontSize: 28, fontWeight: '800', color: Colors.white, letterSpacing: -0.5 },
+  heroTrend: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
+  heroTrendText: { fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: '500' },
+  heroRight: {
+    flexDirection: 'row', alignItems: 'center', gap: 16,
+    paddingLeft: 16,
+    borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.3)',
+  },
+  heroStat:       { alignItems: 'center', gap: 3 },
+  heroStatValue:  { fontSize: 16, fontWeight: '700', color: Colors.white },
+  heroStatLabel:  { fontSize: 10, color: 'rgba(255,255,255,0.7)' },
+  heroStatDivider:{ width: 1, height: 28, backgroundColor: 'rgba(255,255,255,0.3)' },
 
-  // Section
-  section: { paddingHorizontal: 16, paddingTop: 16, gap: 10 },
+  // ── Sections ──
+  section: { paddingHorizontal: 16, paddingTop: 20, gap: 12 },
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.dark },
-  sectionHint:  { fontSize: 11, color: Colors.grayLight },
   badge: {
-    backgroundColor: Colors.helperColor,
+    backgroundColor: AMBER,
     borderRadius: Radius.pill, width: 22, height: 22,
     alignItems: 'center', justifyContent: 'center',
   },
   badgeText: { fontSize: 11, fontWeight: '700', color: Colors.white },
 
-  // Schedule
+  // ── Schedule ──
   scheduleCard: {
     backgroundColor: Colors.white,
-    borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border,
+    borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: Colors.border,
     overflow: 'hidden',
   },
   scheduleRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingHorizontal: 14, paddingVertical: 12,
+    paddingHorizontal: 14, paddingVertical: 13,
   },
   scheduleRowBorder: { borderBottomWidth: 1, borderBottomColor: Colors.border },
   scheduleTimeBadge: {
     backgroundColor: Colors.accentLight,
     borderRadius: Radius.sm,
     paddingHorizontal: 8, paddingVertical: 4,
-    minWidth: 100, alignItems: 'center',
+    minWidth: 104, alignItems: 'center',
   },
-  scheduleTimeDone: { backgroundColor: Colors.section },
+  scheduleTimeDone:    { backgroundColor: Colors.section },
   scheduleTime:        { fontSize: 11, fontWeight: '700', color: Colors.accent },
   scheduleTimeDoneText:{ color: Colors.grayLight },
-  scheduleInfo: { flex: 1 },
-  scheduleCustomer: { fontSize: 13, fontWeight: '600', color: Colors.dark },
-  scheduleService:  { fontSize: 11, color: Colors.gray, marginTop: 2 },
+  scheduleInfo:    { flex: 1 },
+  scheduleCustomer:{ fontSize: 13, fontWeight: '600', color: Colors.dark },
+  scheduleService: { fontSize: 11, color: Colors.gray, marginTop: 2 },
 
-  // Services grid
-  servicesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  svcChip: {
-    flexDirection: 'row', alignItems: 'center', gap: 6,
-    backgroundColor: Colors.white,
-    borderRadius: Radius.pill,
-    borderWidth: 1, borderColor: Colors.border,
-    paddingHorizontal: 12, paddingVertical: 8,
-    position: 'relative',
-  },
-  svcLabel: { fontSize: 13, fontWeight: '500', color: Colors.grayLight },
-  svcActiveDot: {
-    position: 'absolute', top: 4, right: 4,
-    width: 6, height: 6, borderRadius: 3,
-  },
-
-  // Request card
+  // ── Request card ──
   requestCard: {
     backgroundColor: Colors.white,
     borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border,
     padding: 16, ...Shadow.sm,
   },
   reqTop:    { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 10 },
-  reqAvatar: { width: 44, height: 44, borderRadius: 22 },
+  reqAvatar: { width: 46, height: 46, borderRadius: 23 },
   reqName:   { fontSize: 14, fontWeight: '700', color: Colors.darkMid, marginBottom: 3 },
   reqMeta:   { fontSize: 12, color: Colors.grayLight },
-  reqPrice:  { fontSize: 15, fontWeight: '700', color: Colors.helperColor },
+  reqPrice:  { fontSize: 15, fontWeight: '700', color: AMBER },
 
   reqTagsRow: { flexDirection: 'row', gap: 6, marginBottom: 10 },
   reqTag: {
-    backgroundColor: '#FFFBEB',
+    backgroundColor: Colors.accentLight,
     borderRadius: Radius.pill,
     paddingHorizontal: 10, paddingVertical: 4,
-    borderWidth: 1, borderColor: Colors.helperColor + '40',
+    borderWidth: 1, borderColor: AMBER + '40',
   },
-  reqTagText: { fontSize: 11, fontWeight: '600', color: Colors.helperColor },
+  reqTagText: { fontSize: 11, fontWeight: '600', color: AMBER },
 
   reqDetails: {
     backgroundColor: Colors.section, borderRadius: Radius.md,
@@ -428,7 +466,7 @@ const s = StyleSheet.create({
   btnPrimary: {
     flex: 2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 11,
-    borderRadius: Radius.pill, backgroundColor: Colors.helperColor,
+    borderRadius: Radius.pill, backgroundColor: AMBER,
   },
   btnPrimaryText: { fontSize: 13, fontWeight: '700', color: Colors.white },
 

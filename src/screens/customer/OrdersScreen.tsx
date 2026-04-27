@@ -3,10 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Image } fr
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../types';
 import { W1, W2, W3, W4 } from '../../constants/photos';
+
+// 리뷰 완료된 주문 ID 추적 (ReviewScreen에서 공유)
+export const reviewedOrderIds = new Set<string>();
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -56,8 +60,15 @@ const MOCK_ORDERS = [
 export default function OrdersScreen() {
   const navigation = useNavigation<Nav>();
   const { t } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<'active' | 'history'>('active');
   const [orders, setOrders] = useState(MOCK_ORDERS);
+  const [, forceUpdate] = useState(0);
+
+  // ReviewScreen에서 돌아왔을 때 리뷰 완료 상태 반영
+  useFocusEffect(
+    React.useCallback(() => { forceUpdate(n => n + 1); }, [])
+  );
 
   const STATUS_CONFIG = {
     pending:               { label: t.orders.pending,        color: Colors.gray      },
@@ -78,6 +89,7 @@ export default function OrdersScreen() {
     : orders.filter((o) => ['completed', 'cancelled'].includes(o.status));
 
   const confirmCompletion = (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
     Alert.alert(
       t.orders.confirmTitle,
       t.orders.confirmMsg,
@@ -89,6 +101,16 @@ export default function OrdersScreen() {
             setOrders((prev) =>
               prev.map((o) => o.id === orderId ? { ...o, status: 'completed' as const, remaining: 0 } : o)
             );
+            // 잔금 확인 즉시 리뷰 화면으로 이동
+            if (order) {
+              setTimeout(() => {
+                navigation.navigate('Review', {
+                  orderId: order.id,
+                  workerName: order.workerName,
+                  workerPhoto: order.workerPhoto,
+                });
+              }, 300);
+            }
           },
         },
       ]
@@ -98,7 +120,10 @@ export default function OrdersScreen() {
   return (
     <View style={s.root}>
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
+        <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color={Colors.dark} />
+        </TouchableOpacity>
         <Text style={s.title}>{t.orders.myOrders}</Text>
       </View>
 
@@ -210,12 +235,19 @@ export default function OrdersScreen() {
 
                 {isCompleted && (
                   <View style={s.actionRow}>
-                    <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}
-                      onPress={() => navigation.navigate('Review', { orderId: order.id, workerName: order.workerName, workerPhoto: order.workerPhoto })}
-                    >
-                      <Ionicons name="star-outline" size={13} color={Colors.accent} />
-                      <Text style={[s.btnSecondaryText, { color: Colors.accent }]}>{t.orders.review}</Text>
-                    </TouchableOpacity>
+                    {reviewedOrderIds.has(order.id) ? (
+                      <View style={s.reviewedBadge}>
+                        <Ionicons name="checkmark-circle" size={14} color={Colors.accent} />
+                        <Text style={s.reviewedBadgeText}>리뷰 완료</Text>
+                      </View>
+                    ) : (
+                      <TouchableOpacity style={s.btnSecondary} activeOpacity={0.8}
+                        onPress={() => navigation.navigate('Review', { orderId: order.id, workerName: order.workerName, workerPhoto: order.workerPhoto })}
+                      >
+                        <Ionicons name="star-outline" size={13} color={Colors.accent} />
+                        <Text style={[s.btnSecondaryText, { color: Colors.accent }]}>{t.orders.review}</Text>
+                      </TouchableOpacity>
+                    )}
                     <TouchableOpacity style={s.btnPrimary} activeOpacity={0.85}
                       onPress={() => navigation.navigate('WorkerDetail', { workerId: order.id })}
                     >
@@ -244,10 +276,12 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingBottom: 16, paddingHorizontal: 20,
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingBottom: 16, paddingHorizontal: 12,
     backgroundColor: Colors.white,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
+  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   title: { fontSize: 22, fontWeight: '700', color: Colors.dark },
 
   tabsWrap: { paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: Colors.border },
@@ -341,6 +375,13 @@ const s = StyleSheet.create({
     backgroundColor: Colors.accent,
   },
   btnPrimaryText: { fontSize: 13, fontWeight: '700', color: Colors.white },
+
+  reviewedBadge: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    gap: 6, paddingVertical: 10, borderRadius: Radius.pill,
+    backgroundColor: Colors.section, borderWidth: 1, borderColor: Colors.borderMid,
+  },
+  reviewedBadgeText: { fontSize: 13, fontWeight: '600', color: Colors.accent },
 
   refundNote: {
     flexDirection: 'row', alignItems: 'center', gap: 6,

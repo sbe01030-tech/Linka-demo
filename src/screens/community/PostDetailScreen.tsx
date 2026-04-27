@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
 import { useAuthStore } from '../../store/authStore';
@@ -59,6 +60,7 @@ export default function PostDetailScreen({ navigation, route }: Props) {
   const { title, category, author, time, preview, comments: commentCount, likes: likeCount } = route.params;
   const { lang } = useLanguageStore();
   const { user } = useAuthStore();
+  const insets = useSafeAreaInsets();
 
   const mockComments = lang === 'ko' ? MOCK_COMMENTS_KO : lang === 'en' ? MOCK_COMMENTS_EN : MOCK_COMMENTS_ID;
   const [commentsList, setCommentsList] = useState<MockComment[]>(mockComments);
@@ -108,7 +110,7 @@ export default function PostDetailScreen({ navigation, route }: Props) {
       keyboardVerticalOffset={0}
     >
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={Colors.dark} />
         </TouchableOpacity>
@@ -230,7 +232,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingHorizontal: 16, paddingBottom: 14,
+    paddingHorizontal: 16, paddingBottom: 14,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     borderBottomWidth: 1, borderBottomColor: Colors.border,
     backgroundColor: Colors.white,

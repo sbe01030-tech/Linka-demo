@@ -50,7 +50,7 @@ export default function LanguageSelector({ variant = 'button' }: Props) {
             <Text style={s.sheetTitle}>{t.lang.selectLanguage}</Text>
 
             <FlatList
-              data={LANGUAGES}
+              data={LANGUAGES.filter((l) => !l.disabled)}
               keyExtractor={(i) => i.code}
               renderItem={({ item }) => {
                 const active = item.code === lang;

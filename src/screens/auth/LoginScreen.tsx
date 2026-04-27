@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { RootStackParamList } from '../../types';
 import { useAuthStore } from '../../store/authStore';
@@ -17,6 +18,7 @@ type DemoIcon = 'person-outline' | 'home-outline';
 export default function LoginScreen({ navigation }: Props) {
   const { t } = useLanguageStore();
   const { login, isLoading } = useAuthStore();
+  const insets = useSafeAreaInsets();
 
   const [phone,    setPhone]    = useState('');
   const [password, setPassword] = useState('');
@@ -39,7 +41,7 @@ export default function LoginScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         {/* Top bar */}
-        <View style={s.topBar}>
+        <View style={[s.topBar, { paddingTop: insets.top + 10 }]}>
           <View style={s.logoRow}>
             <View style={s.logoMark}>
               <Text style={s.logoLetter}>L</Text>
@@ -165,12 +167,12 @@ const s = StyleSheet.create({
 
   topBar: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingTop: 54, paddingBottom: 4,
+    paddingHorizontal: 20, paddingBottom: 4,
   },
   logoRow:    { flexDirection: 'row', alignItems: 'center', gap: 8 },
   logoMark:   { width: 28, height: 28, borderRadius: 8, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' },
   logoLetter: { fontSize: 14, fontWeight: '800', color: Colors.white },
-  logoName:   { fontSize: 16, fontWeight: '700', color: Colors.dark },
+  logoName:   { fontFamily: 'Nunito_900Black', fontSize: 18, color: Colors.dark, letterSpacing: -0.3 },
 
   // text-2xl font-normal
   hero:    { paddingHorizontal: 20, paddingTop: 32, paddingBottom: 28 },

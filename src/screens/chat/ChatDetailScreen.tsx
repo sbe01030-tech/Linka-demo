@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { RootStackParamList, ChatMessage } from '../../types';
 import { useLanguageStore } from '../../store/languageStore';
@@ -23,6 +24,7 @@ const MOCK_MESSAGES: ChatMessage[] = [
 export default function ChatDetailScreen({ navigation, route }: Props) {
   const { name, photo, role } = route.params;
   const { t } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList>(null);
@@ -52,7 +54,7 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
       keyboardVerticalOffset={0}
     >
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 6 }]}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={Colors.dark} />
         </TouchableOpacity>
@@ -154,7 +156,7 @@ const s = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: Colors.white,
-    paddingTop: 52, paddingBottom: 12,
+    paddingBottom: 12,
     paddingHorizontal: 16, gap: 10,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },

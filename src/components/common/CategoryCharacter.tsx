@@ -1,172 +1,186 @@
+/**
+ * CategoryCharacter — Version B
+ * Faithful react-native-svg conversion of LinkaCategoryIcons.jsx
+ *
+ * Version A backup: CategoryCharacter_A.tsx
+ */
 import React from 'react';
 import Svg, {
-  Circle, Rect, Path, Ellipse, Line, G, Text as ST,
+  Circle, Path, G, Defs, LinearGradient, Stop,
 } from 'react-native-svg';
 
 export type CatCharKey =
   | 'helper' | 'cooking' | 'cleaning' | 'custom'
   | 'tutor'  | 'homevisit' | 'english' | 'more';
 
-const W      = '#FFFFFF';
-const EYE    = '#2A2D3E';
-const BLUSH  = '#FFB3C6';
-const BOW_L  = '#93C5F8';   // bow-tie wings
-const BOW_C  = '#5BA8F5';   // bow-tie knot
+// ── Palette — exact copy from LinkaCategoryIcons.jsx ──────────────
+const PAL: Record<CatCharKey, { top: string; bot: string }> = {
+  helper:    { top: '#FFE174', bot: '#F5C026' },
+  cooking:   { top: '#FFA8B5', bot: '#F17188' },
+  cleaning:  { top: '#7FD9A0', bot: '#3EB873' },
+  custom:    { top: '#8FD0EC', bot: '#4FAFD6' },
+  tutor:     { top: '#9FBCE2', bot: '#6B92C8' },
+  homevisit: { top: '#F5A3B8', bot: '#E4728F' },
+  english:   { top: '#7ED6C8', bot: '#3FB8A6' },
+  more:      { top: '#B8C2CC', bot: '#8995A1' },
+};
 
-// ── Base character  (60 × 60 viewBox) ────────────────────────────
-// Soft blob body — rounded rect that fills most of the frame
-// Large eyes · pink blush · gentle smile · blue bow-tie
-function Base({ children }: { children?: React.ReactNode }) {
+// ── iOS squircle path (200×200 canvas, r = 0.28 × 200 = 56) ──────
+// Formula: squirclePath(s, r) from LinkaCategoryIcons.jsx
+// M r,0 L s-r,0 C s-r*0.2,0 s,r*0.2 s,r  L s,s-r  C s,s-r*0.2 s-r*0.2,s s-r,s  L r,s  C r*0.2,s 0,s-r*0.2 0,s-r  L 0,r  C 0,r*0.2 r*0.2,0 r,0 Z
+const SQUIRCLE =
+  'M 56,0 L 144,0 ' +
+  'C 188.8,0 200,11.2 200,56 ' +
+  'L 200,144 ' +
+  'C 200,188.8 188.8,200 144,200 ' +
+  'L 56,200 ' +
+  'C 11.2,200 0,188.8 0,144 ' +
+  'L 0,56 ' +
+  'C 0,11.2 11.2,0 56,0 Z';
+
+// ── Symbol positioning ────────────────────────────────────────────
+// Original: symbol SVG is size*0.56 of container, viewBox 0 0 24 24
+// On our 200×200 canvas: target = 200*0.56 = 112, offset = (200-112)/2 = 44
+// scale = 112/24 ≈ 4.667  →  strokeWidth 2 scales to ~9.3 (looks right)
+const SYM_TRANSFORM = 'translate(44, 44) scale(4.667)';
+const SW = 2; // stroke-width in 24×24 space (matches original)
+
+// ── Shared base: squircle bg + centered symbol ────────────────────
+function Base({ id, children }: { id: CatCharKey; children: React.ReactNode }) {
+  const { top, bot } = PAL[id];
+  const gId = `g_${id}`;
   return (
     <G>
-      {/* Body blob */}
-      <Rect x={4} y={3} width={52} height={54} rx={22} fill={W} />
-
-      {/* Eyes */}
-      <Circle cx={21} cy={22} r={8}   fill={EYE} />
-      <Circle cx={39} cy={22} r={8}   fill={EYE} />
-      {/* Eye shine (upper-left of each eye) */}
-      <Circle cx={18} cy={19} r={3}   fill={W} />
-      <Circle cx={36} cy={19} r={3}   fill={W} />
-
-      {/* Blush */}
-      <Ellipse cx={10} cy={30} rx={6.5} ry={4}  fill={BLUSH} fillOpacity={0.65} />
-      <Ellipse cx={50} cy={30} rx={6.5} ry={4}  fill={BLUSH} fillOpacity={0.65} />
-
-      {/* Smile */}
-      <Path d="M18,35 Q30,44 42,35" stroke={EYE} strokeWidth={2.2} strokeLinecap="round" fill="none" />
-
-      {/* Bow-tie */}
-      <Ellipse cx={23} cy={47} rx={10} ry={6}  fill={BOW_L} />
-      <Ellipse cx={37} cy={47} rx={10} ry={6}  fill={BOW_L} />
-      <Circle  cx={30} cy={47} r={4.8}          fill={BOW_C} />
-
-      {children}
+      <Defs>
+        {/* Vertical gradient — same direction as original (y1=0 → y2=1) */}
+        <LinearGradient id={gId} x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={top} />
+          <Stop offset="1" stopColor={bot} />
+        </LinearGradient>
+      </Defs>
+      <Path d={SQUIRCLE} fill={`url(#${gId})`} />
+      <G transform={SYM_TRANSFORM}>
+        {children}
+      </G>
     </G>
   );
 }
 
-// ── 1. 가사도우미 — clipboard + broom ────────────────────────────
+// ── 1. 가사도우미 — house + heart ────────────────────────────────
 function HelperChar() {
   return (
-    <Base>
-      {/* Clipboard */}
-      <Rect x={18} y={49} width={20} height={16} rx={3} fill="#F5E6C0" />
-      <Rect x={24} y={47} width={8}  height={4}  rx={2} fill="#F0A050" />
-      {/* Broom handle */}
-      <Line x1={54} y1={26} x2={54} y2={54} stroke="#8B6228" strokeWidth={4.5} strokeLinecap="round" />
-      {/* Broom head */}
-      <Rect x={48} y={51} width={12} height={7} rx={2.5} fill="#D4A020" />
+    <Base id="helper">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M3.5 11L12 4l8.5 7" />
+        <Path d="M5.5 10v9h13v-9" />
+        {/* Heart on door */}
+        <Path d="M12 17.2c-2.2-1.5-3.3-2.8-3.3-4.2 0-1.1.9-1.9 1.9-1.9.7 0 1.1.3 1.4.8.3-.5.7-.8 1.4-.8 1 0 1.9.8 1.9 1.9 0 1.4-1.1 2.7-3.3 4.2z"
+          fill="white" stroke="none" />
+      </G>
     </Base>
   );
 }
 
-// ── 2. 요리 — chef-hat brim + ladle ─────────────────────────────
+// ── 2. 요리 — steam + pot ────────────────────────────────────────
 function CookingChar() {
   return (
-    <Base>
-      {/* Chef hat brim across top of head */}
-      <Rect x={11} y={5} width={38} height={7} rx={3.5} fill="#D8D8D8" />
-      {/* Ladle handle (right) */}
-      <Line x1={55} y1={34} x2={55} y2={54} stroke="#8B6228" strokeWidth={4.5} strokeLinecap="round" />
-      {/* Ladle bowl */}
-      <Circle cx={55} cy={28} r={7.5} fill="#C8C8C8" />
-      <Circle cx={55} cy={28} r={5.5} fill="#DEDEDE" />
+    <Base id="cooking">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M6 14v5.5a.5.5 0 00.5.5h11a.5.5 0 00.5-.5V14" />
+        <Path d="M4.5 14a3 3 0 01-3-3 3 3 0 013-3c.3-2.3 2.1-4 4.3-4 1.3 0 2.5.6 3.3 1.5.8-.9 2-1.5 3.3-1.5 2.2 0 4 1.7 4.3 4a3 3 0 013 3 3 3 0 01-3 3H4.5z" />
+        <Path d="M9 14v3M12 14v3M15 14v3" opacity={0.55} />
+      </G>
     </Base>
   );
 }
 
-// ── 3. 청소 — green bubbles + sponge ────────────────────────────
+// ── 3. 청소 — scissors/broom ─────────────────────────────────────
 function CleaningChar() {
   return (
-    <Base>
-      {/* Green spray bubbles */}
-      <Circle cx={22} cy={4}  r={3.5} fill="#3ECC7E" />
-      <Circle cx={42} cy={3}  r={2.5} fill="#3ECC7E" />
-      <Circle cx={12} cy={10} r={5}   fill="#3ECC7E" />
-      <Circle cx={50} cy={9}  r={4}   fill="#3ECC7E" />
-      {/* Sponge (bottom-right) */}
-      <Rect x={43} y={47} width={16} height={12} rx={3} fill="#F5DD68" />
-      <Rect x={45} y={49} width={2.5} height={8} rx={1} fill="#E0C030" />
-      <Rect x={49} y={49} width={2.5} height={8} rx={1} fill="#E0C030" />
-      <Rect x={53} y={49} width={2.5} height={8} rx={1} fill="#E0C030" />
+    <Base id="cleaning">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M17.5 3.5l-7 7" />
+        <Path d="M14.5 10.5l-3-3" />
+        <Path d="M8 12.5l3.5 3.5-4.8 4.2a1.4 1.4 0 01-2-.1l-.8-.8a1.4 1.4 0 01-.1-2L8 12.5z" />
+        <Path d="M8 12.5l3.5 3.5" opacity={0.55} />
+      </G>
     </Base>
   );
 }
 
-// ── 4. 맞춤 — purple pin + linked rings ─────────────────────────
+// ── 4. 맞춤 — magic wand + sparkles ──────────────────────────────
 function CustomChar() {
   return (
-    <Base>
-      {/* Purple dotted pin (left) */}
-      <Rect x={5}  y={22} width={5} height={5} rx={1.5} fill="#9B7BE8" />
-      <Rect x={5}  y={30} width={5} height={5} rx={1.5} fill="#9B7BE8" />
-      <Rect x={5}  y={38} width={5} height={5} rx={1.5} fill="#9B7BE8" />
-      <Circle cx={7.5} cy={50} r={5.5} fill="#9B7BE8" />
-      {/* Linked rings (right) */}
-      <Circle cx={48} cy={42} r={7}   fill="none" stroke="#888" strokeWidth={3.5} />
-      <Circle cx={55} cy={49} r={7}   fill="none" stroke="#888" strokeWidth={3.5} />
+    <Base id="custom">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M15 4l-11 11 3 3 11-11z" />
+        <Path d="M13 6l3 3" />
+        <Path d="M19 4v3M17.5 5.5h3M19 9v2M18 10h2" opacity={0.9} />
+        <Path d="M5 7v2M4 8h2" opacity={0.75} />
+      </G>
     </Base>
   );
 }
 
-// ── 5. 과외 — glasses + pencil ───────────────────────────────────
+// ── 5. 과외 — open book ──────────────────────────────────────────
 function TutorChar() {
   return (
-    <Base>
-      {/* Glasses rings over eyes */}
-      <Circle cx={21} cy={22} r={10} fill="none" stroke={BOW_C} strokeWidth={2.5} />
-      <Circle cx={39} cy={22} r={10} fill="none" stroke={BOW_C} strokeWidth={2.5} />
-      {/* Bridge */}
-      <Line x1={31} y1={22} x2={29} y2={22} stroke={BOW_C} strokeWidth={2.5} />
-      {/* Pencil (right) */}
-      <Rect x={53} y={19} width={6} height={28} rx={2} fill="#F5D03A" />
-      {/* Pencil tip */}
-      <Path d="M53,47 L56,55 L59,47 Z" fill="#E87050" />
+    <Base id="tutor">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M4 5.5C4 4.7 4.7 4 5.5 4H11v14H5.5a1.5 1.5 0 01-1.5-1.5v-11z" />
+        <Path d="M20 5.5c0-.8-.7-1.5-1.5-1.5H13v14h5.5a1.5 1.5 0 001.5-1.5v-11z" />
+        <Path d="M7 8h2M7 11h2M15 8h2M15 11h2" opacity={0.75} />
+      </G>
     </Base>
   );
 }
 
-// ── 6. 방문 서비스 — list + briefcase ────────────────────────────
+// ── 6. 방문서비스 — house + door ─────────────────────────────────
 function HomeVisitChar() {
   return (
-    <Base>
-      {/* List/form (left) */}
-      <Rect x={1} y={41} width={17} height={18} rx={2} fill={BOW_C} />
-      <Rect x={3} y={44} width={13} height={2}  rx={1} fill={W} opacity={0.7} />
-      <Rect x={3} y={48} width={13} height={2}  rx={1} fill={W} opacity={0.7} />
-      <Rect x={3} y={52} width={13} height={2}  rx={1} fill={W} opacity={0.7} />
-      <Rect x={3} y={56} width={13} height={2}  rx={1} fill={W} opacity={0.7} />
-      {/* Briefcase (right) */}
-      <Rect x={42} y={44} width={17} height={14} rx={3} fill="#7B3F10" />
-      <Path d="M47 44 Q47 40 51 40 Q55 40 55 44" fill="none" stroke="#5A2E0A" strokeWidth={2.8} strokeLinecap="round" />
-      <Circle cx={51} cy={51} r={2.5} fill="#D4A020" />
+    <Base id="homevisit">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M3.5 12L12 5l8.5 7" />
+        <Path d="M5.5 11v9h13v-9" />
+        <Path d="M9 20v-4.5a1 1 0 011-1h4a1 1 0 011 1V20" />
+        <Circle cx={12} cy={17} r={0.6} fill="white" stroke="none" />
+      </G>
     </Base>
   );
 }
 
-// ── 7. 언어 과외 — "Hi" + "안녕" speech bubbles ─────────────────
+// ── 7. 영어 — speech bubble + A ──────────────────────────────────
 function EnglishChar() {
   return (
-    <Base>
-      {/* "Hi" bubble (upper-left) */}
-      <Rect x={0} y={1} width={23} height={16} rx={6} fill="#00C0D8" />
-      <Path d="M7,16 L4,22 L14,16 Z" fill="#00C0D8" />
-      <ST x={11.5} y={13} textAnchor="middle" fontSize={9} fontWeight="bold" fill={W}>Hi</ST>
-      {/* "안녕" bubble (upper-right) */}
-      <Rect x={37} y={1} width={25} height={16} rx={6} fill="#00C0D8" />
-      <Path d="M46,16 L50,22 L56,16 Z" fill="#00C0D8" />
-      <ST x={49.5} y={13} textAnchor="middle" fontSize={8} fontWeight="bold" fill={W}>안녕</ST>
+    <Base id="english">
+      <G fill="none" stroke="white" strokeWidth={SW} strokeLinecap="round" strokeLinejoin="round">
+        <Path d="M4 6.5A2.5 2.5 0 016.5 4h11A2.5 2.5 0 0120 6.5v8a2.5 2.5 0 01-2.5 2.5H11l-4 3.5V17H6.5A2.5 2.5 0 014 14.5v-8z" />
+        <Path d="M9.5 13l2.5-6 2.5 6M10.5 11h3" strokeWidth={SW * 0.9} />
+      </G>
     </Base>
   );
 }
 
-// ── 8. 더보기 — plain character ───────────────────────────────────
+// ── 8. 더보기 — 3×3 dots ─────────────────────────────────────────
 function MoreChar() {
-  return <Base />;
+  return (
+    <Base id="more">
+      <G fill="white" stroke="none">
+        <Circle cx={6}  cy={6}  r={1.6} />
+        <Circle cx={12} cy={6}  r={1.6} />
+        <Circle cx={18} cy={6}  r={1.6} />
+        <Circle cx={6}  cy={12} r={1.6} />
+        <Circle cx={12} cy={12} r={1.6} />
+        <Circle cx={18} cy={12} r={1.6} />
+        <Circle cx={6}  cy={18} r={1.6} />
+        <Circle cx={12} cy={18} r={1.6} />
+        <Circle cx={18} cy={18} r={1.6} />
+      </G>
+    </Base>
+  );
 }
 
-// ── Registry ─────────────────────────────────────────────────────
+// ── Registry ──────────────────────────────────────────────────────
 const CHARS: Record<CatCharKey, () => React.JSX.Element> = {
   helper:    HelperChar,
   cooking:   CookingChar,
@@ -180,14 +194,14 @@ const CHARS: Record<CatCharKey, () => React.JSX.Element> = {
 
 export default function CategoryCharacter({
   category,
-  size = 60,
+  size = 64,
 }: {
   category: CatCharKey;
   size?: number;
 }) {
   const Char = CHARS[category];
   return (
-    <Svg width={size} height={size} viewBox="0 0 60 60">
+    <Svg width={size} height={size} viewBox="0 0 200 200">
       <Char />
     </Svg>
   );

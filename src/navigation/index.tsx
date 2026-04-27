@@ -10,8 +10,10 @@ import { useAuthStore } from '../store/authStore';
 import { useLanguageStore } from '../store/languageStore';
 import { Colors } from '../constants/colors';
 
+import SlidingTabBar    from '../components/common/SlidingTabBar';
 import SplashScreen      from '../screens/auth/SplashScreen';
 import OnboardingScreen  from '../screens/auth/OnboardingScreen';
+import WelcomeScreen    from '../screens/auth/WelcomeScreen';
 import LoginScreen       from '../screens/auth/LoginScreen';
 import RegisterScreen    from '../screens/auth/RegisterScreen';
 
@@ -32,8 +34,17 @@ import CreatePostScreen  from '../screens/community/CreatePostScreen';
 import PostDetailScreen  from '../screens/community/PostDetailScreen';
 import EditProfileScreen from '../screens/profile/EditProfileScreen';
 import HelpFAQScreen     from '../screens/help/HelpFAQScreen';
-import ReviewScreen        from '../screens/customer/ReviewScreen';
+import ReviewScreen           from '../screens/customer/ReviewScreen';
+import BookingScreen          from '../screens/customer/BookingScreen';
+import NotificationsScreen    from '../screens/customer/NotificationsScreen';
+import OrdersScreen           from '../screens/customer/OrdersScreen';
 import WorkerSearchScreen from '../screens/customer/WorkerSearchScreen';
+import TermsScreen          from '../screens/auth/TermsScreen';
+import ErrandBoardScreen   from '../screens/errand/ErrandBoardScreen';
+import ErrandCreateScreen  from '../screens/errand/ErrandCreateScreen';
+import ErrandDetailScreen  from '../screens/errand/ErrandDetailScreen';
+import DriverBoardScreen   from '../screens/driver/DriverBoardScreen';
+import DriverDetailScreen  from '../screens/driver/DriverDetailScreen';
 
 import { RootStackParamList } from '../types';
 
@@ -51,51 +62,11 @@ function TabIcon({ focused, name }: { focused: boolean; name: any }) {
 }
 
 function CustomerTabs() {
-  const insets = useSafeAreaInsets();
   const { t } = useLanguageStore();
-  const tabH = 64 + insets.bottom;
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors.white,
-          borderTopColor:  Colors.border,
-          borderTopWidth:  1,
-          height:          tabH,
-          paddingBottom:   insets.bottom + 12,
-          paddingTop:      8,
-        },
-        tabBarActiveTintColor:   Colors.accent,
-        tabBarInactiveTintColor: Colors.grayLight,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '500', marginTop: 0 },
-        tabBarIcon: ({ focused }) => {
-          const icons: Record<string, string> = {
-            Home:      'home',
-            Community: 'chatbubbles',
-            Map:       'map',
-            ChatList:  'chatbubble-ellipses',
-            Profile:   'person',
-          };
-          if (route.name === 'Map') {
-            return (
-              <View style={{
-                width: 46, height: 46, borderRadius: 23,
-                backgroundColor: focused ? Colors.accent : Colors.section,
-                alignItems: 'center', justifyContent: 'center',
-                marginTop: -18,
-                borderWidth: 3, borderColor: Colors.white,
-                shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.15, shadowRadius: 4, elevation: 6,
-              }}>
-                <Ionicons name={focused ? 'search' : 'search-outline'} size={22}
-                  color={focused ? Colors.white : Colors.grayLight} />
-              </View>
-            );
-          }
-          return <TabIcon focused={focused} name={icons[route.name] ?? 'ellipse'} />;
-        },
-      })}
+      tabBar={(props) => <SlidingTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home"      component={HomeScreen}      options={{ tabBarLabel: t.nav.home }} />
       <Tab.Screen name="Community" component={CommunityScreen} options={{ tabBarLabel: t.community.title }} />
@@ -107,56 +78,16 @@ function CustomerTabs() {
 }
 
 function WorkerTabs() {
-  const insets = useSafeAreaInsets();
   const { t } = useLanguageStore();
-  const tabH = 64 + insets.bottom;
   return (
     <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarStyle: {
-          backgroundColor: Colors.white,
-          borderTopColor:  Colors.border,
-          borderTopWidth:  1,
-          height:          tabH,
-          paddingBottom:   insets.bottom + 12,
-          paddingTop:      8,
-        },
-        tabBarActiveTintColor:   Colors.accent,
-        tabBarInactiveTintColor: Colors.grayLight,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '500', marginTop: 0 },
-        tabBarIcon: ({ focused }) => {
-          const icons: Record<string, string> = {
-            WorkerHome:    'grid',
-            WorkerOrders:  'briefcase',
-            WorkerMap:     'map',
-            WorkerChat:    'chatbubble-ellipses',
-            WorkerProfile: 'person',
-          };
-          if (route.name === 'WorkerMap') {
-            return (
-              <View style={{
-                width: 46, height: 46, borderRadius: 23,
-                backgroundColor: focused ? Colors.accent : Colors.section,
-                alignItems: 'center', justifyContent: 'center',
-                marginTop: -18,
-                borderWidth: 3, borderColor: Colors.white,
-                shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.15, shadowRadius: 4, elevation: 6,
-              }}>
-                <Ionicons name={focused ? 'search' : 'search-outline'} size={22}
-                  color={focused ? Colors.white : Colors.grayLight} />
-              </View>
-            );
-          }
-          return <TabIcon focused={focused} name={icons[route.name] ?? 'ellipse'} />;
-        },
-      })}
+      tabBar={(props) => <SlidingTabBar {...props} />}
+      screenOptions={{ headerShown: false }}
     >
-      <Tab.Screen name="WorkerHome"    component={WorkerHomeScreen}   options={{ tabBarLabel: t.nav.dashboard }} />
-      <Tab.Screen name="WorkerOrders"  component={WorkerOrdersScreen} options={{ tabBarLabel: t.nav.jobs }} />
-      <Tab.Screen name="WorkerMap"     component={MapScreen}          options={{ tabBarLabel: t.nav.map }} />
-      <Tab.Screen name="WorkerChat"    component={ChatListScreen}     options={{ tabBarLabel: t.nav.chat }} />
+      <Tab.Screen name="WorkerHome"    component={WorkerHomeScreen}    options={{ tabBarLabel: t.nav.dashboard }} />
+      <Tab.Screen name="WorkerOrders"  component={WorkerOrdersScreen}  options={{ tabBarLabel: t.nav.jobs }} />
+      <Tab.Screen name="WorkerMap"     component={MapScreen}           options={{ tabBarLabel: t.nav.map }} />
+      <Tab.Screen name="WorkerChat"    component={ChatListScreen}      options={{ tabBarLabel: t.nav.chat }} />
       <Tab.Screen name="WorkerProfile" component={WorkerProfileScreen} options={{ tabBarLabel: t.nav.profile }} />
     </Tab.Navigator>
   );
@@ -172,10 +103,12 @@ export default function Navigation() {
           <>
             <Stack.Screen name="Splash"     component={SplashScreen} />
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+            <Stack.Screen name="Welcome"    component={WelcomeScreen}   options={{ animation: 'fade' }} />
             <Stack.Screen name="Login"      component={LoginScreen} />
             <Stack.Screen name="Register"   component={RegisterScreen} />
+            <Stack.Screen name="Terms"      component={TermsScreen}    options={{ animation: 'slide_from_right' }} />
           </>
-        ) : user?.role === 'helper' ? (
+        ) : (user?.role === 'helper' || user?.role === 'driver') ? (
           <>
             <Stack.Screen name="WorkerTabs"   component={WorkerTabs} />
             <Stack.Screen name="ChatDetail"   component={ChatDetailScreen}  options={{ animation: 'slide_from_right' }} />
@@ -183,18 +116,33 @@ export default function Navigation() {
             <Stack.Screen name="HelpFAQ"      component={HelpFAQScreen}     options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="CreatePost"   component={CreatePostScreen}  options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="PostDetail"   component={PostDetailScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="Terms"        component={TermsScreen}       options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ErrandBoard"  component={ErrandBoardScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ErrandCreate" component={ErrandCreateScreen} options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="ErrandDetail" component={ErrandDetailScreen} options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="DriverBoard"  component={DriverBoardScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="DriverDetail" component={DriverDetailScreen} options={{ animation: 'slide_from_right' }} />
           </>
         ) : (
           <>
             <Stack.Screen name="CustomerTabs"  component={CustomerTabs} />
             <Stack.Screen name="WorkerSearch"  component={WorkerSearchScreen}  options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="WorkerDetail"  component={WorkerDetailScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="Booking"       component={BookingScreen}       options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="Orders"        component={OrdersScreen}        options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="ChatDetail"   component={ChatDetailScreen}   options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="EditProfile"  component={EditProfileScreen}  options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="HelpFAQ"      component={HelpFAQScreen}      options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="Review"       component={ReviewScreen}       options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="CreatePost"   component={CreatePostScreen}   options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="PostDetail"   component={PostDetailScreen}   options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="Terms"         component={TermsScreen}         options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ErrandBoard"   component={ErrandBoardScreen}   options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ErrandCreate"  component={ErrandCreateScreen}  options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="ErrandDetail"  component={ErrandDetailScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="DriverBoard"   component={DriverBoardScreen}   options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="DriverDetail"  component={DriverDetailScreen}  options={{ animation: 'slide_from_right' }} />
           </>
         )}
       </Stack.Navigator>

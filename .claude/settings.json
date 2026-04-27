@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -n \"export default function\\\\|{ navigation, route }\" /Users/bigband/Linka-app/Linka-app/src/screens/customer/WorkerDetailScreen.tsx)"
+    ]
+  }
+}

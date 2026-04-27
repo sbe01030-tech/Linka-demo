@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
 import { LangCode } from '../../i18n';
@@ -60,6 +61,7 @@ function getPosts(lang: LangCode): PostData[] {
 export default function CommunityScreen() {
   const navigation = useNavigation<Nav>();
   const { t, lang } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [activeTab, setActiveTab]  = useState<CategoryKey>('all');
   const [searchText, setSearchText] = useState('');
 
@@ -88,7 +90,7 @@ export default function CommunityScreen() {
   return (
     <View style={s.root}>
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <View style={s.headerRow}>
           <Text style={s.pageTitle}>{t.community.title}</Text>
           <TouchableOpacity style={s.writeBtn} onPress={() => navigation.navigate('CreatePost')}>
@@ -124,8 +126,12 @@ export default function CommunityScreen() {
               style={[s.tab, activeTab === key && s.tabActive]}
               onPress={() => setActiveTab(key)}
             >
-              {key === 'popular'  && <Text style={s.tabEmoji}>🔥</Text>}
-              {key === 'tips'     && <Text style={s.tabEmoji}>💡</Text>}
+              {key === 'popular' && (
+                <Ionicons name="flame" size={13} color={activeTab === key ? Colors.white : '#F97316'} />
+              )}
+              {key === 'tips' && (
+                <Ionicons name="bulb-outline" size={13} color={activeTab === key ? Colors.white : '#EAB308'} />
+              )}
               <Text style={[s.tabText, activeTab === key && s.tabTextActive]}>{catLabel(key)}</Text>
             </TouchableOpacity>
           ))}
@@ -200,7 +206,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingHorizontal: 16, paddingBottom: 12,
+    paddingHorizontal: 16, paddingBottom: 12,
     backgroundColor: Colors.white,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
     gap: 10,
@@ -231,7 +237,6 @@ const s = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   tabActive: { backgroundColor: Colors.accent, borderColor: Colors.accent },
-  tabEmoji:  { fontSize: 12 },
   tabText:       { fontSize: 13, fontWeight: '500', color: Colors.gray },
   tabTextActive: { color: Colors.white, fontWeight: '700' },
 

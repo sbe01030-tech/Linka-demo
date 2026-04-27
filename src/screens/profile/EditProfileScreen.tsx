@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
@@ -15,6 +16,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'EditProfile'>;
 export default function EditProfileScreen({ navigation }: Props) {
   const { user, setUser } = useAuthStore();
   const { lang } = useLanguageStore();
+  const insets = useSafeAreaInsets();
 
   const [name,  setName]  = useState(user?.name  ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
@@ -56,7 +58,7 @@ export default function EditProfileScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color={Colors.dark} />
         </TouchableOpacity>
@@ -144,7 +146,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingHorizontal: 16, paddingBottom: 14,
+    paddingHorizontal: 16, paddingBottom: 14,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     borderBottomWidth: 1, borderBottomColor: Colors.border,
     backgroundColor: Colors.white,

@@ -20,24 +20,24 @@ const BRAND = '#00C853';
 const NODES = [
   { id: 1, cx: 460, cy: -80,  r: 220, delay: 0,   opacity: 0.70 },
   { id: 2, cx: -40, cy: 790,  r: 140, delay: 100,  opacity: 0.78 },
-  { id: 3, cx: -10, cy: 310,  r: 96,  delay: 200,  opacity: 0.65 },
+  { id: 3, cx: -10, cy: 310,  r: 96,  delay: 200,  opacity: 0.70 },
   { id: 4, cx: 360, cy: 640,  r: 72,  delay: 280,  opacity: 0.82 },
   { id: 5, cx: 148, cy: 148,  r: 42,  delay: 350,  opacity: 0.74 },
-  { id: 6, cx: 318, cy: 370,  r: 24,  delay: 400,  opacity: 0.88 },
-  { id: 7, cx: 120, cy: 620,  r: 16,  delay: 450,  opacity: 0.60 },
+  { id: 6, cx: 352, cy: 240,  r: 32,  delay: 400,  opacity: 0.55 },
+  { id: 7, cx: 90,  cy: 658,  r: 16,  delay: 450,  opacity: 0.60 },
 ];
 
 // Network edges connecting nodes
 const EDGES = [
   { id: 'e1', x1: 460, y1: -30,  x2: 148, y2: 148,  delay: 550 },
   { id: 'e2', x1: 148, y1: 148,  x2: -10, y2: 310,  delay: 620 },
-  { id: 'e3', x1: 148, y1: 148,  x2: 318, y2: 370,  delay: 670 },
+  { id: 'e3', x1: 148, y1: 148,  x2: 352, y2: 240,  delay: 670 },
   { id: 'e4', x1: -10, y1: 310,  x2: -40, y2: 760,  delay: 720 },
-  { id: 'e5', x1: 318, y1: 370,  x2: 360, y2: 640,  delay: 770 },
+  { id: 'e5', x1: 352, y1: 240,  x2: 360, y2: 640,  delay: 770 },
   { id: 'e6', x1: 360, y1: 640,  x2: -40, y2: 760,  delay: 820 },
-  { id: 'e7', x1: 120, y1: 620,  x2: 360, y2: 640,  delay: 860 },
-  { id: 'e8', x1: -10, y1: 310,  x2: 120, y2: 620,  delay: 900 },
-  { id: 'e9', x1: 120, y1: 620,  x2: -40, y2: 760,  delay: 940 },
+  { id: 'e7', x1: 90,  y1: 658,  x2: 360, y2: 640,  delay: 860 },
+  { id: 'e8', x1: -10, y1: 310,  x2: 90,  y2: 658,  delay: 900 },
+  { id: 'e9', x1: 90,  y1: 658,  x2: -40, y2: 760,  delay: 940 },
 ];
 
 // Animated SVG Line
@@ -77,7 +77,7 @@ export default function SplashScreen({ navigation }: Props) {
     // Animate each edge
     EDGES.forEach((edge, i) => {
       Animated.timing(edgeOpacity[i], {
-        toValue: 0.18, delay: edge.delay,
+        toValue: 0.30, delay: edge.delay,
         duration: 500, useNativeDriver: true,
       }).start();
     });
@@ -103,7 +103,7 @@ export default function SplashScreen({ navigation }: Props) {
     // Navigate after animation completes
     const timer = setTimeout(
       () => {
-        if (!isLoggedIn) navigation.replace('Login'); // Onboarding disabled — re-enable with 'Onboarding' when needed
+        if (!isLoggedIn) navigation.replace('Welcome');
         else if (user?.role === 'helper' || user?.role === 'tutor') navigation.replace('WorkerTabs');
         else navigation.replace('CustomerTabs');
       },

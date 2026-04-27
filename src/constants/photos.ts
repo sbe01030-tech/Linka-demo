@@ -33,5 +33,19 @@ export const C6  = px(29451034);  // street style, urban
 // ── Male customer ────────────────────────────────────────────
 export const MALE1 = px(33549701); // bapak tradisional Jawa
 
+// ── Drivers (local assets, male Indonesian drivers) ─────────
+// 로컬 이미지 — Image source에 직접 전달 가능 (number 타입)
+export const D1  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 001.jpeg');
+export const D2  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 002.jpeg');
+export const D3  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 003.jpeg');
+export const D4  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 004.jpeg');
+export const D5  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 005.jpeg');
+export const D6  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 006.jpeg');
+export const D7  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 007.jpeg');
+export const D8  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 008.jpeg');
+export const D9  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 009.jpeg');
+export const D10 = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-38 001.jpeg');
+export const D11 = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-38 002.jpeg');
+
 // ── Stack avatars (count bar) ────────────────────────────────
 export const AVATAR_STACK = [W1, W4, C1];

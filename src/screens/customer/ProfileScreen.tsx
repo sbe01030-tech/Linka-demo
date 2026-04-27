@@ -7,6 +7,7 @@ import Svg, { Line } from 'react-native-svg';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
@@ -25,6 +26,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation<Nav>();
   const { user, logout } = useAuthStore();
   const { t, lang } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [showSplash, setShowSplash] = React.useState(false);
 
   const COMING_SOON = lang === 'ko' ? '준비 중입니다.' : lang === 'en' ? 'Coming soon.' : 'Segera hadir.';
@@ -57,7 +59,7 @@ export default function ProfileScreen() {
   return (
     <ScrollView style={s.root} showsVerticalScrollIndicator={false}>
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <Text style={s.pageTitle}>{t.profile.editProfile}</Text>
       </View>
 
@@ -93,6 +95,25 @@ export default function ProfileScreen() {
         ))}
       </View>
 
+      {/* 내 예약 목록 — 구분된 카드 */}
+      <TouchableOpacity
+        style={s.ordersCard}
+        onPress={() => navigation.navigate('Orders')}
+        activeOpacity={0.85}
+      >
+        <View style={s.ordersIconWrap}>
+          <Ionicons name="calendar-clear" size={22} color={Colors.accent} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={s.ordersTitle}>내 예약 목록</Text>
+          <Text style={s.ordersSub}>진행 중 1건 · 완료 3건</Text>
+        </View>
+        <View style={s.ordersBadge}>
+          <Text style={s.ordersBadgeText}>1</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={Colors.accent} />
+      </TouchableOpacity>
+
       {/* Menu list — bg-gray-50 rounded-xl, divide-y */}
       <View style={s.menuSection}>
         <View style={s.menuList}>
@@ -101,6 +122,7 @@ export default function ProfileScreen() {
               onPress={() => {
                 if (i === 0) navigation.navigate('EditProfile');
                 else if (i === 5) navigation.navigate('HelpFAQ');
+                else if (i === 6) navigation.navigate('Terms', { mode: 'view' });
                 else Alert.alert(item.label, COMING_SOON);
               }}
             >
@@ -149,7 +171,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingBottom: 16, paddingHorizontal: 20,
+    paddingBottom: 16, paddingHorizontal: 20,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   // text-2xl font-normal
@@ -215,6 +237,27 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   menuLabel: { flex: 1, fontSize: 14, color: Colors.dark, fontWeight: '400' },
+
+  // 내 예약 목록 카드
+  ordersCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    marginHorizontal: 20, marginTop: 20,
+    paddingVertical: 16, paddingHorizontal: 18,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.accentLight,
+    borderWidth: 1.5, borderColor: Colors.accent + '40',
+    ...Shadow.sm,
+  },
+  ordersIconWrap: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: Colors.white,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 1, borderColor: Colors.accent + '30',
+  },
+  ordersTitle:      { fontSize: 15, fontWeight: '700', color: Colors.dark, marginBottom: 2 },
+  ordersSub:        { fontSize: 12, color: Colors.gray },
+  ordersBadge:      { backgroundColor: Colors.accent, borderRadius: Radius.pill, minWidth: 22, height: 22, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+  ordersBadgeText:  { fontSize: 12, fontWeight: '700', color: Colors.white },
 
   // Branding preview button
   brandingBtn: {

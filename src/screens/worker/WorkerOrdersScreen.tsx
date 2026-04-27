@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../types';
 import { C1, C2, C3 } from '../../constants/photos';
 
@@ -48,6 +49,7 @@ export default function WorkerOrdersScreen() {
   const navigation = useNavigation<Nav>();
   const { user } = useAuthStore();
   const { t }    = useLanguageStore();
+  const insets   = useSafeAreaInsets();
 
   const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = {
     upcoming:         { label: t.workerOrders.upcomingLabel,    color: Colors.accent  },
@@ -92,7 +94,7 @@ export default function WorkerOrdersScreen() {
   return (
     <View style={s.root}>
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <View style={s.headerRow}>
           <Text style={s.pageTitle}>{t.workerOrders.title}</Text>
           <View style={s.earningPill}>
@@ -241,7 +243,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingBottom: 16, paddingHorizontal: 20,
+    paddingBottom: 16, paddingHorizontal: 20,
     backgroundColor: Colors.white,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },

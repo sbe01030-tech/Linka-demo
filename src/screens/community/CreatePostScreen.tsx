@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useLanguageStore } from '../../store/languageStore';
 import { RootStackParamList } from '../../types';
@@ -22,6 +23,7 @@ const CATEGORIES: { key: PostCategory; emoji: string; labelId: string; labelEn: 
 
 export default function CreatePostScreen({ navigation }: Props) {
   const { t, lang } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const [category, setCategory] = useState<PostCategory>('chat');
   const [title, setTitle]       = useState('');
   const [body, setBody]         = useState('');
@@ -62,7 +64,7 @@ export default function CreatePostScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Header */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
           <Ionicons name="close" size={22} color={Colors.dark} />
         </TouchableOpacity>
@@ -87,21 +89,23 @@ export default function CreatePostScreen({ navigation }: Props) {
           <Text style={s.sectionLabel}>
             {lang === 'ko' ? '카테고리' : lang === 'en' ? 'Category' : 'Kategori'}
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.catRow}>
-            {CATEGORIES.map((c) => (
-              <TouchableOpacity
-                key={c.key}
-                style={[s.catChip, category === c.key && { backgroundColor: c.bg, borderColor: c.color }]}
-                onPress={() => setCategory(c.key)}
-                activeOpacity={0.75}
-              >
-                <Text style={s.catEmoji}>{c.emoji}</Text>
-                <Text style={[s.catChipText, category === c.key && { color: c.color, fontWeight: '700' }]}>
-                  {catLabel(c)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+          <View style={s.catWrap}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.catRow}>
+              {CATEGORIES.map((c) => (
+                <TouchableOpacity
+                  key={c.key}
+                  style={[s.catChip, category === c.key && { backgroundColor: c.bg, borderColor: c.color }]}
+                  onPress={() => setCategory(c.key)}
+                  activeOpacity={0.75}
+                >
+                  <Text style={s.catEmoji}>{c.emoji}</Text>
+                  <Text style={[s.catChipText, category === c.key && { color: c.color, fontWeight: '700' }]}>
+                    {catLabel(c)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         </View>
 
         {/* Title input */}
@@ -202,7 +206,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   header: {
-    paddingTop: 56, paddingHorizontal: 16, paddingBottom: 14,
+    paddingHorizontal: 16, paddingBottom: 14,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     borderBottomWidth: 1, borderBottomColor: Colors.border,
     backgroundColor: Colors.white,
@@ -221,7 +225,8 @@ const s = StyleSheet.create({
   section: { paddingTop: 20 },
   sectionLabel: { fontSize: 12, fontWeight: '600', color: Colors.gray, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
 
-  catRow: { gap: 8, paddingBottom: 4 },
+  catWrap: { height: 44 },
+  catRow: { gap: 8, alignItems: 'center' },
   catChip: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     borderRadius: Radius.pill, borderWidth: 1, borderColor: Colors.borderMid,

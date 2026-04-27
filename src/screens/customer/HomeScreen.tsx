@@ -1,23 +1,18 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Image, Alert,
+  TouchableOpacity, Image, Alert, Dimensions,
 } from 'react-native';
+
+const SCREEN_W = Dimensions.get('window').width;
+const AD_W = SCREEN_W - 32;
 
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
-const CAT_ICONS: Record<string, any> = {
-  helper:    require('../../../assets/icons/cat_helper.png'),
-  cooking:   require('../../../assets/icons/cat_cooking.png'),
-  cleaning:  require('../../../assets/icons/cat_cleaning.png'),
-  custom:    require('../../../assets/icons/cat_custom.png'),
-  tutor:     require('../../../assets/icons/cat_tutor.png'),
-  homevisit: require('../../../assets/icons/cat_homevisit.png'),
-  english:   require('../../../assets/icons/cat_english.png'),
-  more:      require('../../../assets/icons/cat_more.png'),
-};
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import CategoryCharacter, { CatCharKey } from '../../components/common/CategoryCharacter_A';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { AVATAR_STACK, W1, W2, W3, W4, W5, W6 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
@@ -49,14 +44,14 @@ function getPreviewPosts(lang: LangCode): CommunityPost[] {
 const CATEGORY_META: {
   id: string; key: string; bgColor: string;
 }[] = [
-  { id: 'helper',    key: 'catArt',      bgColor: '#FFF3C0' },
-  { id: 'cooking',   key: 'catCooking',  bgColor: '#FFD8D4' },
-  { id: 'cleaning',  key: 'catCleaning', bgColor: '#C4F5DC' },
-  { id: 'custom',    key: 'catCustom',   bgColor: '#E4DEFF' },
-  { id: 'tutor',     key: 'catTutor',    bgColor: '#CCE8FF' },
-  { id: 'homevisit', key: 'catVisit',    bgColor: '#FFD8EA' },
-  { id: 'english',   key: 'catEnglish',  bgColor: '#C8F4F2' },
-  { id: 'more',      key: 'catMore',     bgColor: '#EAEAEF' },
+  { id: 'helper',    key: 'catArt',              bgColor: '#FFF3C0' },
+  { id: 'cooking',   key: 'catCooking',          bgColor: '#FFD8D4' },
+  { id: 'cleaning',  key: 'catCleaning',         bgColor: '#C4F5DC' },
+  { id: 'childcare', key: 'catChildcare',        bgColor: '#FFD8EA' },
+  { id: 'driver_designated', key: 'catDriverDesignated', bgColor: '#EDE9FE' },
+  { id: 'driver_daily',      key: 'catDriverDaily',      bgColor: '#FEF3C7' },
+  { id: 'errand',    key: 'catErrand',           bgColor: '#FFE4E6' },
+  { id: 'more',      key: 'catMore',             bgColor: '#EAEAEF' },
 ];
 
 const AVATAR_URLS = AVATAR_STACK;
@@ -65,15 +60,55 @@ interface MockWorker {
   id: string; name: string; photo: string; location: string;
   rating: number; pricePerHour: number; totalJobs: number;
   isAvailable: boolean; skills: string[]; isVerified: boolean;
+  temperature: number;
 }
 
 const MOCK_WORKERS: MockWorker[] = [
-  { id:'w1', name:'Sari Dewi',       photo:W1, location:'Kebayoran Baru', rating:5.0, pricePerHour:30000, totalJobs:312, isAvailable:true,  skills:['Beberes','Masak','Cuci'],   isVerified:true  },
-  { id:'w2', name:'Rina Wulandari',  photo:W2, location:'Cilandak',       rating:4.9, pricePerHour:25000, totalJobs:198, isAvailable:true,  skills:['Masak Sehat','Beberes'],    isVerified:true  },
-  { id:'w3', name:'Dewi Anggraeni',  photo:W3, location:'Kemang',         rating:4.7, pricePerHour:28000, totalJobs:143, isAvailable:true,  skills:['Masak','Cuci'],             isVerified:true  },
-  { id:'w4', name:'Fitri Handayani', photo:W4, location:'Fatmawati',      rating:4.9, pricePerHour:27000, totalJobs:227, isAvailable:true,  skills:['Setrika','Beberes'],        isVerified:true  },
-  { id:'w5', name:'Indah Lestari',   photo:W5, location:'Pondok Indah',   rating:4.8, pricePerHour:35000, totalJobs:89,  isAvailable:false, skills:['Deep Cleaning'],            isVerified:true  },
-  { id:'w6', name:'Nur Aini',        photo:W6, location:'BSD City',       rating:4.8, pricePerHour:24000, totalJobs:89,  isAvailable:true,  skills:['Cuci','Setrika'],           isVerified:true  },
+  { id:'w1', name:'Sari Dewi',       photo:W1, location:'Kebayoran Baru', rating:5.0, pricePerHour:30000, totalJobs:312, isAvailable:true,  skills:['Beberes','Masak','Cuci'],   isVerified:true, temperature:84.2 },
+  { id:'w2', name:'Rina Wulandari',  photo:W2, location:'Cilandak',       rating:4.9, pricePerHour:25000, totalJobs:198, isAvailable:true,  skills:['Masak Sehat','Beberes'],    isVerified:true, temperature:72.6 },
+  { id:'w3', name:'Dewi Anggraeni',  photo:W3, location:'Kemang',         rating:4.7, pricePerHour:28000, totalJobs:143, isAvailable:true,  skills:['Masak','Cuci'],             isVerified:true, temperature:58.9 },
+  { id:'w4', name:'Fitri Handayani', photo:W4, location:'Fatmawati',      rating:4.9, pricePerHour:27000, totalJobs:227, isAvailable:true,  skills:['Setrika','Beberes'],        isVerified:true, temperature:76.3 },
+  { id:'w5', name:'Indah Lestari',   photo:W5, location:'Pondok Indah',   rating:4.8, pricePerHour:35000, totalJobs:89,  isAvailable:false, skills:['Deep Cleaning'],            isVerified:true, temperature:48.1 },
+  { id:'w6', name:'Nur Aini',        photo:W6, location:'BSD City',       rating:4.8, pricePerHour:24000, totalJobs:89,  isAvailable:true,  skills:['Cuci','Setrika'],           isVerified:true, temperature:51.7 },
+];
+
+// ── Mock drivers (고객 차량 운전 서비스) ──────────────────────────
+import { MOCK_DRIVERS, DRIVER_SERVICE_META } from '../../constants/mockDrivers';
+import { HELPER_OF_MONTH, DRIVER_OF_MONTH } from '../../constants/monthlyAwards';
+import MonthlyAwardCard from '../../components/common/MonthlyAwardCard';
+
+// ── Mock ads ──────────────────────────────────────────────────────
+const ADS = [
+  {
+    id: 'a1',
+    bg: Colors.accentLight,
+    border: Colors.accent + '30',
+    badge: Colors.accent + '25',
+    badgeColor: Colors.accent,
+    title: '첫 예약 20% 할인 쿠폰',
+    sub: '지금 바로 헬퍼를 예약하고 혜택을 받아보세요!',
+    cta: '쿠폰 받기',
+  },
+  {
+    id: 'a2',
+    bg: '#FFF7ED',
+    border: '#F59E0B30',
+    badge: '#F59E0B25',
+    badgeColor: '#F59E0B',
+    title: 'Linka Pro 멤버십',
+    sub: '월정액으로 우선 매칭 & 수수료 0% 혜택',
+    cta: '자세히 보기',
+  },
+  {
+    id: 'a3',
+    bg: '#F0FDF4',
+    border: '#22C55E30',
+    badge: '#22C55E25',
+    badgeColor: '#22C55E',
+    title: '친구 초대하면 Rp 50rb 적립',
+    sub: '친구가 첫 예약 완료 시 즉시 크레딧 지급',
+    cta: '초대하기',
+  },
 ];
 
 // ── Tiny mascot face (chest-level, 36×36) ──────────────────────
@@ -93,13 +128,22 @@ function MascotFace({ size = 36 }: { size?: number }) {
   );
 }
 
-type ServiceTab = 'regular' | 'special';
-
 export default function HomeScreen() {
   const navigation  = useNavigation<Nav>();
   const { user }    = useAuthStore();
   const { t, lang } = useLanguageStore();
-  const [svcTab, setSvcTab] = useState<ServiceTab>('regular');
+  const insets      = useSafeAreaInsets();
+  const adPage = useRef(0);
+  const adScrollRef = useRef<ScrollView>(null);
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      const next = (adPage.current + 1) % ADS.length;
+      adScrollRef.current?.scrollTo({ x: next * (AD_W + 12), animated: true });
+      adPage.current = next;
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   const firstName = user?.name?.split(' ')[0] ?? 'Bunda';
   const MOCK_POSTS = getPreviewPosts(lang);
@@ -109,7 +153,7 @@ export default function HomeScreen() {
     <ScrollView style={s.root} showsVerticalScrollIndicator={false} stickyHeaderIndices={[0]}>
 
       {/* ── Sticky header ── */}
-      <View style={s.header}>
+      <View style={[s.header, { paddingTop: insets.top + 12 }]}>
         <View style={s.headerRow}>
           {/* Logo */}
           <View style={s.logoRow}>
@@ -123,11 +167,7 @@ export default function HomeScreen() {
             <Ionicons name="chevron-down" size={12} color={Colors.gray} />
           </TouchableOpacity>
           {/* Bell */}
-          <TouchableOpacity style={s.bellBtn} onPress={() => Alert.alert(
-            lang === 'ko' ? '알림' : lang === 'en' ? 'Notifications' : 'Notifikasi',
-            lang === 'ko' ? '새 알림이 없습니다.' : lang === 'en' ? 'No new notifications.' : 'Tidak ada notifikasi baru.',
-            [{ text: 'OK' }]
-          )}>
+          <TouchableOpacity style={s.bellBtn} onPress={() => navigation.navigate('Notifications')}>
             <Ionicons name="notifications-outline" size={22} color={Colors.dark} />
             <View style={s.bellDot} />
           </TouchableOpacity>
@@ -137,22 +177,20 @@ export default function HomeScreen() {
       {/* ── Service type buttons ── */}
       <View style={s.svcBtnWrap}>
         <TouchableOpacity
-          style={[s.svcBtn, svcTab === 'regular' && s.svcBtnActive]}
-          onPress={() => { setSvcTab('regular'); (navigation as any).navigate('Map', { expanded: true, serviceType: 'regular' }); }}
+          style={s.svcBtn}
+          onPress={() => (navigation as any).navigate('Map', { expanded: true, serviceType: 'regular' })}
           activeOpacity={0.75}
         >
-          <Ionicons name="calendar-outline" size={15}
-            color={svcTab === 'regular' ? Colors.accent : Colors.gray} />
-          <Text style={[s.svcBtnText, svcTab === 'regular' && s.svcBtnTextActive]}>{t.homeNew.serviceRegular}</Text>
+          <Ionicons name="calendar-outline" size={15} color={Colors.accent} />
+          <Text style={s.svcBtnText}>{t.homeNew.serviceRegular}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[s.svcBtn, svcTab === 'special' && s.svcBtnActive]}
-          onPress={() => { setSvcTab('special'); (navigation as any).navigate('Map', { expanded: true, serviceType: 'onetime' }); }}
+          style={s.svcBtn}
+          onPress={() => (navigation as any).navigate('Map', { expanded: true, serviceType: 'onetime' })}
           activeOpacity={0.75}
         >
-          <Ionicons name="flash-outline" size={15}
-            color={svcTab === 'special' ? Colors.accent : Colors.gray} />
-          <Text style={[s.svcBtnText, svcTab === 'special' && s.svcBtnTextActive]}>{t.homeNew.serviceSpecial}</Text>
+          <Ionicons name="flash-outline" size={15} color={Colors.accent} />
+          <Text style={s.svcBtnText}>{t.homeNew.serviceSpecial}</Text>
         </TouchableOpacity>
       </View>
 
@@ -168,32 +206,153 @@ export default function HomeScreen() {
           </View>
           <View>
             <Text style={s.nearbyTitle}>
-              {lang === 'ko' ? '내 주변 헬퍼 찾기' : lang === 'en' ? 'Find Helpers Nearby' : 'Cari Helper Terdekat'}
+              {lang === 'ko' ? '내 주변의 손길' : lang === 'en' ? 'Help near you' : 'Bantuan di sekitar'}
             </Text>
             <Text style={s.nearbySub}>
-              {lang === 'ko' ? '지도에서 근처 헬퍼를 확인하세요' : lang === 'en' ? 'See helpers on the map' : 'Lihat helper di peta'}
+              {lang === 'ko' ? '지도 위에서 바로 만나보세요.'
+                : lang === 'en' ? 'Meet them right on the map.'
+                : 'Temui di peta, saat itu juga.'}
             </Text>
           </View>
         </View>
         <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
       </TouchableOpacity>
 
+      {/* ── 3 Main Topics hero ── */}
+      <View style={s.topicsSection}>
+        <View style={s.topicsRow}>
+          {/* 가사·돌봄 */}
+          <TouchableOpacity
+            style={s.topicCard}
+            activeOpacity={0.85}
+            onPress={() => (navigation as any).navigate('Map', { expanded: true })}
+          >
+            <View style={s.topicBlobClip}>
+              <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
+                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.helperColor} strokeWidth={1.8} opacity={0.35} />
+                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.helperColor} strokeWidth={1.8} opacity={0.4} />
+              </Svg>
+            </View>
+            <View style={[s.topicIconLarge, { backgroundColor: Colors.helperLight }]}>
+              <Ionicons name="home" size={26} color={Colors.helperColor} />
+            </View>
+            <Text style={[s.topicEyebrow, { color: Colors.helperColor }]}>
+              {lang === 'ko' ? '가사·돌봄' : lang === 'en' ? 'HOME CARE' : 'ASISTEN'}
+            </Text>
+            <Text style={s.topicHeadline} numberOfLines={2}>
+              {lang === 'ko' ? '집안일은 덜고,\n시간은 더 늘리고.'
+                : lang === 'en' ? 'Less chores.\nMore time.'
+                : 'Kurangi kerja.\nTambah waktu.'}
+            </Text>
+            <View style={[s.topicLivePill, { backgroundColor: Colors.helperLight }]}>
+              <View style={[s.topicLiveDot, { backgroundColor: Colors.helperColor }]} />
+              <Text style={[s.topicLiveText, { color: Colors.helperColor }]}>
+                {lang === 'ko' ? '지금 23명' : lang === 'en' ? '23 online' : '23 aktif'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* 드라이버 */}
+          <TouchableOpacity
+            style={s.topicCard}
+            activeOpacity={0.85}
+            onPress={() => (navigation as any).navigate('DriverBoard')}
+          >
+            <View style={s.topicBlobClip}>
+              <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
+                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.35} />
+                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.4} />
+              </Svg>
+            </View>
+            <View style={[s.topicIconLarge, { backgroundColor: Colors.tutorLight }]}>
+              <Ionicons name="car" size={26} color={Colors.tutorColor} />
+            </View>
+            <Text style={[s.topicEyebrow, { color: Colors.tutorColor }]}>
+              {lang === 'ko' ? '드라이버' : lang === 'en' ? 'DRIVER' : 'SOPIR'}
+            </Text>
+            <Text style={s.topicHeadline} numberOfLines={2}>
+              {lang === 'ko' ? '운전은 잠시 내려두고,\n편히 쉬세요.'
+                : lang === 'en' ? 'Set the wheel down.\nJust sit back.'
+                : 'Turunkan setir.\nSantai saja.'}
+            </Text>
+            <View style={[s.topicLivePill, { backgroundColor: Colors.tutorLight }]}>
+              <View style={[s.topicLiveDot, { backgroundColor: Colors.tutorColor }]} />
+              <Text style={[s.topicLiveText, { color: Colors.tutorColor }]}>
+                {lang === 'ko' ? '지금 8명' : lang === 'en' ? '8 online' : '8 aktif'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* 심부름 — 아래쪽 가로 길게 */}
+        <TouchableOpacity
+          style={s.topicWideCard}
+          activeOpacity={0.85}
+          onPress={() => (navigation as any).navigate('ErrandBoard')}
+        >
+          <View style={s.topicBlobClip}>
+            <Svg width="100%" height="100%" viewBox="0 0 360 90" preserveAspectRatio="xMidYMid slice">
+              <Circle cx="-10" cy="-10" r="36" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.35} />
+              <Circle cx="360" cy="95"  r="58" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.4}  />
+            </Svg>
+          </View>
+          <View style={[s.topicIconLarge, { backgroundColor: Colors.accentLight, marginBottom: 0 }]}>
+            <Ionicons name="bicycle" size={26} color={Colors.accent} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 14 }}>
+            <View style={s.topicWideTitleRow}>
+              <Text style={[s.topicEyebrow, { color: Colors.accent, marginBottom: 0 }]}>
+                {lang === 'ko' ? '심부름' : lang === 'en' ? 'ERRANDS' : 'TITIP'}
+              </Text>
+              <View style={[s.topicLivePill, { backgroundColor: Colors.accentLight, marginTop: 0 }]}>
+                <View style={[s.topicLiveDot, { backgroundColor: Colors.accent }]} />
+                <Text style={[s.topicLiveText, { color: Colors.accent }]}>
+                  {lang === 'ko' ? '요청 4건' : lang === 'en' ? '4 new' : '4 baru'}
+                </Text>
+              </View>
+            </View>
+            <Text style={[s.topicHeadline, { marginTop: 4, fontSize: 15 }]} numberOfLines={1}>
+              {lang === 'ko' ? '바쁜 순간에, 더 빠른 손.'
+                : lang === 'en' ? 'Busy moments. Faster hands.'
+                : 'Saat sibuk, tangan cepat.'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={Colors.grayLight} />
+        </TouchableOpacity>
+      </View>
+
       {/* ── Category grid ── */}
       <View style={s.catSection}>
         <View style={s.catGrid}>
-          {CATEGORIES.map((cat) => (
-            <TouchableOpacity
-              key={cat.id}
-              style={s.catItem}
-              activeOpacity={0.75}
-              onPress={() => (navigation as any).navigate('Map', { expanded: true })}
-            >
-              <View style={[s.catIconWrap, { backgroundColor: cat.bgColor }]}>
-                <Image source={CAT_ICONS[cat.id]} style={s.catIconImg} resizeMode="contain" />
-              </View>
-              <Text style={s.catLabel}>{cat.label}</Text>
-            </TouchableOpacity>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const isDriver = cat.id.startsWith('driver_');
+            const driverIcon: any =
+              cat.id === 'driver_designated' ? 'moon-outline'
+              : cat.id === 'driver_daily'    ? 'sunny-outline'
+              : cat.id === 'driver_hourly'   ? 'time-outline'
+              : 'airplane-outline';
+            const onPress = () => {
+              if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
+              if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
+              (navigation as any).navigate('Map', { expanded: true });
+            };
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                style={s.catItem}
+                activeOpacity={0.75}
+                onPress={onPress}
+              >
+                <View style={[s.catIconWrap, { backgroundColor: cat.bgColor }]}>
+                  {isDriver
+                    ? <Ionicons name={driverIcon} size={26} color={Colors.dark} />
+                    : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
+                  }
+                </View>
+                <Text style={s.catLabel}>{cat.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
 
@@ -211,9 +370,16 @@ export default function HomeScreen() {
       {/* ── Recommended workers ── */}
       <View style={s.workerSection}>
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>
-            {lang === 'ko' ? '추천 헬퍼' : lang === 'en' ? 'Recommended' : 'Helper Terdekat'}
-          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.sectionEyebrow, { color: Colors.helperColor }]}>
+              {lang === 'ko' ? '추천 헬퍼' : lang === 'en' ? 'TOP HELPERS' : 'HELPER PILIHAN'}
+            </Text>
+            <Text style={s.sectionHeadline}>
+              {lang === 'ko' ? '이웃처럼 가까운,\n가족처럼 편안한.'
+                : lang === 'en' ? 'Close as neighbors.\nEasy as family.'
+                : 'Sedekat tetangga,\nsenyaman keluarga.'}
+            </Text>
+          </View>
           <TouchableOpacity onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
             <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
           </TouchableOpacity>
@@ -244,8 +410,8 @@ export default function HomeScreen() {
                 ))}
               </View>
               <View style={s.workerPriceRow}>
-                <Ionicons name="star" size={11} color="#F59E0B" />
-                <Text style={s.workerRating}>{w.rating.toFixed(1)}</Text>
+                <Ionicons name="thermometer" size={11} color="#EF4444" />
+                <Text style={s.workerRating}>{w.temperature.toFixed(1)}°</Text>
                 <Text style={s.workerPriceDot}>·</Text>
                 <Text style={s.workerPrice}>Rp {(w.pricePerHour / 1000).toFixed(0)}rb</Text>
                 <Text style={s.workerPriceUnit}>/jam</Text>
@@ -255,25 +421,142 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
-      {/* ── Ad card ── */}
-      <View style={s.adCard}>
-        <View style={s.adBadge}><Text style={s.adBadgeText}>AD</Text></View>
-        <View style={s.adContent}>
-          <Text style={s.adTitle}>{t.homeNew.adTitle}</Text>
-          <Text style={s.adSub}>{t.homeNew.adSub}</Text>
-          <TouchableOpacity style={s.adBtn} onPress={() => Alert.alert('Linka Pro', lang === 'ko' ? '프리미엄 서비스 준비 중입니다.' : lang === 'en' ? 'Premium service coming soon.' : 'Layanan premium segera hadir.')}>
-            <Text style={s.adBtnText}>{t.homeNew.adCta}</Text>
+      {/* ── Ad carousel ── */}
+      <View style={s.adWrap}>
+        <ScrollView
+          ref={adScrollRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={AD_W + 12}
+          decelerationRate="fast"
+          contentContainerStyle={s.adScrollContent}
+          onMomentumScrollEnd={(e) => {
+            adPage.current = Math.round(e.nativeEvent.contentOffset.x / (AD_W + 12));
+          }}
+        >
+          {ADS.map((ad) => (
+            <View key={ad.id} style={[s.adCard, { backgroundColor: ad.bg, borderColor: ad.border }]}>
+              <View style={[s.adBadge, { backgroundColor: ad.badge }]}>
+                <Text style={[s.adBadgeText, { color: ad.badgeColor }]}>AD</Text>
+              </View>
+              <View style={s.adContent}>
+                <Text style={s.adTitle}>{ad.title}</Text>
+                <Text style={s.adSub}>{ad.sub}</Text>
+                <TouchableOpacity
+                  style={[s.adBtn, { backgroundColor: ad.badgeColor }]}
+                  onPress={() => Alert.alert(ad.title, ad.sub)}
+                >
+                  <Text style={s.adBtnText}>{ad.cta}</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={s.adMascotWrap}>
+                <MascotFace size={56} />
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* ── Recommended drivers ── */}
+      <View style={s.tutorSection}>
+        <View style={s.sectionHeader}>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.sectionEyebrow, { color: Colors.tutorColor }]}>
+              {lang === 'ko' ? '추천 드라이버' : lang === 'en' ? 'TOP DRIVERS' : 'SOPIR PILIHAN'}
+            </Text>
+            <Text style={s.sectionHeadline}>
+              {lang === 'ko' ? '안전한 길.\n편안한 이동.'
+                : lang === 'en' ? 'Safer road.\nEasier ride.'
+                : 'Jalan aman.\nPerjalanan nyaman.'}
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('DriverBoard')}>
+            <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
           </TouchableOpacity>
         </View>
-        <View style={s.adMascotWrap}>
-          <MascotFace size={56} />
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tutorScroll}>
+          {MOCK_DRIVERS.map((driver) => {
+            const topService = driver.services[0];
+            const meta = DRIVER_SERVICE_META[topService];
+            return (
+              <TouchableOpacity
+                key={driver.id}
+                style={s.tutorCard}
+                activeOpacity={0.88}
+                onPress={() => (navigation as any).navigate('DriverDetail', { driverId: driver.id })}
+              >
+                <Image source={typeof driver.photo === "string" ? { uri: driver.photo } : driver.photo} style={s.tutorPhoto} />
+                {driver.isVerified && (
+                  <View style={s.tutorVerifyBadge}>
+                    <Ionicons name="checkmark-circle" size={14} color={Colors.accent} />
+                  </View>
+                )}
+                <Text style={s.tutorName} numberOfLines={1}>{driver.firstName}</Text>
+                <View style={[s.tutorGradeBadge, { backgroundColor: meta.bg, flexDirection: 'row', alignItems: 'center', gap: 3 }]}>
+                  <Ionicons name={meta.icon as any} size={10} color={meta.color} />
+                  <Text style={[s.tutorGradeText, { color: meta.color }]}>{driver.licenseClass}</Text>
+                </View>
+                <View style={s.tutorSubjectsRow}>
+                  {driver.drivableTypes.slice(0, 2).map((t) => (
+                    <View key={t} style={s.tutorSubjectTag}>
+                      <Text style={s.tutorSubjectText} numberOfLines={1}>{t.toUpperCase()}</Text>
+                    </View>
+                  ))}
+                </View>
+                <View style={s.tutorPriceRow}>
+                  <Ionicons name="thermometer-outline" size={11} color="#F59E0B" />
+                  <Text style={s.tutorRating}>{driver.temperature.toFixed(1)}°</Text>
+                  <Text style={s.tutorPriceDot}>·</Text>
+                  <Text style={s.tutorPrice}>Rp {(driver.pricePerHour / 1000).toFixed(0)}rb</Text>
+                  <Text style={s.tutorPriceUnit}>/jam</Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
+
+      {/* ── Errand section ── */}
+      <TouchableOpacity
+        style={s.errandBanner}
+        activeOpacity={0.88}
+        onPress={() => (navigation as any).navigate('ErrandBoard')}
+      >
+        <View style={s.errandLeft}>
+          <View style={s.errandIconWrap}>
+            <Ionicons name="bicycle" size={20} color={Colors.white} />
+          </View>
+          <View>
+            <Text style={s.errandTitle}>
+              {lang === 'ko' ? '심부름 요청하기' : lang === 'en' ? 'Request an Errand' : 'Minta Bantuan Jasa'}
+            </Text>
+            <Text style={s.errandSub}>
+              {lang === 'ko' ? '장보기·배달·줄서기 등 심부름을 맡겨보세요' : lang === 'en' ? 'Shopping, delivery, queuing & more' : 'Belanja, antar, antre & lainnya'}
+            </Text>
+          </View>
+        </View>
+        <View style={s.errandRight}>
+          <Text style={s.errandCount}>
+            {lang === 'ko' ? '헬퍼 12명 대기중' : lang === 'en' ? '12 helpers ready' : '12 helper siap'}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color={Colors.white} />
+        </View>
+      </TouchableOpacity>
 
       {/* ── Community preview ── */}
       <View style={s.communitySection}>
         <View style={s.sectionHeader}>
-          <Text style={s.sectionTitle}>{t.homeNew.popularPosts}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[s.sectionEyebrow, { color: '#F97316' }]}>
+              {t.homeNew.popularPosts.toString().toUpperCase()}
+            </Text>
+            <Text style={s.sectionHeadline}>
+              {lang === 'ko' ? '오늘의 고민.\n내일의 답.'
+                : lang === 'en' ? 'Today’s questions.\nTomorrow’s answers.'
+                : 'Pertanyaan hari ini.\nJawaban esok.'}
+            </Text>
+          </View>
           <TouchableOpacity onPress={() => (navigation as any).navigate('Community')}>
             <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
           </TouchableOpacity>
@@ -310,7 +593,30 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      <View style={{ height: 32 }} />
+      {/* ── Monthly MVP section (bottom) ── */}
+      <View style={s.mvpBackdrop}>
+        <MonthlyAwardCard
+          helper={HELPER_OF_MONTH}
+          driver={DRIVER_OF_MONTH}
+          lang={lang}
+          onPressHelper={() => navigation.navigate('WorkerDetail', { workerId: HELPER_OF_MONTH.winnerId })}
+          onPressDriver={() => (navigation as any).navigate('DriverDetail', { driverId: DRIVER_OF_MONTH.winnerId })}
+        />
+
+        {/* Linka footer */}
+        <View style={s.footer}>
+          <View style={s.footerLogoRow}>
+            <MascotFace size={24} />
+            <Text style={s.footerLogoText}>Linka</Text>
+          </View>
+          <Text style={s.footerTagline}>
+            {lang === 'ko' ? '작은 연결로 세상을 아름답게'
+              : lang === 'en' ? 'Small connections, warmer world'
+              : 'Koneksi kecil, dunia yang hangat'}
+          </Text>
+          <Text style={s.footerCopy}>© 2026 Linka</Text>
+        </View>
+      </View>
     </ScrollView>
   );
 }
@@ -322,7 +628,7 @@ const s = StyleSheet.create({
   // Header
   header: {
     backgroundColor: Colors.white,
-    paddingTop: 52, paddingHorizontal: 16, paddingBottom: 12,
+    paddingHorizontal: 16, paddingBottom: 12,
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -351,15 +657,10 @@ const s = StyleSheet.create({
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 6, paddingVertical: 11,
     borderRadius: Radius.pill,
-    borderWidth: 1.5, borderColor: Colors.borderMid,
+    borderWidth: 1.1, borderColor: Colors.accent,
     backgroundColor: Colors.white,
   },
-  svcBtnActive: {
-    borderColor: Colors.accent,
-    backgroundColor: Colors.accentLight,
-  },
-  svcBtnText:       { fontSize: 14, fontWeight: '500', color: Colors.gray },
-  svcBtnTextActive: { color: Colors.accent, fontWeight: '700' },
+  svcBtnText: { fontSize: 14, fontWeight: '500', color: Colors.dark },
 
   // Category grid
   catSection: {
@@ -370,16 +671,10 @@ const s = StyleSheet.create({
   catGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   catItem: { width: '25%', alignItems: 'center', marginBottom: 18, gap: 8 },
   catIconWrap: {
-    width: 66, height: 66, borderRadius: 33,
+    width: 64, height: 64,
+    borderRadius: 32,
     alignItems: 'center', justifyContent: 'center',
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    elevation: 2,
   },
-  catIconImg: { width: 65, height: 65, marginTop: 9 },
   catLabel: { fontSize: 11, fontWeight: '500', color: Colors.dark, textAlign: 'center', lineHeight: 15 },
 
   // Nearby banner
@@ -408,26 +703,26 @@ const s = StyleSheet.create({
   countText:   { flex: 1, fontSize: 13, color: Colors.dark },
   countBold:   { fontWeight: '700', color: Colors.accent },
 
-  // Ad card
+  // Ad carousel
+  adWrap: { marginTop: 8 },
+  adScrollContent: { paddingHorizontal: 16, gap: 12, paddingVertical: 2 },
   adCard: {
+    width: AD_W,
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: Colors.accentLight,
-    marginTop: 8, marginHorizontal: 16, borderRadius: Radius.lg,
-    padding: 16, borderWidth: 1, borderColor: Colors.accent + '30',
+    borderRadius: Radius.lg,
+    padding: 16, borderWidth: 1,
     overflow: 'hidden',
   },
   adBadge: {
     position: 'absolute', top: 10, right: 10,
-    backgroundColor: Colors.accent + '25',
     borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2,
   },
-  adBadgeText: { fontSize: 10, fontWeight: '700', color: Colors.accent },
+  adBadgeText: { fontSize: 10, fontWeight: '700' },
   adContent: { flex: 1, gap: 4 },
   adTitle: { fontSize: 15, fontWeight: '700', color: Colors.dark },
   adSub:   { fontSize: 12, color: Colors.gray },
   adBtn: {
     alignSelf: 'flex-start', marginTop: 8,
-    backgroundColor: Colors.accent,
     borderRadius: Radius.pill,
     paddingHorizontal: 14, paddingVertical: 7,
   },
@@ -462,6 +757,47 @@ const s = StyleSheet.create({
   workerPrice:     { fontSize: 11, fontWeight: '700', color: Colors.accent },
   workerPriceUnit: { fontSize: 10, color: Colors.grayLight },
 
+  // Tutor section
+  tutorSection: {
+    backgroundColor: Colors.white, marginTop: 8,
+    paddingTop: 16, paddingBottom: 8,
+    borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
+  },
+  tutorScroll: { paddingHorizontal: 16, gap: 10, paddingBottom: 4, paddingTop: 10 },
+  tutorCard: {
+    width: 130, backgroundColor: Colors.white,
+    borderRadius: Radius.lg, borderWidth: 1, borderColor: Colors.border,
+    padding: 12, gap: 5, alignItems: 'center', ...Shadow.sm,
+  },
+  tutorPhoto:       { width: 56, height: 56, borderRadius: 28, marginBottom: 2 },
+  tutorVerifyBadge: { position: 'absolute', top: 10, right: 10 },
+  tutorName:        { fontSize: 13, fontWeight: '700', color: Colors.dark, textAlign: 'center' },
+  tutorGradeBadge:  { backgroundColor: '#CCE8FF', borderRadius: 6, paddingHorizontal: 7, paddingVertical: 2 },
+  tutorGradeText:   { fontSize: 10, fontWeight: '600', color: '#1D4ED8' },
+  tutorSubjectsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, justifyContent: 'center' },
+  tutorSubjectTag:  { backgroundColor: Colors.section, borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 },
+  tutorSubjectText: { fontSize: 9, color: Colors.gray },
+  tutorPriceRow:    { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: 2 },
+  tutorRating:      { fontSize: 11, fontWeight: '600', color: Colors.dark },
+  tutorPriceDot:    { fontSize: 10, color: Colors.grayLight, marginHorizontal: 2 },
+  tutorPrice:       { fontSize: 11, fontWeight: '700', color: '#3B82F6' },
+  tutorPriceUnit:   { fontSize: 10, color: Colors.grayLight },
+
+  // Errand banner
+  errandBanner: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#F97316',
+    marginHorizontal: 16, marginTop: 10,
+    borderRadius: Radius.lg,
+    paddingHorizontal: 16, paddingVertical: 14,
+  },
+  errandLeft:    { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  errandIconWrap:{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
+  errandTitle:   { fontSize: 14, fontWeight: '700', color: Colors.white, marginBottom: 2 },
+  errandSub:     { fontSize: 11, color: 'rgba(255,255,255,0.8)' },
+  errandRight:   { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  errandCount:   { fontSize: 11, fontWeight: '600', color: 'rgba(255,255,255,0.9)' },
+
   // Community
   communitySection: {
     backgroundColor: Colors.white, marginTop: 8,
@@ -469,9 +805,13 @@ const s = StyleSheet.create({
     borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
   },
   sectionHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingHorizontal: 16, marginBottom: 4,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
+    paddingHorizontal: 16, marginBottom: 8, gap: 12,
   },
+  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  sectionTagline:  { fontSize: 11, color: Colors.grayLight, marginTop: 2, fontWeight: '500', letterSpacing: -0.1 },
+  sectionEyebrow:  { fontSize: 10, fontWeight: '800', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 },
+  sectionHeadline: { fontSize: 18, fontWeight: '800', letterSpacing: -0.4, color: Colors.dark, lineHeight: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.dark },
   sectionCount: { fontSize: 12, color: Colors.gray },
   seeAll: { fontSize: 13, color: Colors.gray },
@@ -496,4 +836,146 @@ const s = StyleSheet.create({
   postMetaRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   postMetaNum:   { fontSize: 11, color: Colors.grayLight },
 
+  // 3 Topics hero
+  topicsSection: {
+    paddingHorizontal: 16, paddingTop: 20, paddingBottom: 16,
+    backgroundColor: Colors.white,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+    marginTop: 10,
+  },
+  topicsHeader: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    marginBottom: 14,
+  },
+  topicsAccent: {
+    width: 3, height: 16, borderRadius: 2,
+    backgroundColor: Colors.accent,
+  },
+  topicsLead: {
+    fontSize: 16, fontWeight: '800', color: Colors.dark,
+    letterSpacing: -0.3,
+  },
+  topicsRow: {
+    flexDirection: 'row', gap: 10,
+  },
+  topicCard: {
+    flex: 1,
+    borderRadius: 20,
+    paddingVertical: 18, paddingHorizontal: 16,
+    backgroundColor: Colors.white,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    overflow: 'hidden',
+    position: 'relative',
+    minHeight: 160,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  topicBlob: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  topicWideBlob: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  topicBlobClip: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  topicWideCard: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: Colors.white,
+    borderRadius: 18,
+    paddingVertical: 16, paddingHorizontal: 16,
+    marginTop: 10,
+    borderWidth: 1, borderColor: Colors.border,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  topicIconWrap: {
+    width: 42, height: 42, borderRadius: 21,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 10,
+    backgroundColor: Colors.accentLight,
+  },
+  topicIconLarge: {
+    width: 48, height: 48, borderRadius: 24,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 12,
+  },
+  topicLabelLarge: {
+    fontSize: 16, fontWeight: '800', letterSpacing: -0.3,
+    color: Colors.dark,
+    marginBottom: 4,
+  },
+  topicSubLarge: {
+    fontSize: 11, color: Colors.gray,
+    lineHeight: 16,
+    marginBottom: 'auto' as any,
+  },
+  topicEyebrow: {
+    fontSize: 10, fontWeight: '800', letterSpacing: 0.8,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  topicHeadline: {
+    fontSize: 15, fontWeight: '800', letterSpacing: -0.3,
+    color: Colors.dark, lineHeight: 20,
+    marginBottom: 'auto' as any,
+  },
+  topicLivePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8, paddingVertical: 4,
+    borderRadius: 999,
+    marginTop: 10,
+  },
+  topicLiveDot: {
+    width: 6, height: 6, borderRadius: 3,
+  },
+  topicLiveText: {
+    fontSize: 11, fontWeight: '700', letterSpacing: -0.2,
+  },
+  topicWideTitleRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    gap: 8,
+  },
+  topicLabel: {
+    fontSize: 14, fontWeight: '800', letterSpacing: -0.2,
+    marginBottom: 2,
+    color: Colors.dark,
+  },
+  topicSub: {
+    fontSize: 11, color: Colors.gray,
+    lineHeight: 15,
+  },
+  topicChevron: {
+    position: 'absolute', bottom: 12, right: 12,
+    width: 20, height: 20,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  // MVP bottom section
+  mvpBackdrop: {
+    marginTop: 8,
+    paddingTop: 8, paddingBottom: 32,
+    backgroundColor: Colors.white,
+    borderTopWidth: 1, borderTopColor: Colors.border,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingTop: 4,
+    gap: 3,
+  },
+  footerLogoRow:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  footerLogoText: { fontFamily: 'Nunito_900Black', fontSize: 16, color: Colors.accent, letterSpacing: -0.3 },
+  footerTagline:  { fontSize: 11, color: Colors.gray, fontWeight: '600', marginTop: 2 },
+  footerCopy:     { fontSize: 10, color: Colors.grayLight, marginTop: 4 },
 });

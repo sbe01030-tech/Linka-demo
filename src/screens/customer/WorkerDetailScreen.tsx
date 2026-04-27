@@ -5,12 +5,19 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
+import { getMonthlyAwardBadge } from '../../constants/monthlyAwards';
+import { MvpMiniBadge } from '../../components/common/MonthlyAwardCard';
 import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3 } from '../../constants/photos';
 import { RootStackParamList, Worker } from '../../types';
 import { useLanguageStore } from '../../store/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WorkerDetail'>;
+
+/** 평점과 누적 주문 기반 Linka 온도 추정치 (목업) */
+const computeTemp = (rating: number, totalJobs: number) =>
+  Math.max(36.5, Math.min(99, 36.5 + (rating - 4.5) * 18 + Math.sqrt(totalJobs) * 1.5));
 
 // Same mock data as HomeScreen
 const MOCK_WORKERS: Worker[] = [
@@ -86,6 +93,52 @@ const MOCK_WORKERS: Worker[] = [
     skills: ['Setrika', 'Cuci', 'Laundry Kilat'],
     isAvailable: false, rating: 4.8, totalJobs: 302, isVerified: true, experienceYears: 7,
   },
+  // ── Tutors ────────────────────────────────────────────────────
+  {
+    id: 't1', name: 'Budi Santoso', phone: '0821-1111-2222', role: 'tutor', serviceType: 'tutor',
+    photo: W1,
+    pricePerHour: 80000,
+    location: 'Menteng, Jakarta Pusat',
+    bio: 'Lulusan ITB jurusan Matematika. Sudah 6 tahun mengajar privat, khusus SMP–SMA. Metode belajar menyenangkan, sabar, dan fokus pada pemahaman konsep dasar.',
+    subjects: ['Matematika', 'Fisika', 'Kimia'],
+    isAvailable: true, rating: 5.0, totalJobs: 52, isVerified: true, experienceYears: 6,
+  },
+  {
+    id: 't2', name: 'Lisa Permata', phone: '0821-3333-4444', role: 'tutor', serviceType: 'tutor',
+    photo: W2,
+    pricePerHour: 70000,
+    location: 'Kemang, Jakarta Selatan',
+    bio: 'Native-like English speaker, lulusan S2 Linguistik UI. Pengalaman mengajar konversasi, grammar, IELTS, dan TOEFL. Cocok untuk semua usia.',
+    subjects: ['Bahasa Inggris', 'IELTS', 'TOEFL'],
+    isAvailable: true, rating: 4.9, totalJobs: 38, isVerified: true, experienceYears: 5,
+  },
+  {
+    id: 't3', name: 'Hendra Wijaya', phone: '0821-5555-6666', role: 'tutor', serviceType: 'tutor',
+    photo: W3,
+    pricePerHour: 100000,
+    location: 'Senayan, Jakarta Selatan',
+    bio: 'Mantan guru SMA unggulan, kini full-time tutor privat. Spesialis persiapan SNBT dan olimpiade Sains. Murid berhasil masuk UI, ITB, dan UNPAD.',
+    subjects: ['Kimia', 'Biologi', 'Persiapan SNBT'],
+    isAvailable: true, rating: 4.8, totalJobs: 29, isVerified: true, experienceYears: 9,
+  },
+  {
+    id: 't4', name: 'Anisa Rahayu', phone: '0821-7777-8888', role: 'tutor', serviceType: 'tutor',
+    photo: W4,
+    pricePerHour: 65000,
+    location: 'Tebet, Jakarta Selatan',
+    bio: 'Ahli matematika SD–SMP. Menggunakan metode visual dan permainan agar anak tidak takut matematika. Sudah membimbing 60+ murid.',
+    subjects: ['Matematika SD', 'Matematika SMP'],
+    isAvailable: true, rating: 4.9, totalJobs: 61, isVerified: true, experienceYears: 4,
+  },
+  {
+    id: 't5', name: 'Rizky Pratama', phone: '0821-9999-0000', role: 'tutor', serviceType: 'tutor',
+    photo: W5,
+    pricePerHour: 90000,
+    location: 'Kelapa Gading, Jakarta Utara',
+    bio: 'Certified IELTS instructor dengan skor IELTS 8.5. Fokus pada persiapan IELTS, TOEFL iBT, dan beasiswa luar negeri. Metode intensif & efisien.',
+    subjects: ['Bahasa Inggris', 'IELTS', 'Beasiswa'],
+    isAvailable: true, rating: 4.7, totalJobs: 18, isVerified: true, experienceYears: 3,
+  },
 ];
 
 const MOCK_REVIEWS = [
@@ -97,6 +150,7 @@ const MOCK_REVIEWS = [
 export default function WorkerDetailScreen({ navigation, route }: Props) {
   const { workerId } = route.params;
   const { t } = useLanguageStore();
+  const insets = useSafeAreaInsets();
   const worker = MOCK_WORKERS.find((w) => w.id === workerId) ?? MOCK_WORKERS[0];
   const [duration, setDuration] = useState(4);
 
@@ -108,21 +162,14 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
   const isTutor = worker.serviceType === 'tutor';
 
   const handleBook = () => {
-    Alert.alert(
-      t.workerDetail.confirmTitle,
-      t.workerDetail.confirmMsg,
-      [
-        { text: t.profile.cancel, style: 'cancel' },
-        {
-          text: t.workerDetail.confirmBook,
-          onPress: () => {
-            Alert.alert(t.workerDetail.bookSuccess, t.workerDetail.bookSuccessMsg, [
-              { text: 'OK', onPress: () => navigation.goBack() },
-            ]);
-          },
-        },
-      ]
-    );
+    navigation.navigate('Booking', {
+      workerId:     worker.id,
+      workerName:   worker.name,
+      workerPhoto:  worker.photo,
+      pricePerHour: worker.pricePerHour,
+      serviceType:  worker.serviceType,
+      pricePerDay:  worker.pricePerDay,
+    });
   };
 
   const handleChat = () => {
@@ -137,13 +184,13 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
   return (
     <View style={s.root}>
       {/* Back button overlay */}
-      <TouchableOpacity style={s.backBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={[s.backBtn, { top: insets.top + 6 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={24} color={Colors.dark} />
       </TouchableOpacity>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero — photo + identity */}
-        <View style={s.hero}>
+        <View style={[s.hero, { paddingTop: insets.top + 34 }]}>
           {worker.photo ? (
             <Image source={{ uri: worker.photo }} style={s.heroPhoto} />
           ) : (
@@ -157,6 +204,7 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
               {worker.isVerified && (
                 <Ionicons name="checkmark-circle" size={18} color={Colors.accent} />
               )}
+              {getMonthlyAwardBadge(worker.id) && <MvpMiniBadge role="helper" />}
             </View>
             <View style={s.heroMeta}>
               <Ionicons name="location-outline" size={13} color={Colors.grayLight} />
@@ -191,12 +239,12 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
         <View style={s.statsCard}>
           {[
             { label: t.workerDetail.jobsDone, value: `${worker.totalJobs}` },
-            { label: t.workerHome.rating,     value: `${worker.rating}` },
+            { label: 'Suhu Linka',            value: `${computeTemp(worker.rating ?? 4.5, worker.totalJobs ?? 0).toFixed(1)}°C`, isTemp: true },
             { label: t.workerDetail.expYears, value: `${worker.experienceYears}` },
           ].map((stat, i, arr) => (
             <React.Fragment key={stat.label}>
               <View style={s.statCol}>
-                <Text style={s.statValue}>{stat.value}</Text>
+                <Text style={[s.statValue, stat.isTemp && { color: '#EF4444' }]}>{stat.value}</Text>
                 <Text style={s.statLabel}>{stat.label}</Text>
               </View>
               {i < arr.length - 1 && <View style={s.statDivider} />}
@@ -332,7 +380,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: Colors.white },
 
   backBtn: {
-    position: 'absolute', top: 52, left: 16, zIndex: 10,
+    position: 'absolute', left: 16, zIndex: 10,
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: Colors.white,
     alignItems: 'center', justifyContent: 'center',
@@ -341,7 +389,7 @@ const s = StyleSheet.create({
 
   // Hero
   hero: {
-    paddingTop: 80, paddingHorizontal: 20, paddingBottom: 20,
+    paddingHorizontal: 20, paddingBottom: 20,
     flexDirection: 'row', gap: 16, alignItems: 'flex-start',
     borderBottomWidth: 1, borderBottomColor: Colors.border,
   },

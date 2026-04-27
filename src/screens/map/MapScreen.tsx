@@ -14,12 +14,13 @@ import { useLanguageStore } from '../../store/languageStore';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, CustomerTabParamList } from '../../types';
-import { W1, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12 } from '../../constants/photos';
+import { W1, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12, D7, D8, D9, D10, D11 } from '../../constants/photos';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-type SvcType  = 'regular' | 'onetime' | 'live-in';
-type ExpLevel = 'all' | '1y' | '3y' | '5y';
-type SortBy   = 'rating' | 'price_low' | 'price_high' | 'reviews';
+type SvcType       = 'regular' | 'onetime' | 'live-in';
+type ExpLevel      = 'all' | '1y' | '3y' | '5y';
+type SortBy        = 'rating' | 'price_low' | 'price_high' | 'reviews';
+type PartnerFilter = 'all' | 'helper' | 'driver';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const EXPANDED_H = SCREEN_H * 0.72;
@@ -29,36 +30,49 @@ interface Partner {
   id: string; name: string; firstName: string;
   lat: number; lng: number;
   rating: number; pricePerHour: number; isAvailable: boolean;
-  photo: string; location: string; totalJobs: number;
+  photo: string | number; location: string; totalJobs: number;
   serviceFrequency: 'regular' | 'special' | 'both';
   skills: string[]; experienceYears: number; isVerified: boolean;
+  partnerType: 'helper' | 'driver';
+  driverServices?: string[];
+  licenseClass?: string;
 }
+
+// URL 문자열 또는 local require (number) 둘 다 받아서 Image source로 변환
+const imgSrc = (p: string | number | undefined): any =>
+  typeof p === 'string' ? { uri: p } : p;
 
 // ── Demo cluster center (Kebayoran Baru, South Jakarta) ─────────
 // For internal preview: always shows the dense cluster regardless of GPS
 const DEMO_REGION = { latitude: -6.2488, longitude: 106.8052, latitudeDelta: 0.010, longitudeDelta: 0.010 };
 
 const MOCK_PARTNERS: Partner[] = [
-  { id:'p1',  name:'Sari Dewi',        firstName:'Sari',    lat:-6.2440, lng:106.8022, rating:5.0, pricePerHour:30000, isAvailable:true,  photo:W1,  location:'Kebayoran Baru', totalJobs:312, serviceFrequency:'regular', skills:['Beberes','Masak','Cuci'],      experienceYears:10, isVerified:true  },
-  { id:'p2',  name:'Rina Wulandari',   firstName:'Rina',    lat:-6.2465, lng:106.8058, rating:4.9, pricePerHour:25000, isAvailable:true,  photo:W2,  location:'Kebayoran Baru', totalJobs:198, serviceFrequency:'regular', skills:['Masak Sehat','Beberes'],       experienceYears:7,  isVerified:true  },
-  { id:'p3',  name:'Dewi Anggraeni',   firstName:'Dewi',    lat:-6.2492, lng:106.8072, rating:4.7, pricePerHour:28000, isAvailable:true,  photo:W3,  location:'Kemang',         totalJobs:143, serviceFrequency:'both',    skills:['Masak','Cuci'],                experienceYears:5,  isVerified:true  },
-  { id:'p4',  name:'Fitri Handayani',  firstName:'Fitri',   lat:-6.2512, lng:106.8036, rating:4.9, pricePerHour:27000, isAvailable:true,  photo:W4,  location:'Pesanggrahan',   totalJobs:227, serviceFrequency:'regular', skills:['Setrika','Beberes'],           experienceYears:8,  isVerified:true  },
-  { id:'p5',  name:'Indah Lestari',    firstName:'Indah',   lat:-6.2530, lng:106.8088, rating:4.8, pricePerHour:35000, isAvailable:false, photo:W5,  location:'Pondok Indah',   totalJobs:89,  serviceFrequency:'special', skills:['Deep Cleaning'],               experienceYears:3,  isVerified:true  },
-  { id:'p6',  name:'Nurul Hidayah',    firstName:'Nurul',   lat:-6.2458, lng:106.8098, rating:4.8, pricePerHour:24000, isAvailable:true,  photo:W6,  location:'Kebayoran Baru', totalJobs:89,  serviceFrequency:'special', skills:['Cuci','Setrika'],              experienceYears:6,  isVerified:true  },
-  { id:'p7',  name:'Sri Mulyani',      firstName:'Sri',     lat:-6.2480, lng:106.8012, rating:4.6, pricePerHour:23000, isAvailable:true,  photo:W7,  location:'Cilandak',       totalJobs:64,  serviceFrequency:'regular', skills:['Masak','Cuci'],                experienceYears:5,  isVerified:false },
-  { id:'p8',  name:'Ratna Sari',       firstName:'Ratna',   lat:-6.2522, lng:106.8062, rating:4.9, pricePerHour:25000, isAvailable:true,  photo:W8,  location:'Kebayoran Baru', totalJobs:112, serviceFrequency:'both',    skills:['Beberes','Setrika'],           experienceYears:7,  isVerified:true  },
-  { id:'p9',  name:'Wulan Sari',       firstName:'Wulan',   lat:-6.2447, lng:106.8078, rating:5.0, pricePerHour:26000, isAvailable:false, photo:W9,  location:'Pondok Indah',   totalJobs:201, serviceFrequency:'regular', skills:['Masak','Beberes'],             experienceYears:9,  isVerified:true  },
-  { id:'p10', name:'Mega Putri',       firstName:'Mega',    lat:-6.2505, lng:106.8046, rating:4.7, pricePerHour:22000, isAvailable:true,  photo:W10, location:'Pesanggrahan',   totalJobs:77,  serviceFrequency:'special', skills:['Cuci','Deep Cleaning'],        experienceYears:2,  isVerified:false },
-  { id:'p11', name:'Lina Kartini',     firstName:'Lina',    lat:-6.2470, lng:106.8032, rating:4.8, pricePerHour:26000, isAvailable:true,  photo:W11, location:'Kebayoran Baru', totalJobs:134, serviceFrequency:'regular', skills:['Beberes','Cuci'],              experienceYears:6,  isVerified:true  },
-  { id:'p12', name:'Aisyah Putri',     firstName:'Aisyah',  lat:-6.2496, lng:106.8091, rating:4.9, pricePerHour:29000, isAvailable:true,  photo:W12, location:'Kemang',         totalJobs:176, serviceFrequency:'both',    skills:['Masak','Beberes','Setrika'],   experienceYears:8,  isVerified:true  },
-  { id:'p13', name:'Yuni Rahayu',      firstName:'Yuni',    lat:-6.2460, lng:106.8052, rating:4.6, pricePerHour:21000, isAvailable:true,  photo:W3,  location:'Cilandak',       totalJobs:55,  serviceFrequency:'special', skills:['Cuci','Setrika'],              experienceYears:3,  isVerified:false },
-  { id:'p14', name:'Hana Pratiwi',     firstName:'Hana',    lat:-6.2535, lng:106.8022, rating:4.9, pricePerHour:32000, isAvailable:true,  photo:W5,  location:'Pondok Indah',   totalJobs:248, serviceFrequency:'regular', skills:['Masak Sehat','Deep Cleaning'], experienceYears:11, isVerified:true  },
-  { id:'p15', name:'Reni Susanti',     firstName:'Reni',    lat:-6.2475, lng:106.8068, rating:4.7, pricePerHour:24000, isAvailable:false, photo:W7,  location:'Kebayoran Baru', totalJobs:92,  serviceFrequency:'both',    skills:['Beberes','Masak'],             experienceYears:4,  isVerified:true  },
-  { id:'p16', name:'Tutik Wahyuni',    firstName:'Tutik',   lat:-6.2500, lng:106.8082, rating:4.8, pricePerHour:27000, isAvailable:true,  photo:W9,  location:'Pesanggrahan',   totalJobs:163, serviceFrequency:'regular', skills:['Setrika','Cuci','Beberes'],    experienceYears:7,  isVerified:true  },
-  { id:'p17', name:'Mira Handayani',   firstName:'Mira',    lat:-6.2450, lng:106.8040, rating:5.0, pricePerHour:33000, isAvailable:true,  photo:W1,  location:'Kebayoran Baru', totalJobs:289, serviceFrequency:'regular', skills:['Masak','Beberes','Cuci'],      experienceYears:12, isVerified:true  },
-  { id:'p18', name:'Novi Anggraini',   firstName:'Novi',    lat:-6.2518, lng:106.8014, rating:4.6, pricePerHour:22000, isAvailable:true,  photo:W4,  location:'Cilandak',       totalJobs:48,  serviceFrequency:'special', skills:['Deep Cleaning','Cuci'],        experienceYears:2,  isVerified:false },
-  { id:'p19', name:'Desi Kurniawati',  firstName:'Desi',    lat:-6.2485, lng:106.8056, rating:4.8, pricePerHour:28000, isAvailable:true,  photo:W6,  location:'Kemang',         totalJobs:121, serviceFrequency:'both',    skills:['Masak','Setrika'],             experienceYears:6,  isVerified:true  },
-  { id:'p20', name:'Ayu Puspita',      firstName:'Ayu',     lat:-6.2442, lng:106.8092, rating:4.9, pricePerHour:31000, isAvailable:false, photo:W2,  location:'Pondok Indah',   totalJobs:187, serviceFrequency:'regular', skills:['Masak Sehat','Beberes'],       experienceYears:9,  isVerified:true  },
+  { id:'p1',  name:'Sari Dewi',        firstName:'Sari',    lat:-6.2440, lng:106.8022, rating:5.0, pricePerHour:30000, isAvailable:true,  photo:W1,  location:'Kebayoran Baru', totalJobs:312, serviceFrequency:'regular', skills:['Beberes','Masak','Cuci'],      experienceYears:10, isVerified:true,  partnerType:'helper' },
+  { id:'p2',  name:'Rina Wulandari',   firstName:'Rina',    lat:-6.2465, lng:106.8058, rating:4.9, pricePerHour:25000, isAvailable:true,  photo:W2,  location:'Kebayoran Baru', totalJobs:198, serviceFrequency:'regular', skills:['Masak Sehat','Beberes'],       experienceYears:7,  isVerified:true,  partnerType:'helper' },
+  { id:'p3',  name:'Dewi Anggraeni',   firstName:'Dewi',    lat:-6.2492, lng:106.8072, rating:4.7, pricePerHour:28000, isAvailable:true,  photo:W3,  location:'Kemang',         totalJobs:143, serviceFrequency:'both',    skills:['Masak','Cuci'],                experienceYears:5,  isVerified:true,  partnerType:'helper' },
+  { id:'p4',  name:'Fitri Handayani',  firstName:'Fitri',   lat:-6.2512, lng:106.8036, rating:4.9, pricePerHour:27000, isAvailable:true,  photo:W4,  location:'Pesanggrahan',   totalJobs:227, serviceFrequency:'regular', skills:['Setrika','Beberes'],           experienceYears:8,  isVerified:true,  partnerType:'helper' },
+  { id:'p5',  name:'Indah Lestari',    firstName:'Indah',   lat:-6.2530, lng:106.8088, rating:4.8, pricePerHour:35000, isAvailable:false, photo:W5,  location:'Pondok Indah',   totalJobs:89,  serviceFrequency:'special', skills:['Deep Cleaning'],               experienceYears:3,  isVerified:true,  partnerType:'helper' },
+  { id:'p6',  name:'Nurul Hidayah',    firstName:'Nurul',   lat:-6.2458, lng:106.8098, rating:4.8, pricePerHour:24000, isAvailable:true,  photo:W6,  location:'Kebayoran Baru', totalJobs:89,  serviceFrequency:'special', skills:['Cuci','Setrika'],              experienceYears:6,  isVerified:true,  partnerType:'helper' },
+  { id:'p7',  name:'Sri Mulyani',      firstName:'Sri',     lat:-6.2480, lng:106.8012, rating:4.6, pricePerHour:23000, isAvailable:true,  photo:W7,  location:'Cilandak',       totalJobs:64,  serviceFrequency:'regular', skills:['Masak','Cuci'],                experienceYears:5,  isVerified:false, partnerType:'helper' },
+  { id:'p8',  name:'Ratna Sari',       firstName:'Ratna',   lat:-6.2522, lng:106.8062, rating:4.9, pricePerHour:25000, isAvailable:true,  photo:W8,  location:'Kebayoran Baru', totalJobs:112, serviceFrequency:'both',    skills:['Beberes','Setrika'],           experienceYears:7,  isVerified:true,  partnerType:'helper' },
+  { id:'p9',  name:'Wulan Sari',       firstName:'Wulan',   lat:-6.2447, lng:106.8078, rating:5.0, pricePerHour:26000, isAvailable:false, photo:W9,  location:'Pondok Indah',   totalJobs:201, serviceFrequency:'regular', skills:['Masak','Beberes'],             experienceYears:9,  isVerified:true,  partnerType:'helper' },
+  { id:'p10', name:'Mega Putri',       firstName:'Mega',    lat:-6.2505, lng:106.8046, rating:4.7, pricePerHour:22000, isAvailable:true,  photo:W10, location:'Pesanggrahan',   totalJobs:77,  serviceFrequency:'special', skills:['Cuci','Deep Cleaning'],        experienceYears:2,  isVerified:false, partnerType:'helper' },
+  { id:'p11', name:'Lina Kartini',     firstName:'Lina',    lat:-6.2470, lng:106.8032, rating:4.8, pricePerHour:26000, isAvailable:true,  photo:W11, location:'Kebayoran Baru', totalJobs:134, serviceFrequency:'regular', skills:['Beberes','Cuci'],              experienceYears:6,  isVerified:true,  partnerType:'helper' },
+  { id:'p12', name:'Aisyah Putri',     firstName:'Aisyah',  lat:-6.2496, lng:106.8091, rating:4.9, pricePerHour:29000, isAvailable:true,  photo:W12, location:'Kemang',         totalJobs:176, serviceFrequency:'both',    skills:['Masak','Beberes','Setrika'],   experienceYears:8,  isVerified:true,  partnerType:'helper' },
+  { id:'p13', name:'Yuni Rahayu',      firstName:'Yuni',    lat:-6.2460, lng:106.8052, rating:4.6, pricePerHour:21000, isAvailable:true,  photo:W3,  location:'Cilandak',       totalJobs:55,  serviceFrequency:'special', skills:['Cuci','Setrika'],              experienceYears:3,  isVerified:false, partnerType:'helper' },
+  { id:'p14', name:'Hana Pratiwi',     firstName:'Hana',    lat:-6.2535, lng:106.8022, rating:4.9, pricePerHour:32000, isAvailable:true,  photo:W5,  location:'Pondok Indah',   totalJobs:248, serviceFrequency:'regular', skills:['Masak Sehat','Deep Cleaning'], experienceYears:11, isVerified:true,  partnerType:'helper' },
+  { id:'p15', name:'Reni Susanti',     firstName:'Reni',    lat:-6.2475, lng:106.8068, rating:4.7, pricePerHour:24000, isAvailable:false, photo:W7,  location:'Kebayoran Baru', totalJobs:92,  serviceFrequency:'both',    skills:['Beberes','Masak'],             experienceYears:4,  isVerified:true,  partnerType:'helper' },
+  { id:'p16', name:'Tutik Wahyuni',    firstName:'Tutik',   lat:-6.2500, lng:106.8082, rating:4.8, pricePerHour:27000, isAvailable:true,  photo:W9,  location:'Pesanggrahan',   totalJobs:163, serviceFrequency:'regular', skills:['Setrika','Cuci','Beberes'],    experienceYears:7,  isVerified:true,  partnerType:'helper' },
+  { id:'p17', name:'Mira Handayani',   firstName:'Mira',    lat:-6.2450, lng:106.8040, rating:5.0, pricePerHour:33000, isAvailable:true,  photo:W1,  location:'Kebayoran Baru', totalJobs:289, serviceFrequency:'regular', skills:['Masak','Beberes','Cuci'],      experienceYears:12, isVerified:true,  partnerType:'helper' },
+  { id:'p18', name:'Novi Anggraini',   firstName:'Novi',    lat:-6.2518, lng:106.8014, rating:4.6, pricePerHour:22000, isAvailable:true,  photo:W4,  location:'Cilandak',       totalJobs:48,  serviceFrequency:'special', skills:['Deep Cleaning','Cuci'],        experienceYears:2,  isVerified:false, partnerType:'helper' },
+  { id:'p19', name:'Desi Kurniawati',  firstName:'Desi',    lat:-6.2485, lng:106.8056, rating:4.8, pricePerHour:28000, isAvailable:true,  photo:W6,  location:'Kemang',         totalJobs:121, serviceFrequency:'both',    skills:['Masak','Setrika'],             experienceYears:6,  isVerified:true,  partnerType:'helper' },
+  { id:'p20', name:'Ayu Puspita',      firstName:'Ayu',     lat:-6.2442, lng:106.8092, rating:4.9, pricePerHour:31000, isAvailable:false, photo:W2,  location:'Pondok Indah',   totalJobs:187, serviceFrequency:'regular', skills:['Masak Sehat','Beberes'],       experienceYears:9,  isVerified:true,  partnerType:'helper' },
+  // ── Drivers (고객 차량 운전 서비스) ───────────────────────────
+  { id:'d1',  name:'Rahmat Hidayat',   firstName:'Rahmat',  lat:-6.2444, lng:106.8050, rating:5.0, pricePerHour:55000,  isAvailable:true,  photo:D7,  location:'Kebayoran Baru', totalJobs:284, serviceFrequency:'both',    skills:['Sedan','SUV','MPV'],           experienceYears:8,  isVerified:true,  partnerType:'driver', driverServices:['designated','daily','airport'], licenseClass:'SIM A' },
+  { id:'d2',  name:'Budi Setiawan',    firstName:'Budi',    lat:-6.2478, lng:106.8032, rating:4.9, pricePerHour:50000,  isAvailable:true,  photo:D8,  location:'Menteng',        totalJobs:192, serviceFrequency:'regular', skills:['Sedan','SUV'],                 experienceYears:6,  isVerified:true,  partnerType:'driver', driverServices:['designated','hourly','commute'], licenseClass:'SIM A' },
+  { id:'d3',  name:'Joko Susanto',     firstName:'Joko',    lat:-6.2510, lng:106.8018, rating:4.8, pricePerHour:45000,  isAvailable:true,  photo:D9,  location:'Cilandak',       totalJobs:156, serviceFrequency:'both',    skills:['Sedan','SUV','MPV','Van'],     experienceYears:10, isVerified:true,  partnerType:'driver', driverServices:['daily','intercity','event'], licenseClass:'SIM A Umum' },
+  { id:'d4',  name:'Ari Wibowo',       firstName:'Ari',     lat:-6.2498, lng:106.8084, rating:4.9, pricePerHour:60000,  isAvailable:true,  photo:D10, location:'Kemang',         totalJobs:221, serviceFrequency:'both',    skills:['Sedan','SUV','MPV'],           experienceYears:7,  isVerified:true,  partnerType:'driver', driverServices:['designated','airport','event'], licenseClass:'SIM A' },
+  { id:'d5',  name:'Agus Setiawan',    firstName:'Agus',    lat:-6.2520, lng:106.8040, rating:4.9, pricePerHour:52000,  isAvailable:true,  photo:D11, location:'Fatmawati',      totalJobs:178, serviceFrequency:'both',    skills:['Sedan','MPV','Van'],           experienceYears:9,  isVerified:true,  partnerType:'driver', driverServices:['daily','intercity','airport'], licenseClass:'SIM A Umum' },
 ];
 
 const MAP_STYLE = [
@@ -147,6 +161,7 @@ export default function MapScreen() {
   const detailAnim  = useRef(new Animated.Value(0)).current;
 
   // ── Filter state ─────────────────────────────────────────────
+  const [partnerFilter, setPartnerFilter]      = useState<PartnerFilter>('all');
   const [serviceType, setServiceType]         = useState<SvcType | null>(null);
   const [selectedActivities, setSelectedAct]  = useState<string[]>([]);
   const [verifiedOnly, setVerifiedOnly]        = useState(false);
@@ -217,6 +232,8 @@ export default function MapScreen() {
   const filtered = useMemo(() => {
     let list = [...MOCK_PARTNERS];
 
+    if (partnerFilter !== 'all') list = list.filter((p) => p.partnerType === partnerFilter);
+
     if (search) list = list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.location.toLowerCase().includes(search.toLowerCase()));
 
     if (serviceType === 'regular') list = list.filter((p) => p.serviceFrequency === 'regular' || p.serviceFrequency === 'both');
@@ -241,7 +258,7 @@ export default function MapScreen() {
     else if (sortBy === 'reviews')     list.sort((a, b) => b.totalJobs - a.totalJobs);
 
     return list;
-  }, [search, serviceType, availableOnly, verifiedOnly, expLevel, selectedActivities, sortBy]);
+  }, [search, partnerFilter, serviceType, availableOnly, verifiedOnly, expLevel, selectedActivities, sortBy]);
 
   const actActive  = selectedActivities.length > 0;
   const condActive = serviceType !== null;
@@ -294,15 +311,12 @@ export default function MapScreen() {
           onPress={() => selected && hideDetail()}
         >
           {filtered.map((p) => (
-            <Marker
+            <PartnerMarker
               key={p.id}
-              coordinate={{ latitude: p.lat, longitude: p.lng }}
+              partner={p}
+              selected={selected?.id === p.id}
               onPress={() => showDetail(p)}
-              anchor={{ x: 0.5, y: 1 }}
-              tracksViewChanges={false}
-            >
-              <PhotoMarker partner={p} selected={selected?.id === p.id} />
-            </Marker>
+            />
           ))}
         </MapView>
       )}
@@ -383,6 +397,16 @@ export default function MapScreen() {
 
           {/* Filter chips */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.peekFilterRow}>
+            {/* Partner type toggle */}
+            <TouchableOpacity style={[s.peekToggleChip, partnerFilter === 'helper' && s.peekToggleOn]} onPress={() => setPartnerFilter((v) => v === 'helper' ? 'all' : 'helper')} activeOpacity={0.75}>
+              <Ionicons name="home-outline" size={11} color={partnerFilter === 'helper' ? Colors.white : Colors.helperColor} />
+              <Text style={[s.peekToggleText, partnerFilter === 'helper' && s.peekToggleTextOn]}>{tx('Helper','헬퍼','Helper')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[s.peekToggleChip, partnerFilter === 'driver' && s.peekToggleOnTutor]} onPress={() => setPartnerFilter((v) => v === 'driver' ? 'all' : 'driver')} activeOpacity={0.75}>
+              <Ionicons name="car-outline" size={11} color={partnerFilter === 'driver' ? Colors.white : Colors.tutorColor} />
+              <Text style={[s.peekToggleText, partnerFilter === 'driver' && s.peekToggleTextOn]}>{tx('Driver','드라이버','Driver')}</Text>
+            </TouchableOpacity>
+            <View style={s.peekChipDivider} />
             <TouchableOpacity style={[s.peekChip, condActive && s.peekChipActive]} onPress={() => { setTmpSvc(serviceType); setShowCondModal(true); }} activeOpacity={0.75}>
               <Ionicons name="calendar-outline" size={12} color={condActive ? Colors.white : Colors.gray} />
               <Text style={[s.peekChipText, condActive && s.peekChipTextActive]}>{condActive ? SVC_TYPES.find((sv) => sv.key === serviceType)?.label : tx('정기/단기', '정기/단기', 'Job Type')}</Text>
@@ -424,7 +448,7 @@ export default function MapScreen() {
             {filtered.map((p) => (
               <TouchableOpacity key={p.id} style={s.storyItem} activeOpacity={0.82} onPress={() => showDetail(p)}>
                 <View style={[s.storyRing, { borderColor: p.isAvailable ? Colors.accent : Colors.gray200 }]}>
-                  <Image source={{ uri: p.photo }} style={s.storyPhoto} />
+                  <Image source={imgSrc(p.photo)} style={s.storyPhoto} />
                   <View style={[s.storyDot, { backgroundColor: p.isAvailable ? Colors.success : Colors.grayLight }]} />
                 </View>
                 <View style={s.storyRatingRow}>
@@ -465,9 +489,9 @@ export default function MapScreen() {
               }
               renderItem={({ item: p }) => (
                 <TouchableOpacity style={s.listCard} activeOpacity={0.92}
-                  onPress={() => { collapseSheet(); navigation.navigate('WorkerDetail', { workerId: p.id }); }}>
+                  onPress={() => { collapseSheet(); p.partnerType === 'driver' ? navigation.navigate('DriverDetail', { driverId: p.id }) : navigation.navigate('WorkerDetail', { workerId: p.id }); }}>
                   <View style={s.listAvatarWrap}>
-                    <Image source={{ uri: p.photo }} style={s.listAvatar} />
+                    <Image source={imgSrc(p.photo)} style={s.listAvatar} />
                     <View style={[s.listAvailDot, { backgroundColor: p.isAvailable ? Colors.success : Colors.grayLight }]} />
                   </View>
                   <View style={s.listInfo}>
@@ -507,17 +531,24 @@ export default function MapScreen() {
           <Animated.View style={[s.detailSheet, { transform: [{ translateY: detailTranslateY }] }]}>
             <View style={s.sheetHandle} />
             <View style={s.sheetHeader}>
-              <Image source={{ uri: selected.photo }} style={s.sheetPhoto} />
+              <Image source={imgSrc(selected.photo)} style={s.sheetPhoto} />
               <View style={s.sheetMeta}>
                 <View style={s.sheetNameRow}>
                   <Text style={s.sheetName}>{selected.name}</Text>
                   <View style={[s.onlineDot, { backgroundColor: selected.isAvailable ? Colors.success : Colors.grayLight }]} />
                 </View>
                 <View style={s.sheetTagRow}>
-                  <View style={[s.sheetTypeBadge, { backgroundColor: Colors.helperLight }]}>
-                    <Ionicons name="home" size={11} color={Colors.helperColor} />
-                    <Text style={[s.sheetTypeText, { color: Colors.helperColor }]}>Helper</Text>
-                  </View>
+                  {selected.partnerType === 'driver' ? (
+                    <View style={[s.sheetTypeBadge, { backgroundColor: '#EDE9FE' }]}>
+                      <Ionicons name="car" size={11} color={Colors.tutorColor} />
+                      <Text style={[s.sheetTypeText, { color: Colors.tutorColor }]}>Driver</Text>
+                    </View>
+                  ) : (
+                    <View style={[s.sheetTypeBadge, { backgroundColor: Colors.helperLight }]}>
+                      <Ionicons name="home" size={11} color={Colors.helperColor} />
+                      <Text style={[s.sheetTypeText, { color: Colors.helperColor }]}>Helper</Text>
+                    </View>
+                  )}
                   <Text style={s.sheetLocation}>{selected.location}</Text>
                 </View>
               </View>
@@ -547,7 +578,15 @@ export default function MapScreen() {
             <TouchableOpacity
               style={[s.bookBtn, !selected.isAvailable && s.bookBtnDisabled]}
               activeOpacity={selected.isAvailable ? 0.85 : 1}
-              onPress={() => { if (selected.isAvailable) { hideDetail(); navigation.navigate('WorkerDetail', { workerId: selected.id }); } }}
+              onPress={() => {
+                if (!selected.isAvailable) return;
+                hideDetail();
+                if (selected.partnerType === 'driver') {
+                  navigation.navigate('DriverDetail', { driverId: selected.id });
+                } else {
+                  navigation.navigate('WorkerDetail', { workerId: selected.id });
+                }
+              }}
             >
               <Text style={s.bookBtnText}>
                 {selected.isAvailable ? tx('Lihat Profil','프로필 보기','View Profile') : tx('Sedang Sibuk','현재 예약 불가','Unavailable')}
@@ -709,21 +748,42 @@ export default function MapScreen() {
 }
 
 // ── Photo pin marker ──────────────────────────────────────────────
-function PhotoMarker({ partner, selected }: { partner: Partner; selected: boolean }) {
+function PhotoMarker({ partner, selected, onImageLoad }: { partner: Partner; selected: boolean; onImageLoad?: () => void }) {
   const size = selected ? 52 : 44;
   const br   = selected ? 26 : 22;
-  const borderColor = selected ? Colors.helperColor : Colors.white;
+  const isDriver = partner.partnerType === 'driver';
+  const accent = isDriver ? Colors.tutorColor : Colors.helperColor;
+  const borderColor = selected ? accent : Colors.white;
   return (
     <View style={m.wrap}>
       <View style={[m.bubble, { width: size + 6, height: size + 6, borderRadius: br + 3, borderColor }]}>
-        <Image source={{ uri: partner.photo }} style={{ width: size, height: size, borderRadius: br }} />
+        <Image
+          source={imgSrc(partner.photo)}
+          style={{ width: size, height: size, borderRadius: br }}
+          onLoad={onImageLoad}
+        />
       </View>
-      <View style={[m.typeBadge, { backgroundColor: Colors.helperColor }]}>
-        <Ionicons name="home" size={8} color={Colors.white} />
+      <View style={[m.typeBadge, { backgroundColor: accent }]}>
+        <Ionicons name={isDriver ? 'car' : 'home'} size={8} color={Colors.white} />
       </View>
       <View style={[m.onlineDot, { backgroundColor: partner.isAvailable ? Colors.success : Colors.grayLight, top: 2, right: 2 }]} />
       <View style={[m.tail, { borderTopColor: borderColor }]} />
     </View>
+  );
+}
+
+// ── Marker wrapper with load tracking (fixes Android blank markers) ──
+function PartnerMarker({ partner, selected, onPress }: { partner: Partner; selected: boolean; onPress: () => void }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <Marker
+      coordinate={{ latitude: partner.lat, longitude: partner.lng }}
+      onPress={onPress}
+      anchor={{ x: 0.5, y: 1 }}
+      tracksViewChanges={!loaded || selected}
+    >
+      <PhotoMarker partner={partner} selected={selected} onImageLoad={() => setLoaded(true)} />
+    </Marker>
   );
 }
 
@@ -780,7 +840,8 @@ const s = StyleSheet.create({
   peekChipTextActive:{ color:Colors.white, fontWeight:'600' },
   // Peek on/off toggle chips
   peekToggleChip:   { flexDirection:'row', alignItems:'center', gap:4, paddingHorizontal:10, paddingVertical:6, borderRadius:Radius.pill, borderWidth:1, borderColor:Colors.borderMid, backgroundColor:Colors.white },
-  peekToggleOn:     { backgroundColor:Colors.accent, borderColor:Colors.accent },
+  peekToggleOn:       { backgroundColor:Colors.accent, borderColor:Colors.accent },
+  peekToggleOnTutor:  { backgroundColor:Colors.tutorColor, borderColor:Colors.tutorColor },
   peekToggleDot:    { width:7, height:7, borderRadius:4 },
   peekToggleText:   { fontSize:12, fontWeight:'500', color:Colors.gray },
   peekToggleTextOn: { color:Colors.white, fontWeight:'600' },
@@ -846,6 +907,8 @@ const s = StyleSheet.create({
   sheetNameRow: { flexDirection:'row', alignItems:'center', gap:8 },
   sheetName:    { fontSize:16, fontWeight:'700', color:Colors.dark },
   onlineDot:    { width:8, height:8, borderRadius:4 },
+  sheetVerifiedBadge: { flexDirection:'row', alignItems:'center', gap:3, backgroundColor:Colors.accentLight, borderRadius:Radius.pill, paddingHorizontal:7, paddingVertical:3 },
+  sheetVerifiedText:  { fontSize:11, fontWeight:'600', color:Colors.accent },
   sheetTagRow:  { flexDirection:'row', alignItems:'center', gap:8 },
   sheetTypeBadge:{ flexDirection:'row', alignItems:'center', gap:4, borderRadius:Radius.pill, paddingHorizontal:8, paddingVertical:3 },
   sheetTypeText: { fontSize:11, fontWeight:'700' },
