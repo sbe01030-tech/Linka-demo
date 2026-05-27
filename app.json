@@ -59,7 +59,7 @@
     },
     "owner": "maxpark",
     "runtimeVersion": {
-      "policy": "appVersion"
+      "policy": "sdkVersion"
     },
     "updates": {
       "url": "https://u.expo.dev/a79cf953-6804-49ec-bcef-e0824432eb64"

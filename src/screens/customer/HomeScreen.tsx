@@ -13,6 +13,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CategoryCharacter, { CatCharKey } from '../../components/common/CategoryCharacter_A';
+import { CATEGORY_ICONS } from '../../components/icons/CategoryIcons';
+import { TexturedCircle } from '../../components/icons/TexturedCircle';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { AVATAR_STACK, W1, W2, W3, W4, W5, W6 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
@@ -44,15 +46,36 @@ function getPreviewPosts(lang: LangCode): CommunityPost[] {
 const CATEGORY_META: {
   id: string; key: string; bgColor: string;
 }[] = [
-  { id: 'helper',    key: 'catArt',              bgColor: '#FFF3C0' },
-  { id: 'cooking',   key: 'catCooking',          bgColor: '#FFD8D4' },
-  { id: 'cleaning',  key: 'catCleaning',         bgColor: '#C4F5DC' },
-  { id: 'childcare', key: 'catChildcare',        bgColor: '#FFD8EA' },
-  { id: 'driver_designated', key: 'catDriverDesignated', bgColor: '#EDE9FE' },
-  { id: 'driver_daily',      key: 'catDriverDaily',      bgColor: '#FEF3C7' },
-  { id: 'errand',    key: 'catErrand',           bgColor: '#FFE4E6' },
-  { id: 'more',      key: 'catMore',             bgColor: '#EAEAEF' },
+  { id: 'helper',    key: 'catArt',              bgColor: '#FFDC7B' },  // 중간 옐로
+  { id: 'cooking',   key: 'catCooking',          bgColor: '#FFAFA8' },  // 중간 코랄
+  { id: 'cleaning',  key: 'catCleaning',         bgColor: '#97E2B7' },  // 중간 민트
+  { id: 'childcare', key: 'catChildcare',        bgColor: '#FFB1D1' },  // 중간 핑크
+  { id: 'driver_designated', key: 'catDriverDesignated', bgColor: '#C6BCF5' },  // 중간 라벤더
+  { id: 'driver_daily',      key: 'catDriverDaily',      bgColor: '#FFC896' },  // 중간 피치
+  { id: 'errand',    key: 'catErrand',           bgColor: '#FFBCBF' },  // 중간 로즈
+  { id: 'more',      key: 'catMore',             bgColor: '#D0D0D9' },  // 중간 그레이
 ];
+
+// [비교용 B 섹션] 얼굴 들어간 편집 PNG 아이콘 매핑 (white/ — 외곽선만 흰색 변환됨)
+const FACE_ICONS: Record<string, any> = {
+  helper:            require('../../../assets/icons-faces/white/helper.png'),
+  cooking:           require('../../../assets/icons-faces/white/cooking.png'),
+  cleaning:          require('../../../assets/icons-faces/white/cleaning.png'),
+  childcare:         require('../../../assets/icons-faces/white/childcare.png'),
+  driver_designated: require('../../../assets/icons-faces/white/driver_designated.png'),
+  driver_daily:      require('../../../assets/icons-faces/white/driver_daily.png'),
+  errand:            require('../../../assets/icons-faces/white/errand.png'),
+  more:              require('../../../assets/icons-faces/white/more.png'),
+};
+
+// [비교용 C 섹션] 카드 위 배지 텍스트 (없는 카테고리는 표시 안 함)
+const CATEGORY_BADGES: Record<string, string> = {
+  helper:            '정기',
+  cooking:           '단기',
+  childcare:         '인기',
+  driver_designated: '야간',
+  errand:            '신규',
+};
 
 const AVATAR_URLS = AVATAR_STACK;
 
@@ -218,138 +241,118 @@ export default function HomeScreen() {
         <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
       </TouchableOpacity>
 
-      {/* ── 3 Main Topics hero ── */}
-      <View style={s.topicsSection}>
-        <View style={s.topicsRow}>
-          {/* 가사·돌봄 */}
-          <TouchableOpacity
-            style={s.topicCard}
-            activeOpacity={0.85}
-            onPress={() => (navigation as any).navigate('Map', { expanded: true })}
-          >
-            <View style={s.topicBlobClip}>
-              <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
-                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.helperColor} strokeWidth={1.8} opacity={0.35} />
-                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.helperColor} strokeWidth={1.8} opacity={0.4} />
-              </Svg>
-            </View>
-            <View style={[s.topicIconLarge, { backgroundColor: Colors.helperLight }]}>
-              <Ionicons name="home" size={26} color={Colors.helperColor} />
-            </View>
-            <Text style={[s.topicEyebrow, { color: Colors.helperColor }]}>
-              {lang === 'ko' ? '가사·돌봄' : lang === 'en' ? 'HOME CARE' : 'ASISTEN'}
-            </Text>
-            <Text style={s.topicHeadline} numberOfLines={2}>
-              {lang === 'ko' ? '집안일은 덜고,\n시간은 더 늘리고.'
-                : lang === 'en' ? 'Less chores.\nMore time.'
-                : 'Kurangi kerja.\nTambah waktu.'}
-            </Text>
-            <View style={[s.topicLivePill, { backgroundColor: Colors.helperLight }]}>
-              <View style={[s.topicLiveDot, { backgroundColor: Colors.helperColor }]} />
-              <Text style={[s.topicLiveText, { color: Colors.helperColor }]}>
-                {lang === 'ko' ? '지금 23명' : lang === 'en' ? '23 online' : '23 aktif'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* 드라이버 */}
-          <TouchableOpacity
-            style={s.topicCard}
-            activeOpacity={0.85}
-            onPress={() => (navigation as any).navigate('DriverBoard')}
-          >
-            <View style={s.topicBlobClip}>
-              <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
-                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.35} />
-                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.4} />
-              </Svg>
-            </View>
-            <View style={[s.topicIconLarge, { backgroundColor: Colors.tutorLight }]}>
-              <Ionicons name="car" size={26} color={Colors.tutorColor} />
-            </View>
-            <Text style={[s.topicEyebrow, { color: Colors.tutorColor }]}>
-              {lang === 'ko' ? '드라이버' : lang === 'en' ? 'DRIVER' : 'SOPIR'}
-            </Text>
-            <Text style={s.topicHeadline} numberOfLines={2}>
-              {lang === 'ko' ? '운전은 잠시 내려두고,\n편히 쉬세요.'
-                : lang === 'en' ? 'Set the wheel down.\nJust sit back.'
-                : 'Turunkan setir.\nSantai saja.'}
-            </Text>
-            <View style={[s.topicLivePill, { backgroundColor: Colors.tutorLight }]}>
-              <View style={[s.topicLiveDot, { backgroundColor: Colors.tutorColor }]} />
-              <Text style={[s.topicLiveText, { color: Colors.tutorColor }]}>
-                {lang === 'ko' ? '지금 8명' : lang === 'en' ? '8 online' : '8 aktif'}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* 심부름 — 아래쪽 가로 길게 */}
-        <TouchableOpacity
-          style={s.topicWideCard}
-          activeOpacity={0.85}
-          onPress={() => (navigation as any).navigate('ErrandBoard')}
-        >
-          <View style={s.topicBlobClip}>
-            <Svg width="100%" height="100%" viewBox="0 0 360 90" preserveAspectRatio="xMidYMid slice">
-              <Circle cx="-10" cy="-10" r="36" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.35} />
-              <Circle cx="360" cy="95"  r="58" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.4}  />
-            </Svg>
-          </View>
-          <View style={[s.topicIconLarge, { backgroundColor: Colors.accentLight, marginBottom: 0 }]}>
-            <Ionicons name="bicycle" size={26} color={Colors.accent} />
-          </View>
-          <View style={{ flex: 1, marginLeft: 14 }}>
-            <View style={s.topicWideTitleRow}>
-              <Text style={[s.topicEyebrow, { color: Colors.accent, marginBottom: 0 }]}>
-                {lang === 'ko' ? '심부름' : lang === 'en' ? 'ERRANDS' : 'TITIP'}
-              </Text>
-              <View style={[s.topicLivePill, { backgroundColor: Colors.accentLight, marginTop: 0 }]}>
-                <View style={[s.topicLiveDot, { backgroundColor: Colors.accent }]} />
-                <Text style={[s.topicLiveText, { color: Colors.accent }]}>
-                  {lang === 'ko' ? '요청 4건' : lang === 'en' ? '4 new' : '4 baru'}
-                </Text>
-              </View>
-            </View>
-            <Text style={[s.topicHeadline, { marginTop: 4, fontSize: 15 }]} numberOfLines={1}>
-              {lang === 'ko' ? '바쁜 순간에, 더 빠른 손.'
-                : lang === 'en' ? 'Busy moments. Faster hands.'
-                : 'Saat sibuk, tangan cepat.'}
-            </Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={Colors.grayLight} />
-        </TouchableOpacity>
-      </View>
-
-      {/* ── Category grid ── */}
+      {/* ── Category grid — A: 현재 버전 (개별 오프셋) ── */}
       <View style={s.catSection}>
+        <Text style={s.compareLabel}>A — 현재 (개별 오프셋)</Text>
         <View style={s.catGrid}>
           {CATEGORIES.map((cat) => {
             const isDriver = cat.id.startsWith('driver_');
-            const driverIcon: any =
-              cat.id === 'driver_designated' ? 'moon-outline'
-              : cat.id === 'driver_daily'    ? 'sunny-outline'
-              : cat.id === 'driver_hourly'   ? 'time-outline'
-              : 'airplane-outline';
             const onPress = () => {
               if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
               if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
               (navigation as any).navigate('Map', { expanded: true });
             };
+            const Icon = CATEGORY_ICONS[cat.id];
             return (
               <TouchableOpacity
-                key={cat.id}
+                key={`A-${cat.id}`}
                 style={s.catItem}
                 activeOpacity={0.75}
                 onPress={onPress}
               >
-                <View style={[s.catIconWrap, { backgroundColor: cat.bgColor }]}>
-                  {isDriver
-                    ? <Ionicons name={driverIcon} size={26} color={Colors.dark} />
-                    : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
-                  }
+                <View style={s.catIconStage}>
+                  <TexturedCircle size={48} color={cat.bgColor} style={s.catIconBg} />
+                  <View style={
+                    cat.id === 'cleaning'           ? s.catIconShiftCleaning  :
+                    cat.id === 'childcare'          ? s.catIconShiftChildcare :
+                    (cat.id === 'helper' ||
+                     cat.id === 'cooking' ||
+                     cat.id === 'driver_designated' ||
+                     cat.id === 'driver_daily' ||
+                     cat.id === 'errand')           ? s.catIconShiftDown      :
+                    s.catIconShift
+                  }>
+                    {Icon
+                      ? <Icon size={48} color={Colors.white} fillColor="transparent" />
+                      : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
+                    }
+                  </View>
                 </View>
                 <Text style={s.catLabel}>{cat.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* ── Category grid — B: 비교용 (얼굴 들어간 PNG 아이콘) ── */}
+      {/* ⚠️ 비교용 임시 섹션. A/B/C 결정 후 둘은 제거 예정. */}
+      <View style={s.catSection}>
+        <Text style={s.compareLabel}>B — 얼굴 들어간 캐릭터 아이콘</Text>
+        <View style={s.catGrid}>
+          {CATEGORIES.map((cat) => {
+            const isDriver = cat.id.startsWith('driver_');
+            const onPress = () => {
+              if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
+              if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
+              (navigation as any).navigate('Map', { expanded: true });
+            };
+            const faceSrc = FACE_ICONS[cat.id];
+            return (
+              <TouchableOpacity
+                key={`B-${cat.id}`}
+                style={s.catItem}
+                activeOpacity={0.75}
+                onPress={onPress}
+              >
+                <View style={s.catIconStage}>
+                  <TexturedCircle size={48} color={cat.bgColor} style={s.catIconBg} />
+                  <View style={s.catIconShiftCentered}>
+                    {faceSrc
+                      ? <Image source={faceSrc} style={s.catFaceIcon} resizeMode="contain" />
+                      : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
+                    }
+                  </View>
+                </View>
+                <Text style={s.catLabel}>{cat.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* ── Category grid — C: 비교용 (Gojek/Grab 스타일 — 둥근 사각 카드 + 배지) ── */}
+      <View style={s.catSection}>
+        <Text style={s.compareLabel}>C — 둥근 사각 카드 + 배지 (Gojek/Grab 스타일)</Text>
+        <View style={s.catGridC}>
+          {CATEGORIES.map((cat) => {
+            const isDriver = cat.id.startsWith('driver_');
+            const onPress = () => {
+              if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
+              if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
+              (navigation as any).navigate('Map', { expanded: true });
+            };
+            const faceSrc = FACE_ICONS[cat.id];
+            const badge   = CATEGORY_BADGES[cat.id];
+            return (
+              <TouchableOpacity
+                key={`C-${cat.id}`}
+                style={s.catItemC}
+                activeOpacity={0.85}
+                onPress={onPress}
+              >
+                <View style={[s.catCardC, { backgroundColor: cat.bgColor }]}>
+                  {badge && (
+                    <View style={s.catBadgeC}>
+                      <Text style={s.catBadgeTextC}>{badge}</Text>
+                    </View>
+                  )}
+                  {faceSrc
+                    ? <Image source={faceSrc} style={s.catFaceIconC} resizeMode="contain" />
+                    : <CategoryCharacter category={cat.id as CatCharKey} size={56} />
+                  }
+                </View>
+                <Text style={s.catLabelC}>{cat.label}</Text>
               </TouchableOpacity>
             );
           })}
@@ -593,7 +596,7 @@ export default function HomeScreen() {
         ))}
       </View>
 
-      {/* ── Monthly MVP section (bottom) ── */}
+      {/* ── Monthly MVP section ── */}
       <View style={s.mvpBackdrop}>
         <MonthlyAwardCard
           helper={HELPER_OF_MONTH}
@@ -602,8 +605,113 @@ export default function HomeScreen() {
           onPressHelper={() => navigation.navigate('WorkerDetail', { workerId: HELPER_OF_MONTH.winnerId })}
           onPressDriver={() => (navigation as any).navigate('DriverDetail', { driverId: DRIVER_OF_MONTH.winnerId })}
         />
+      </View>
 
-        {/* Linka footer */}
+      {/* ── 3 Main Topics hero (moved to bottom) ── */}
+      <View style={s.topicsSection}>
+        <View style={s.topicsRow}>
+          {/* 가사·돌봄 */}
+          <TouchableOpacity
+            style={s.topicCard}
+            activeOpacity={0.85}
+            onPress={() => (navigation as any).navigate('Map', { expanded: true })}
+          >
+            <View style={s.topicBlobClip}>
+              <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
+                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.helperColor} strokeWidth={1.8} opacity={0.35} />
+                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.helperColor} strokeWidth={1.8} opacity={0.4} />
+              </Svg>
+            </View>
+            <View style={[s.topicIconLarge, { backgroundColor: Colors.helperLight }]}>
+              <Ionicons name="home" size={26} color={Colors.helperColor} />
+            </View>
+            <Text style={[s.topicEyebrow, { color: Colors.helperColor }]}>
+              {lang === 'ko' ? '가사·돌봄' : lang === 'en' ? 'HOME CARE' : 'ASISTEN'}
+            </Text>
+            <Text style={s.topicHeadline} numberOfLines={2}>
+              {lang === 'ko' ? '집안일은 덜고,\n시간은 더 늘리고.'
+                : lang === 'en' ? 'Less chores.\nMore time.'
+                : 'Kurangi kerja.\nTambah waktu.'}
+            </Text>
+            <View style={[s.topicLivePill, { backgroundColor: Colors.helperLight }]}>
+              <View style={[s.topicLiveDot, { backgroundColor: Colors.helperColor }]} />
+              <Text style={[s.topicLiveText, { color: Colors.helperColor }]}>
+                {lang === 'ko' ? '지금 23명' : lang === 'en' ? '23 online' : '23 aktif'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* 드라이버 */}
+          <TouchableOpacity
+            style={s.topicCard}
+            activeOpacity={0.85}
+            onPress={() => (navigation as any).navigate('DriverBoard')}
+          >
+            <View style={s.topicBlobClip}>
+              <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
+                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.35} />
+                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.4} />
+              </Svg>
+            </View>
+            <View style={[s.topicIconLarge, { backgroundColor: Colors.tutorLight }]}>
+              <Ionicons name="car" size={26} color={Colors.tutorColor} />
+            </View>
+            <Text style={[s.topicEyebrow, { color: Colors.tutorColor }]}>
+              {lang === 'ko' ? '드라이버' : lang === 'en' ? 'DRIVER' : 'SOPIR'}
+            </Text>
+            <Text style={s.topicHeadline} numberOfLines={2}>
+              {lang === 'ko' ? '운전은 잠시 내려두고,\n편히 쉬세요.'
+                : lang === 'en' ? 'Set the wheel down.\nJust sit back.'
+                : 'Turunkan setir.\nSantai saja.'}
+            </Text>
+            <View style={[s.topicLivePill, { backgroundColor: Colors.tutorLight }]}>
+              <View style={[s.topicLiveDot, { backgroundColor: Colors.tutorColor }]} />
+              <Text style={[s.topicLiveText, { color: Colors.tutorColor }]}>
+                {lang === 'ko' ? '지금 8명' : lang === 'en' ? '8 online' : '8 aktif'}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* 심부름 — 아래쪽 가로 길게 */}
+        <TouchableOpacity
+          style={s.topicWideCard}
+          activeOpacity={0.85}
+          onPress={() => (navigation as any).navigate('ErrandBoard')}
+        >
+          <View style={s.topicBlobClip}>
+            <Svg width="100%" height="100%" viewBox="0 0 360 90" preserveAspectRatio="xMidYMid slice">
+              <Circle cx="-10" cy="-10" r="36" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.35} />
+              <Circle cx="360" cy="95"  r="58" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.4}  />
+            </Svg>
+          </View>
+          <View style={[s.topicIconLarge, { backgroundColor: Colors.accentLight, marginBottom: 0 }]}>
+            <Ionicons name="bicycle" size={26} color={Colors.accent} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 14 }}>
+            <View style={s.topicWideTitleRow}>
+              <Text style={[s.topicEyebrow, { color: Colors.accent, marginBottom: 0 }]}>
+                {lang === 'ko' ? '심부름' : lang === 'en' ? 'ERRANDS' : 'TITIP'}
+              </Text>
+              <View style={[s.topicLivePill, { backgroundColor: Colors.accentLight, marginTop: 0 }]}>
+                <View style={[s.topicLiveDot, { backgroundColor: Colors.accent }]} />
+                <Text style={[s.topicLiveText, { color: Colors.accent }]}>
+                  {lang === 'ko' ? '요청 4건' : lang === 'en' ? '4 new' : '4 baru'}
+                </Text>
+              </View>
+            </View>
+            <Text style={[s.topicHeadline, { marginTop: 4, fontSize: 15 }]} numberOfLines={1}>
+              {lang === 'ko' ? '바쁜 순간에, 더 빠른 손.'
+                : lang === 'en' ? 'Busy moments. Faster hands.'
+                : 'Saat sibuk, tangan cepat.'}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={Colors.grayLight} />
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Linka footer (bottom) ── */}
+      <View style={s.mvpBackdrop}>
         <View style={s.footer}>
           <View style={s.footerLogoRow}>
             <MascotFace size={24} />
@@ -670,10 +778,102 @@ const s = StyleSheet.create({
   },
   catGrid: { flexDirection: 'row', flexWrap: 'wrap' },
   catItem: { width: '25%', alignItems: 'center', marginBottom: 18, gap: 8 },
-  catIconWrap: {
+  // stage: 셀 안의 아이콘 영역. 아이콘은 stage 중앙에 정렬됨.
+  // 그룹(아이콘+bg)을 우측 +7 만큼 이동 → bg가 텍스트와 가로 중앙 정렬됨
+  catIconStage: {
     width: 64, height: 64,
-    borderRadius: 32,
     alignItems: 'center', justifyContent: 'center',
+    transform: [{ translateX: 7 }],
+  },
+  // bg: 60x60 둥근 사각형 (55에서 +10%, 원래 48에서 +25%). bg 중심 (25, 25) 유지.
+  // 위치: (25 - 30, 25 - 30) = (-5, -5)
+  catIconBg: {
+    position: 'absolute',
+    width: 60, height: 60,
+    borderRadius: 15,
+    left: -5, top: -5,
+  },
+  // 아이콘만 살짝 좌상단으로 (배경 동그라미는 그대로)
+  catIconShift: {
+    transform: [{ translateX: -3 }, { translateY: -3 }],
+  },
+  // 청소 — 우측+아래로 약간씩
+  catIconShiftCleaning: {
+    transform: [{ translateX: -1 }, { translateY: -3 }],
+  },
+  // 육아도우미 — 기본보다 우측으로 약간
+  catIconShiftChildcare: {
+    transform: [{ translateX: 0 }, { translateY: -3 }],
+  },
+  // 요리·대리운전·일일 기사·심부름 — 기본보다 아래로 약간
+  catIconShiftDown: {
+    transform: [{ translateX: -3 }, { translateY: 0 }],
+  },
+  // [비교용] 배경 동그라미 중앙에 아이콘 정렬 — bg가 (-7, -7) 오프셋이므로 동일하게
+  catIconShiftCentered: {
+    transform: [{ translateX: -7 }, { translateY: -7 }],
+  },
+  // [비교용 B] 얼굴 들어간 PNG 아이콘 — 42 → 48 (+15%)
+  catFaceIcon: {
+    width: 48,
+    height: 48,
+  },
+  // [비교용 C — Gojek/Grab 스타일: 둥근 사각 카드 + 배지]
+  catGridC: { flexDirection: 'row', flexWrap: 'wrap' },
+  catItemC: {
+    width: '25%',
+    alignItems: 'center',
+    marginBottom: 22,
+    gap: 8,
+    paddingHorizontal: 4,
+  },
+  catCardC: {
+    width: 70, height: 70,
+    borderRadius: 18,
+    alignItems: 'center', justifyContent: 'center',
+    position: 'relative',
+    // 살짝 그림자 (입체감)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  catBadgeC: {
+    position: 'absolute',
+    top: -6, left: -6,
+    backgroundColor: Colors.dark,
+    paddingHorizontal: 8, paddingVertical: 3,
+    borderRadius: 10,
+    zIndex: 1,
+    minWidth: 30,
+    alignItems: 'center',
+  },
+  catBadgeTextC: {
+    color: Colors.white,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  catFaceIconC: {
+    width: 50,
+    height: 50,
+  },
+  catLabelC: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.dark,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  // [비교용] 섹션 라벨
+  compareLabel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.gray,
+    letterSpacing: 0.6,
+    paddingBottom: 12,
+    textTransform: 'uppercase',
   },
   catLabel: { fontSize: 11, fontWeight: '500', color: Colors.dark, textAlign: 'center', lineHeight: 15 },
 

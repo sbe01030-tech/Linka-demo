@@ -5,7 +5,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Svg, { Path, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/colors';
 import { MonthlyAward } from '../../types';
 
@@ -36,21 +36,12 @@ function LaurelIcon({ size = 18, color = Colors.accent }: { size?: number; color
 }
 
 function WinnerAvatar({
-  photo, accent, icon, role,
+  photo, accent, icon,
 }: {
-  photo?: string; accent: string; icon: string; role: 'helper' | 'driver';
+  photo?: string; accent: string; icon: string;
 }) {
   return (
     <View style={av.wrap}>
-      <Svg width={88} height={88} style={StyleSheet.absoluteFill} viewBox="0 0 88 88">
-        <Defs>
-          <LinearGradient id={`g-${role}`} x1="0" y1="0" x2="1" y2="1">
-            <Stop offset="0" stopColor={accent} stopOpacity="0.30" />
-            <Stop offset="1" stopColor={accent} stopOpacity="0" />
-          </LinearGradient>
-        </Defs>
-        <Circle cx="44" cy="44" r="42" fill={`url(#g-${role})`} />
-      </Svg>
       <Image source={{ uri: photo }} style={av.photo} />
       <View style={[av.crownBadge, { backgroundColor: accent }]}>
         <Ionicons name={icon as any} size={11} color={Colors.white} />
@@ -96,7 +87,7 @@ export default function MonthlyAwardCard({ helper, driver, onPressHelper, onPres
       <View style={s.winnersRow}>
         {/* Helper */}
         <TouchableOpacity style={s.winnerCol} onPress={onPressHelper} activeOpacity={0.82}>
-          <WinnerAvatar photo={helper.winnerPhoto} accent={Colors.helperColor} icon="home" role="helper" />
+          <WinnerAvatar photo={helper.winnerPhoto} accent={Colors.helperColor} icon="home" />
           <Text style={[s.roleTag, { color: Colors.helperColor }]}>
             {tx(lang, '이 달의 헬퍼', 'Helper', 'Helper')}
           </Text>
@@ -115,7 +106,7 @@ export default function MonthlyAwardCard({ helper, driver, onPressHelper, onPres
 
         {/* Driver */}
         <TouchableOpacity style={s.winnerCol} onPress={onPressDriver} activeOpacity={0.82}>
-          <WinnerAvatar photo={driver.winnerPhoto} accent={Colors.tutorColor} icon="car" role="driver" />
+          <WinnerAvatar photo={driver.winnerPhoto} accent={Colors.tutorColor} icon="car" />
           <Text style={[s.roleTag, { color: Colors.tutorColor }]}>
             {tx(lang, '이 달의 드라이버', 'Driver', 'Sopir')}
           </Text>
@@ -142,8 +133,6 @@ const s = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1.5, borderColor: Colors.accent + '30',
     paddingTop: 14, paddingBottom: 14,
-    shadowColor: Colors.accent, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08, shadowRadius: 12, elevation: 3,
   },
   topRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',

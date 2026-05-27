@@ -39,3 +39,6 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# EAS Build artifacts (재생성 가능, 큰 파일들)
+builds/

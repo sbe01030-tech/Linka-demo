@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "PKief.material-icon-theme",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "yoavbls.pretty-ts-errors",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "eamodio.gitlens",
+    "formulahendry.auto-rename-tag"
+  ]
+}

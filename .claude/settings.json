@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -n \"export default function\\\\|{ navigation, route }\" /Users/bigband/Linka-app/Linka-app/src/screens/customer/WorkerDetailScreen.tsx)"
+      "Bash(grep -n \"export default function\\\\|{ navigation, route }\" /Users/bigband/Linka-app/Linka-app/src/screens/customer/WorkerDetailScreen.tsx)",
+      "Bash(git branch *)",
+      "Bash(git tag *)",
+      "Bash(python3 -c \"import pptx; print\\(pptx.__version__\\)\")"
     ]
   }
 }
