@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 
 const SCREEN_W = Dimensions.get('window').width;
-const AD_W = SCREEN_W - 32;
+const AD_W = SCREEN_W - 16;
 
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -55,6 +55,18 @@ const CATEGORY_META: {
   { id: 'errand',    key: 'catErrand',           bgColor: '#FFBCBF' },  // 중간 로즈
   { id: 'more',      key: 'catMore',             bgColor: '#D0D0D9' },  // 중간 그레이
 ];
+
+// [비교용 0 섹션] 새 PNG 8종 (assets/icons-v2/)
+const V2_ICONS: Record<string, any> = {
+  helper:            require('../../../assets/icons-v2/helper.png'),
+  cooking:           require('../../../assets/icons-v2/cooking.png'),
+  cleaning:          require('../../../assets/icons-v2/cleaning.png'),
+  childcare:         require('../../../assets/icons-v2/childcare.png'),
+  driver_designated: require('../../../assets/icons-v2/driver_designated.png'),
+  driver_daily:      require('../../../assets/icons-v2/driver_daily.png'),
+  errand:            require('../../../assets/icons-v2/errand.png'),
+  more:              require('../../../assets/icons-v2/more.png'),
+};
 
 // [비교용 B 섹션] 얼굴 들어간 편집 PNG 아이콘 매핑 (white/ — 외곽선만 흰색 변환됨)
 const FACE_ICONS: Record<string, any> = {
@@ -241,9 +253,8 @@ export default function HomeScreen() {
         <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
       </TouchableOpacity>
 
-      {/* ── Category grid — A: 현재 버전 (개별 오프셋) ── */}
+      {/* ── Category grid — 0: 새 PNG 아이콘 (v2) ── */}
       <View style={s.catSection}>
-        <Text style={s.compareLabel}>A — 현재 (개별 오프셋)</Text>
         <View style={s.catGrid}>
           {CATEGORIES.map((cat) => {
             const isDriver = cat.id.startsWith('driver_');
@@ -252,64 +263,19 @@ export default function HomeScreen() {
               if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
               (navigation as any).navigate('Map', { expanded: true });
             };
-            const Icon = CATEGORY_ICONS[cat.id];
+            const v2Src = V2_ICONS[cat.id];
             return (
               <TouchableOpacity
-                key={`A-${cat.id}`}
+                key={`Z-${cat.id}`}
                 style={s.catItem}
                 activeOpacity={0.75}
                 onPress={onPress}
               >
                 <View style={s.catIconStage}>
-                  <TexturedCircle size={48} color={cat.bgColor} style={s.catIconBg} />
-                  <View style={
-                    cat.id === 'cleaning'           ? s.catIconShiftCleaning  :
-                    cat.id === 'childcare'          ? s.catIconShiftChildcare :
-                    (cat.id === 'helper' ||
-                     cat.id === 'cooking' ||
-                     cat.id === 'driver_designated' ||
-                     cat.id === 'driver_daily' ||
-                     cat.id === 'errand')           ? s.catIconShiftDown      :
-                    s.catIconShift
-                  }>
-                    {Icon
-                      ? <Icon size={48} color={Colors.white} fillColor="transparent" />
-                      : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
-                    }
-                  </View>
-                </View>
-                <Text style={s.catLabel}>{cat.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
-
-      {/* ── Category grid — B: 비교용 (얼굴 들어간 PNG 아이콘) ── */}
-      {/* ⚠️ 비교용 임시 섹션. A/B/C 결정 후 둘은 제거 예정. */}
-      <View style={s.catSection}>
-        <Text style={s.compareLabel}>B — 얼굴 들어간 캐릭터 아이콘</Text>
-        <View style={s.catGrid}>
-          {CATEGORIES.map((cat) => {
-            const isDriver = cat.id.startsWith('driver_');
-            const onPress = () => {
-              if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
-              if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
-              (navigation as any).navigate('Map', { expanded: true });
-            };
-            const faceSrc = FACE_ICONS[cat.id];
-            return (
-              <TouchableOpacity
-                key={`B-${cat.id}`}
-                style={s.catItem}
-                activeOpacity={0.75}
-                onPress={onPress}
-              >
-                <View style={s.catIconStage}>
-                  <TexturedCircle size={48} color={cat.bgColor} style={s.catIconBg} />
+                  <TexturedCircle size={69} color="#00C85312" style={s.catIconBg} />
                   <View style={s.catIconShiftCentered}>
-                    {faceSrc
-                      ? <Image source={faceSrc} style={s.catFaceIcon} resizeMode="contain" />
+                    {v2Src
+                      ? <Image source={v2Src} style={s.catFaceIcon} resizeMode="contain" />
                       : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
                     }
                   </View>
@@ -321,53 +287,31 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* ── Category grid — C: 비교용 (Gojek/Grab 스타일 — 둥근 사각 카드 + 배지) ── */}
-      <View style={s.catSection}>
-        <Text style={s.compareLabel}>C — 둥근 사각 카드 + 배지 (Gojek/Grab 스타일)</Text>
-        <View style={s.catGridC}>
-          {CATEGORIES.map((cat) => {
-            const isDriver = cat.id.startsWith('driver_');
-            const onPress = () => {
-              if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
-              if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
-              (navigation as any).navigate('Map', { expanded: true });
-            };
-            const faceSrc = FACE_ICONS[cat.id];
-            const badge   = CATEGORY_BADGES[cat.id];
-            return (
-              <TouchableOpacity
-                key={`C-${cat.id}`}
-                style={s.catItemC}
-                activeOpacity={0.85}
-                onPress={onPress}
-              >
-                <View style={[s.catCardC, { backgroundColor: cat.bgColor }]}>
-                  {badge && (
-                    <View style={s.catBadgeC}>
-                      <Text style={s.catBadgeTextC}>{badge}</Text>
-                    </View>
-                  )}
-                  {faceSrc
-                    ? <Image source={faceSrc} style={s.catFaceIconC} resizeMode="contain" />
-                    : <CategoryCharacter category={cat.id as CatCharKey} size={56} />
-                  }
-                </View>
-                <Text style={s.catLabelC}>{cat.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
+      {/* ── Errand section ── */}
+      <TouchableOpacity
+        style={s.errandBanner}
+        activeOpacity={0.88}
+        onPress={() => (navigation as any).navigate('ErrandBoard')}
+      >
+        <View style={s.errandLeft}>
+          <View style={s.errandIconWrap}>
+            <Ionicons name="bicycle" size={20} color={Colors.white} />
+          </View>
+          <View>
+            <Text style={s.errandTitle}>
+              {lang === 'ko' ? '심부름 요청하기' : lang === 'en' ? 'Request an Errand' : 'Minta Bantuan Jasa'}
+            </Text>
+            <Text style={s.errandSub}>
+              {lang === 'ko' ? '장보기·배달·줄서기 등 심부름을 맡겨보세요' : lang === 'en' ? 'Shopping, delivery, queuing & more' : 'Belanja, antar, antre & lainnya'}
+            </Text>
+          </View>
         </View>
-      </View>
-
-      {/* ── Available count bar ── */}
-      <TouchableOpacity style={s.countBar} activeOpacity={0.85} onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
-        <View style={s.avatarStack}>
-          {AVATAR_URLS.map((uri, i) => (
-            <Image key={i} source={{ uri }} style={[s.stackAvatar, { marginLeft: i === 0 ? 0 : -10, zIndex: 3 - i }]} />
-          ))}
+        <View style={s.errandRight}>
+          <Text style={s.errandCount}>
+            {lang === 'ko' ? '헬퍼 12명 대기중' : lang === 'en' ? '12 helpers ready' : '12 helper siap'}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color={Colors.white} />
         </View>
-        <Text style={s.countText}>{t.homeNew.countBarText}</Text>
-        <Ionicons name="chevron-forward" size={16} color={Colors.accent} />
       </TouchableOpacity>
 
       {/* ── Recommended workers ── */}
@@ -423,6 +367,17 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
+
+      {/* ── Available count bar ── */}
+      <TouchableOpacity style={s.countBar} activeOpacity={0.85} onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
+        <View style={s.avatarStack}>
+          {AVATAR_URLS.map((uri, i) => (
+            <Image key={i} source={{ uri }} style={[s.stackAvatar, { marginLeft: i === 0 ? 0 : -10, zIndex: 3 - i }]} />
+          ))}
+        </View>
+        <Text style={s.countText}>{t.homeNew.countBarText}</Text>
+        <Ionicons name="chevron-forward" size={16} color={Colors.accent} />
+      </TouchableOpacity>
 
       {/* ── Ad carousel ── */}
       <View style={s.adWrap}>
@@ -519,33 +474,6 @@ export default function HomeScreen() {
           })}
         </ScrollView>
       </View>
-
-      {/* ── Errand section ── */}
-      <TouchableOpacity
-        style={s.errandBanner}
-        activeOpacity={0.88}
-        onPress={() => (navigation as any).navigate('ErrandBoard')}
-      >
-        <View style={s.errandLeft}>
-          <View style={s.errandIconWrap}>
-            <Ionicons name="bicycle" size={20} color={Colors.white} />
-          </View>
-          <View>
-            <Text style={s.errandTitle}>
-              {lang === 'ko' ? '심부름 요청하기' : lang === 'en' ? 'Request an Errand' : 'Minta Bantuan Jasa'}
-            </Text>
-            <Text style={s.errandSub}>
-              {lang === 'ko' ? '장보기·배달·줄서기 등 심부름을 맡겨보세요' : lang === 'en' ? 'Shopping, delivery, queuing & more' : 'Belanja, antar, antre & lainnya'}
-            </Text>
-          </View>
-        </View>
-        <View style={s.errandRight}>
-          <Text style={s.errandCount}>
-            {lang === 'ko' ? '헬퍼 12명 대기중' : lang === 'en' ? '12 helpers ready' : '12 helper siap'}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color={Colors.white} />
-        </View>
-      </TouchableOpacity>
 
       {/* ── Community preview ── */}
       <View style={s.communitySection}>
@@ -785,13 +713,12 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     transform: [{ translateX: 7 }],
   },
-  // bg: 60x60 둥근 사각형 (55에서 +10%, 원래 48에서 +25%). bg 중심 (25, 25) 유지.
-  // 위치: (25 - 30, 25 - 30) = (-5, -5)
+  // bg: 69x69 둥근 사각형 (60에서 +15%). bg 중심 (25, 29) — 아래로 +4 이동.
   catIconBg: {
     position: 'absolute',
-    width: 60, height: 60,
-    borderRadius: 15,
-    left: -5, top: -5,
+    width: 69, height: 69,
+    borderRadius: 17,
+    left: -9.5, top: -3.5,
   },
   // 아이콘만 살짝 좌상단으로 (배경 동그라미는 그대로)
   catIconShift: {
@@ -809,9 +736,9 @@ const s = StyleSheet.create({
   catIconShiftDown: {
     transform: [{ translateX: -3 }, { translateY: 0 }],
   },
-  // [비교용] 배경 동그라미 중앙에 아이콘 정렬 — bg가 (-7, -7) 오프셋이므로 동일하게
+  // [비교용] 배경 동그라미 중앙에 아이콘 정렬 — bg와 함께 아래로 +4 이동
   catIconShiftCentered: {
-    transform: [{ translateX: -7 }, { translateY: -7 }],
+    transform: [{ translateX: -7 }, { translateY: -1 }],
   },
   // [비교용 B] 얼굴 들어간 PNG 아이콘 — 42 → 48 (+15%)
   catFaceIcon: {
@@ -880,11 +807,11 @@ const s = StyleSheet.create({
   // Nearby banner
   nearbyBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: Colors.accentLight,
-    marginHorizontal: 16, marginTop: 10, marginBottom: 2,
+    backgroundColor: Colors.white,
+    marginHorizontal: 8, marginTop: 5, marginBottom: 1,
     borderRadius: Radius.lg,
     paddingHorizontal: 14, paddingVertical: 13,
-    borderWidth: 1, borderColor: Colors.accent + '30',
+    borderWidth: 1, borderColor: Colors.border,
   },
   nearbyLeft:    { flexDirection: 'row', alignItems: 'center', gap: 12 },
   nearbyIconWrap:{ width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' },
@@ -905,7 +832,7 @@ const s = StyleSheet.create({
 
   // Ad carousel
   adWrap: { marginTop: 8 },
-  adScrollContent: { paddingHorizontal: 16, gap: 12, paddingVertical: 2 },
+  adScrollContent: { paddingHorizontal: 8, gap: 12, paddingVertical: 2 },
   adCard: {
     width: AD_W,
     flexDirection: 'row', alignItems: 'center',
@@ -987,9 +914,9 @@ const s = StyleSheet.create({
   errandBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: '#F97316',
-    marginHorizontal: 16, marginTop: 10,
+    marginHorizontal: 8, marginTop: 10,
     borderRadius: Radius.lg,
-    paddingHorizontal: 16, paddingVertical: 14,
+    paddingHorizontal: 16, paddingVertical: 10,
   },
   errandLeft:    { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   errandIconWrap:{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' },
