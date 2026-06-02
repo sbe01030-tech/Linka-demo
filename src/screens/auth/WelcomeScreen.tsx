@@ -113,6 +113,11 @@ export default function WelcomeScreen({ navigation }: Props) {
       Animated.timing(opacity, { toValue: 1, duration: 600, useNativeDriver: true }),
       Animated.spring(slideY, { toValue: 0, speed: 14, bounciness: 4, useNativeDriver: true }),
     ]).start();
+    return () => {
+      // 언마운트 시 native 애니메이션 노드 정리
+      opacity.stopAnimation();
+      slideY.stopAnimation();
+    };
   }, []);
 
   return (

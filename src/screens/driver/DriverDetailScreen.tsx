@@ -8,6 +8,10 @@ import {
   TouchableOpacity, Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { W1, W2, W4, W5, W6, W7 } from '../../constants/photos';
+
+// SNS 사진 — 드라이버가 본인 프로필 꾸미는 톤 (워커와 동일 풀)
+const GALLERY_PHOTOS: string[] = [W1, W2, W4, W5, W6, W7];
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
@@ -40,40 +44,69 @@ export default function DriverDetailScreen({ navigation, route }: Props) {
     });
   };
 
+  const driverPhoto = typeof driver.photo === 'string' ? { uri: driver.photo } : driver.photo;
+  // 드라이버는 아직 커버 사진 편집 화면이 없어서 미설정 — 흰 배경 (카톡 기본 톤)
+  const coverPhoto: string | null = null;
+
   return (
     <View style={s.root}>
-      {/* Back button */}
-      <TouchableOpacity
-        style={[s.backBtn, { top: insets.top + 6 }]}
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons name="chevron-back" size={24} color={Colors.dark} />
-      </TouchableOpacity>
-
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        {/* Hero */}
-        <View style={[s.hero, { paddingTop: insets.top + 34 }]}>
-          <Image source={typeof driver.photo === "string" ? { uri: driver.photo } : driver.photo} style={s.heroPhoto} />
-          <View style={{ flex: 1 }}>
-            <View style={s.nameRow}>
-              <Text style={s.heroName}>{driver.firstName}</Text>
-              {driver.isVerified && (
-                <View style={s.verifyBadge}>
-                  <Ionicons name="checkmark-circle" size={12} color={Colors.white} />
-                  <Text style={s.verifyText}>{tx('Verified', '인증', 'Verified')}</Text>
-                </View>
-              )}
-              {getMonthlyAwardBadge(driver.id) && <MvpMiniBadge role="driver" />}
+        {/* ── Cover (드라이버가 설정한 사진. 없으면 흰 배경) ── */}
+        <View style={s.coverWrap}>
+          {coverPhoto ? (
+            <Image source={{ uri: coverPhoto }} style={s.coverImage} />
+          ) : (
+            <View style={[s.coverImage, { backgroundColor: Colors.white }]} />
+          )}
+          <TouchableOpacity style={[s.backBtn, { top: insets.top + 6 }]} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('CustomerTabs' as never)}>
+            <Ionicons name="chevron-back" size={24} color={Colors.dark} />
+          </TouchableOpacity>
+          <TouchableOpacity style={[s.shareBtn, { top: insets.top + 6 }]}>
+            <Ionicons name="share-outline" size={20} color={Colors.dark} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── SNS hero ── */}
+        <View style={s.heroSns}>
+          <View style={s.avatarRing}>
+            <Image source={driverPhoto} style={s.avatarBig} />
+            {driver.isAvailable && <View style={s.availStatusDot} />}
+          </View>
+
+          <View style={s.nameRow}>
+            <Text style={s.heroName}>{driver.firstName}</Text>
+            {driver.isVerified && (
+              <View style={s.verifyBadge}>
+                <Ionicons name="checkmark-circle" size={12} color={Colors.white} />
+                <Text style={s.verifyText}>{tx('Verified', '인증', 'Verified')}</Text>
+              </View>
+            )}
+            {getMonthlyAwardBadge(driver.id) && <MvpMiniBadge role="driver" />}
+          </View>
+          <View style={s.heroMetaRow}>
+            <Ionicons name="location-outline" size={12} color={Colors.grayLight} />
+            <Text style={s.heroMetaText}>{driver.location}</Text>
+          </View>
+          <View style={s.heroMetaRow}>
+            <Ionicons name="trophy-outline" size={12} color={Colors.grayLight} />
+            <Text style={s.heroMetaText}>
+              {driver.experienceYears}{tx('thn', '년', 'yr')} {tx('pengalaman', '경력', 'exp')} · {driver.licenseClass}
+            </Text>
+          </View>
+
+          {/* Verification chips */}
+          <View style={s.verifyChipRow}>
+            <View style={[s.verifyChip, s.verifyChipOn]}>
+              <Ionicons name="card-outline" size={12} color={Colors.accent} />
+              <Text style={[s.verifyChipText, s.verifyChipTextOn]}>SIM</Text>
             </View>
-            <View style={s.heroMetaRow}>
-              <Ionicons name="location-outline" size={12} color={Colors.grayLight} />
-              <Text style={s.heroMetaText}>{driver.location}</Text>
+            <View style={[s.verifyChip, driver.isVerified && s.verifyChipOn]}>
+              <Ionicons name="card-outline" size={12} color={driver.isVerified ? Colors.accent : Colors.grayLight} />
+              <Text style={[s.verifyChipText, driver.isVerified && s.verifyChipTextOn]}>KTP</Text>
             </View>
-            <View style={s.heroMetaRow}>
-              <Ionicons name="trophy-outline" size={12} color={Colors.grayLight} />
-              <Text style={s.heroMetaText}>
-                {driver.experienceYears}{tx('thn', '년', 'yr')} {tx('pengalaman', '경력', 'exp')} · {driver.licenseClass}
-              </Text>
+            <View style={[s.verifyChip, s.verifyChipOn]}>
+              <Ionicons name="finger-print-outline" size={12} color={Colors.accent} />
+              <Text style={[s.verifyChipText, s.verifyChipTextOn]}>본인인증</Text>
             </View>
           </View>
         </View>
@@ -159,6 +192,21 @@ export default function DriverDetailScreen({ navigation, route }: Props) {
           </View>
         </View>
 
+        {/* Gallery — SNS photos */}
+        <View style={s.section}>
+          <View style={s.galleryHeader}>
+            <Text style={s.sectionTitle}>{tx('Foto', '사진', 'Photos')}</Text>
+            <Text style={s.galleryCount}>{GALLERY_PHOTOS.length}</Text>
+          </View>
+          <View style={s.galleryGrid}>
+            {GALLERY_PHOTOS.map((uri, i) => (
+              <View key={i} style={s.galleryCell}>
+                <Image source={{ uri }} style={s.galleryImage} />
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* Info */}
         <View style={s.infoBox}>
           <Ionicons name="shield-checkmark" size={16} color={Colors.accent} />
@@ -201,11 +249,59 @@ const s = StyleSheet.create({
   backBtn: {
     position: 'absolute', left: 16, zIndex: 10,
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: Colors.white,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    alignItems: 'center', justifyContent: 'center',
+    ...Shadow.sm,
+  },
+  shareBtn: {
+    position: 'absolute', right: 16, zIndex: 10,
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.95)',
     alignItems: 'center', justifyContent: 'center',
     ...Shadow.sm,
   },
 
+  // Cover
+  coverWrap:    { width: '100%', height: 180, position: 'relative', backgroundColor: Colors.accentLight },
+  coverImage:   { width: '100%', height: '100%' },
+  coverOverlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.18)' },
+
+  // SNS hero
+  heroSns: {
+    paddingHorizontal: 20, paddingBottom: 18,
+    alignItems: 'center',
+    borderBottomWidth: 1, borderBottomColor: Colors.border,
+  },
+  avatarRing: {
+    marginTop: -54,
+    width: 112, height: 112, borderRadius: 56,
+    backgroundColor: Colors.white,
+    alignItems: 'center', justifyContent: 'center',
+    ...Shadow.md,
+    position: 'relative',
+    marginBottom: 12,
+  },
+  avatarBig: { width: 104, height: 104, borderRadius: 52 },
+  availStatusDot: {
+    position: 'absolute', bottom: 6, right: 6,
+    width: 18, height: 18, borderRadius: 9,
+    backgroundColor: Colors.success,
+    borderWidth: 3, borderColor: Colors.white,
+  },
+
+  verifyChipRow: { flexDirection: 'row', gap: 6, marginTop: 12, flexWrap: 'wrap', justifyContent: 'center' },
+  verifyChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingHorizontal: 10, paddingVertical: 6,
+    borderRadius: 14,
+    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: Colors.section,
+  },
+  verifyChipOn:      { backgroundColor: Colors.accentLight, borderColor: Colors.accent + '40' },
+  verifyChipText:    { fontSize: 11, fontWeight: '600', color: Colors.grayLight },
+  verifyChipTextOn:  { color: Colors.accent },
+
+  // legacy
   hero: {
     paddingHorizontal: 20, paddingBottom: 20,
     flexDirection: 'row', gap: 16, alignItems: 'flex-start',
@@ -258,6 +354,13 @@ const s = StyleSheet.create({
   },
   serviceEmoji: { fontSize: 14 },
   serviceLabel: { fontSize: 12, fontWeight: '700' },
+
+  // Gallery
+  galleryHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 12 },
+  galleryCount:  { fontSize: 12, color: Colors.grayLight, fontWeight: '500' },
+  galleryGrid:   { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  galleryCell:   { width: '32%', aspectRatio: 1, borderRadius: 10, overflow: 'hidden', backgroundColor: Colors.section },
+  galleryImage:  { width: '100%', height: '100%' },
 
   skillRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
   skillLabel: { fontSize: 12, color: Colors.gray, width: 100 },

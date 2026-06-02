@@ -13,7 +13,7 @@ import { useLanguageStore } from '../../store/languageStore';
 import LanguageSelector from '../../components/common/LanguageSelector';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
-type DemoIcon = 'person-outline' | 'home-outline';
+type DemoIcon = 'person-outline' | 'home-outline' | 'car-outline';
 
 export default function LoginScreen({ navigation }: Props) {
   const { t } = useLanguageStore();
@@ -28,6 +28,7 @@ export default function LoginScreen({ navigation }: Props) {
   const DEMO: { label: string; phone: string; icon: DemoIcon; desc: string }[] = [
     { label: t.auth.customer, phone: '0812-3456-7890', icon: 'person-outline', desc: t.auth.customerDesc },
     { label: t.auth.helper,   phone: '0812-3456-7891', icon: 'home-outline',   desc: t.auth.helperDesc },
+    { label: t.auth.driver,   phone: '0812-3456-7892', icon: 'car-outline',    desc: t.auth.driverDesc },
   ];
 
   return (

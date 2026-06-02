@@ -10,6 +10,11 @@ import { Colors, Radius, Shadow } from '../../constants/colors';
 import { getMonthlyAwardBadge } from '../../constants/monthlyAwards';
 import { MvpMiniBadge } from '../../components/common/MonthlyAwardCard';
 import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3 } from '../../constants/photos';
+
+// 워커가 SNS처럼 본인 프로필 꾸미는 톤 — 6장 (WorkerProfileScreen 동일)
+const GALLERY_PHOTOS: string[] = [W1, W2, W4, W5, W6, W7];
+// 기본 커버 (워커가 따로 설정 안 한 경우 — W3 사용. WorkerProfileScreen 기본값과 동일)
+const DEFAULT_COVER = W3;
 import { RootStackParamList, Worker } from '../../types';
 import { useLanguageStore } from '../../store/languageStore';
 
@@ -147,6 +152,7 @@ const MOCK_REVIEWS = [
   { id: 'r3', name: 'Bunda Tari',  photo: C3, rating: 4, text: 'Ramah dan profesional. Masakannya enak, keluarga puas.', date: '2 minggu lalu' },
 ];
 
+
 export default function WorkerDetailScreen({ navigation, route }: Props) {
   const { workerId } = route.params;
   const { t } = useLanguageStore();
@@ -181,56 +187,75 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
     });
   };
 
+  // 워커별 커버 — mock: 모든 워커가 같은 W3 사용 (실제로는 worker.coverPhoto 필드 만들어서 워커가 설정)
+  // 미설정 워커는 흰 배경
+  const coverPhoto: string | null = DEFAULT_COVER;
+
   return (
     <View style={s.root}>
-      {/* Back button overlay */}
-      <TouchableOpacity style={[s.backBtn, { top: insets.top + 6 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="chevron-back" size={24} color={Colors.dark} />
-      </TouchableOpacity>
-
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Hero — photo + identity */}
-        <View style={[s.hero, { paddingTop: insets.top + 34 }]}>
-          {worker.photo ? (
-            <Image source={{ uri: worker.photo }} style={s.heroPhoto} />
+        {/* ── Cover photo (SNS-style — 워커가 설정한 사진. 없으면 흰 배경) ── */}
+        <View style={s.coverWrap}>
+          {coverPhoto ? (
+            <Image source={{ uri: coverPhoto }} style={s.coverImage} />
           ) : (
-            <View style={[s.heroPhoto, s.heroPhotoFallback]}>
-              <Text style={s.heroPhotoLetter}>{worker.name.charAt(0)}</Text>
-            </View>
+            <View style={[s.coverImage, { backgroundColor: Colors.white }]} />
           )}
-          <View style={s.heroInfo}>
-            <View style={s.heroNameRow}>
-              <Text style={s.heroName}>{worker.name}</Text>
-              {worker.isVerified && (
-                <Ionicons name="checkmark-circle" size={18} color={Colors.accent} />
-              )}
-              {getMonthlyAwardBadge(worker.id) && <MvpMiniBadge role="helper" />}
+          {/* Floating back button on cover */}
+          <TouchableOpacity style={[s.backBtn, { top: insets.top + 6 }]} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('CustomerTabs' as never)}>
+            <Ionicons name="chevron-back" size={24} color={Colors.dark} />
+          </TouchableOpacity>
+          <TouchableOpacity style={[s.shareBtn, { top: insets.top + 6 }]}>
+            <Ionicons name="share-outline" size={20} color={Colors.dark} />
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Hero — avatar overlapping cover + identity ── */}
+        <View style={s.heroSns}>
+          <View style={s.avatarRing}>
+            {worker.photo ? (
+              <Image source={{ uri: worker.photo }} style={s.avatarBig} />
+            ) : (
+              <View style={[s.avatarBig, s.heroPhotoFallback]}>
+                <Text style={s.heroPhotoLetter}>{worker.name.charAt(0)}</Text>
+              </View>
+            )}
+            {worker.isAvailable && <View style={s.availStatusDot} />}
+          </View>
+
+          <View style={s.heroNameRow}>
+            <Text style={s.heroNameBig}>{worker.name}</Text>
+            {worker.isVerified && (
+              <Ionicons name="checkmark-circle" size={20} color={Colors.accent} />
+            )}
+            {getMonthlyAwardBadge(worker.id) && <MvpMiniBadge role="helper" />}
+          </View>
+
+          <View style={s.heroMeta}>
+            <Ionicons name="location-outline" size={13} color={Colors.grayLight} />
+            <Text style={s.heroMetaText}>{worker.location}</Text>
+          </View>
+
+          <View style={s.heroPillsRow}>
+            <View style={[s.pill, { backgroundColor: isTutor ? Colors.tutorLight : Colors.helperLight }]}>
+              <Ionicons
+                name={isTutor ? 'school-outline' : 'home-outline'}
+                size={11}
+                color={isTutor ? Colors.tutorColor : Colors.helperColor}
+              />
+              <Text style={[s.pillText, { color: isTutor ? Colors.tutorColor : Colors.helperColor }]}>
+                {isTutor ? t.services.tutorFull : t.services.art}
+              </Text>
             </View>
-            <View style={s.heroMeta}>
-              <Ionicons name="location-outline" size={13} color={Colors.grayLight} />
-              <Text style={s.heroMetaText}>{worker.location}</Text>
+            <View style={s.pill}>
+              <Ionicons name="star" size={11} color={Colors.accent} />
+              <Text style={s.pillText}>{worker.rating} rating</Text>
             </View>
-            <View style={s.heroPillsRow}>
-              <View style={[s.pill, { backgroundColor: isTutor ? Colors.tutorLight : Colors.helperLight }]}>
-                <Ionicons
-                  name={isTutor ? 'school-outline' : 'home-outline'}
-                  size={11}
-                  color={isTutor ? Colors.tutorColor : Colors.helperColor}
-                />
-                <Text style={[s.pillText, { color: isTutor ? Colors.tutorColor : Colors.helperColor }]}>
-                  {isTutor ? t.services.tutorFull : t.services.art}
-                </Text>
-              </View>
-              <View style={s.pill}>
-                <Ionicons name="star" size={11} color={Colors.accent} />
-                <Text style={s.pillText}>{worker.rating} rating</Text>
-              </View>
-              <View style={[s.pill, { backgroundColor: worker.isAvailable ? '#F0FDF4' : Colors.section }]}>
-                <View style={[s.availDot, { backgroundColor: worker.isAvailable ? Colors.success : Colors.grayLight }]} />
-                <Text style={[s.pillText, { color: worker.isAvailable ? Colors.success : Colors.grayLight }]}>
-                  {worker.isAvailable ? t.workerDetail.available : t.workerDetail.busy}
-                </Text>
-              </View>
+            <View style={[s.pill, { backgroundColor: worker.isAvailable ? '#F0FDF4' : Colors.section }]}>
+              <View style={[s.availDot, { backgroundColor: worker.isAvailable ? Colors.success : Colors.grayLight }]} />
+              <Text style={[s.pillText, { color: worker.isAvailable ? Colors.success : Colors.grayLight }]}>
+                {worker.isAvailable ? t.workerDetail.available : t.workerDetail.busy}
+              </Text>
             </View>
           </View>
         </View>
@@ -252,6 +277,29 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
           ))}
         </View>
 
+        {/* Verification badges */}
+        <View style={s.section}>
+          <Text style={s.sectionTitle}>신뢰 정보</Text>
+          <View style={s.verifyRow}>
+            <View style={[s.verifyChip, worker.isVerified && s.verifyChipOn]}>
+              <Ionicons name="card-outline" size={14} color={worker.isVerified ? Colors.accent : Colors.grayLight} />
+              <Text style={[s.verifyText, worker.isVerified && s.verifyTextOn]}>KTP</Text>
+            </View>
+            <View style={[s.verifyChip, worker.isVerified && s.verifyChipOn]}>
+              <Ionicons name="shield-checkmark-outline" size={14} color={worker.isVerified ? Colors.accent : Colors.grayLight} />
+              <Text style={[s.verifyText, worker.isVerified && s.verifyTextOn]}>BPJS</Text>
+            </View>
+            <View style={[s.verifyChip, worker.isVerified && s.verifyChipOn]}>
+              <Ionicons name="card-outline" size={14} color={worker.isVerified ? Colors.accent : Colors.grayLight} />
+              <Text style={[s.verifyText, worker.isVerified && s.verifyTextOn]}>Bank</Text>
+            </View>
+            <View style={[s.verifyChip, s.verifyChipOn]}>
+              <Ionicons name="finger-print-outline" size={14} color={Colors.accent} />
+              <Text style={[s.verifyText, s.verifyTextOn]}>본인인증</Text>
+            </View>
+          </View>
+        </View>
+
         {/* About */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>{t.workerDetail.about}</Text>
@@ -269,6 +317,23 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
             ))}
           </View>
         </View>
+
+        {/* Gallery — SNS photos */}
+        {!isTutor && (
+          <View style={s.section}>
+            <View style={s.portfolioHeader}>
+              <Text style={s.sectionTitle}>사진</Text>
+              <Text style={s.portfolioCount}>{GALLERY_PHOTOS.length}</Text>
+            </View>
+            <View style={s.portfolioGrid}>
+              {GALLERY_PHOTOS.map((uri, i) => (
+                <View key={i} style={s.portfolioCell}>
+                  <Image source={{ uri }} style={s.portfolioImage} />
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {/* Booking calculator */}
         <View style={s.section}>
@@ -382,12 +447,50 @@ const s = StyleSheet.create({
   backBtn: {
     position: 'absolute', left: 16, zIndex: 10,
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: Colors.white,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    alignItems: 'center', justifyContent: 'center',
+    ...Shadow.sm,
+  },
+  shareBtn: {
+    position: 'absolute', right: 16, zIndex: 10,
+    width: 36, height: 36, borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.95)',
     alignItems: 'center', justifyContent: 'center',
     ...Shadow.sm,
   },
 
-  // Hero
+  // ── Cover (SNS-style) ──
+  coverWrap: { width: '100%', height: 180, position: 'relative', backgroundColor: Colors.accentLight },
+  coverImage: { width: '100%', height: '100%' },
+  coverOverlay: {
+    position: 'absolute', inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.18)',
+  },
+
+  // ── SNS hero ──
+  heroSns: {
+    paddingHorizontal: 20, paddingTop: 0, paddingBottom: 18,
+    alignItems: 'center',
+    borderBottomWidth: 1, borderBottomColor: Colors.border,
+  },
+  avatarRing: {
+    marginTop: -54,
+    width: 112, height: 112, borderRadius: 56,
+    backgroundColor: Colors.white,
+    alignItems: 'center', justifyContent: 'center',
+    ...Shadow.md,
+    position: 'relative',
+  },
+  avatarBig: { width: 104, height: 104, borderRadius: 52 },
+  availStatusDot: {
+    position: 'absolute', bottom: 6, right: 6,
+    width: 18, height: 18, borderRadius: 9,
+    backgroundColor: Colors.success,
+    borderWidth: 3, borderColor: Colors.white,
+  },
+  heroNameBig: { fontSize: 22, fontWeight: '800', color: Colors.dark },
+
+  // Hero (legacy — kept for fallback)
   hero: {
     paddingHorizontal: 20, paddingBottom: 20,
     flexDirection: 'row', gap: 16, alignItems: 'flex-start',
@@ -400,11 +503,31 @@ const s = StyleSheet.create({
   },
   heroPhotoLetter: { fontSize: 32, fontWeight: '700', color: Colors.accent },
   heroInfo:   { flex: 1 },
-  heroNameRow:{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 5 },
+  heroNameRow:{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10, marginBottom: 5 },
   heroName:   { fontSize: 20, fontWeight: '700', color: Colors.dark },
   heroMeta:   { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 10 },
   heroMetaText: { fontSize: 13, color: Colors.gray },
-  heroPillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  heroPillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, justifyContent: 'center' },
+
+  // ── Verification chips ──
+  verifyRow:    { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  verifyChip:   {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 11, paddingVertical: 7,
+    borderRadius: Radius.pill,
+    borderWidth: 1.2, borderColor: Colors.border,
+    backgroundColor: Colors.section,
+  },
+  verifyChipOn: { backgroundColor: Colors.accentLight, borderColor: Colors.accent + '40' },
+  verifyText:   { fontSize: 12, fontWeight: '600', color: Colors.grayLight },
+  verifyTextOn: { color: Colors.accent },
+
+  // ── Portfolio grid ──
+  portfolioHeader: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginBottom: 12 },
+  portfolioCount:  { fontSize: 12, color: Colors.grayLight, fontWeight: '500' },
+  portfolioGrid:   { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  portfolioCell:   { width: '32%', aspectRatio: 1, borderRadius: 10, overflow: 'hidden', backgroundColor: Colors.section },
+  portfolioImage:  { width: '100%', height: '100%' },
   pill: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     backgroundColor: Colors.section, borderRadius: Radius.pill,

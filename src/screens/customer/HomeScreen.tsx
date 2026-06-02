@@ -99,12 +99,12 @@ interface MockWorker {
 }
 
 const MOCK_WORKERS: MockWorker[] = [
-  { id:'w1', name:'Sari Dewi',       photo:W1, location:'Kebayoran Baru', rating:5.0, pricePerHour:30000, totalJobs:312, isAvailable:true,  skills:['Beberes','Masak','Cuci'],   isVerified:true, temperature:84.2 },
-  { id:'w2', name:'Rina Wulandari',  photo:W2, location:'Cilandak',       rating:4.9, pricePerHour:25000, totalJobs:198, isAvailable:true,  skills:['Masak Sehat','Beberes'],    isVerified:true, temperature:72.6 },
-  { id:'w3', name:'Dewi Anggraeni',  photo:W3, location:'Kemang',         rating:4.7, pricePerHour:28000, totalJobs:143, isAvailable:true,  skills:['Masak','Cuci'],             isVerified:true, temperature:58.9 },
-  { id:'w4', name:'Fitri Handayani', photo:W4, location:'Fatmawati',      rating:4.9, pricePerHour:27000, totalJobs:227, isAvailable:true,  skills:['Setrika','Beberes'],        isVerified:true, temperature:76.3 },
-  { id:'w5', name:'Indah Lestari',   photo:W5, location:'Pondok Indah',   rating:4.8, pricePerHour:35000, totalJobs:89,  isAvailable:false, skills:['Deep Cleaning'],            isVerified:true, temperature:48.1 },
-  { id:'w6', name:'Nur Aini',        photo:W6, location:'BSD City',       rating:4.8, pricePerHour:24000, totalJobs:89,  isAvailable:true,  skills:['Cuci','Setrika'],           isVerified:true, temperature:51.7 },
+  { id:'w1', name:'Renny Ivonnie',   photo:W1, location:'Kebayoran Baru', rating:4.6, pricePerHour:25000, totalJobs:112, isAvailable:true,  skills:['Cuci','Belanja','Deep Clean'],   isVerified:true, temperature:49.4 },
+  { id:'w2', name:'Brilian Zabrina', photo:W2, location:'Senopati',       rating:4.7, pricePerHour:15000, totalJobs:132, isAvailable:true,  skills:['Cuci','Masak','Belanja'],        isVerified:true, temperature:64.1 },
+  { id:'w3', name:'Fitri Yatun',     photo:W3, location:'Cilandak',       rating:4.7, pricePerHour:20000, totalJobs:208, isAvailable:false, skills:['Beberes','Asuh Anak','Belanja'], isVerified:true, temperature:64.8 },
+  { id:'w4', name:'Sarinah Sohari',  photo:W4, location:'Pondok Indah',   rating:4.9, pricePerHour:15000, totalJobs:86,  isAvailable:true,  skills:['Asuh Anak','Belanja','Lansia'],  isVerified:true, temperature:52.5 },
+  { id:'w5', name:'Yeni',            photo:W5, location:'Kemang',         rating:5.0, pricePerHour:25000, totalJobs:108, isAvailable:true,  skills:['Deep Clean','Asuh Anak','Masak'], isVerified:true, temperature:55.9 },
+  { id:'w6', name:'Rani Oktaviani',  photo:W6, location:'Menteng',        rating:4.5, pricePerHour:30000, totalJobs:247, isAvailable:true,  skills:['Cuci','Belanja','Masak'],        isVerified:true, temperature:68.8 },
 ];
 
 // ── Mock drivers (고객 차량 운전 서비스) ──────────────────────────
@@ -260,8 +260,8 @@ export default function HomeScreen() {
             const isDriver = cat.id.startsWith('driver_');
             const onPress = () => {
               if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
-              if (isDriver)            { (navigation as any).navigate('DriverBoard'); return; }
-              (navigation as any).navigate('Map', { expanded: true });
+              if (isDriver)            { (navigation as any).navigate('Map', { expanded: true, partnerFilter: 'driver' }); return; }
+              (navigation as any).navigate('Map', { expanded: true, partnerFilter: 'helper' });
             };
             const v2Src = V2_ICONS[cat.id];
             return (
@@ -429,7 +429,7 @@ export default function HomeScreen() {
                 : 'Jalan aman.\nPerjalanan nyaman.'}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => (navigation as any).navigate('DriverBoard')}>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Map', { expanded: true, partnerFilter: 'driver' })}>
             <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
           </TouchableOpacity>
         </View>

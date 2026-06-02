@@ -47,6 +47,7 @@ export interface Translations {
     customer: string;
     customerDesc: string;
     driver: string;
+    driverDesc: string;
     helper: string;
     helperDesc: string;
     iWantTo: string;
@@ -501,6 +502,7 @@ const id: Translations = {
     demoLogin: 'Login cepat (demo)',
     quickLogin: 'Login cepat (demo)',
     customer: 'Pelanggan',
+    driverDesc: 'Terima order antar',
     customerDesc: 'Cari & pesan ART',
     driver: 'Driver',
     helper: 'ART',
@@ -905,6 +907,7 @@ const en: Translations = {
     demoLogin: 'Quick login (demo)',
     quickLogin: 'Quick login (demo)',
     customer: 'Customer',
+    driverDesc: 'Accept ride orders',
     customerDesc: 'Find & book a housekeeper',
     driver: 'Driver',
     helper: 'Housekeeper',
@@ -1308,6 +1311,7 @@ const ko: Translations = {
     demoLogin: '빠른 로그인 (데모)',
     quickLogin: '빠른 로그인 (데모)',
     customer: '고객',
+    driverDesc: '배차 받기',
     customerDesc: 'ART 찾기 & 예약',
     driver: '드라이버',
     helper: '가사도우미',
@@ -1711,6 +1715,7 @@ const zh: Translations = {
     demoLogin: '快速登录（演示）',
     quickLogin: '快速登录（演示）',
     customer: '客户',
+    driverDesc: '接受订单',
     customerDesc: '查找并预约家政',
     driver: '司机',
     helper: '家政',
@@ -2114,6 +2119,7 @@ const ja: Translations = {
     demoLogin: 'クイックログイン（デモ）',
     quickLogin: 'クイックログイン（デモ）',
     customer: 'お客様',
+    driverDesc: '依頼を受ける',
     customerDesc: 'ヘルパーを探して予約',
     driver: 'ドライバー',
     helper: '家事ヘルパー',

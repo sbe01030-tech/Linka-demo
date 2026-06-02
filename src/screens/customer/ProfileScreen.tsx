@@ -347,6 +347,15 @@ function SplashPreviewModal({ visible, onClose }: { visible: boolean; onClose: (
       Animated.timing(textOpacity, { toValue: 1, delay: 1000, duration: 600, useNativeDriver: true }),
       Animated.timing(textY,       { toValue: 0, delay: 1000, duration: 600, useNativeDriver: true }),
     ]).start();
+
+    return () => {
+      // 모달 닫힐 때 진행 중 애니메이션 정지 — Android 네이티브 노드 race 방지
+      nodeScales.forEach((v) => v.stopAnimation());
+      nodeOpacity.forEach((v) => v.stopAnimation());
+      edgeOpacity.forEach((v) => v.stopAnimation());
+      textOpacity.stopAnimation();
+      textY.stopAnimation();
+    };
   }, [visible]);
 
   return (

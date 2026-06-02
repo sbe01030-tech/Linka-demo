@@ -29,20 +29,24 @@ const WORKER_ICONS: Record<string, string> = {
 
 export default function SlidingTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets   = useSafeAreaInsets();
-  const numTabs  = state.routes.length;
+  const numTabs  = Math.max(state.routes.length, 1);   // 0 division 방어
   const tabW     = W / numTabs;
+  const initialX = Number.isFinite(state.index * tabW) ? state.index * tabW : 0;
 
   // 슬라이딩 pill x 위치
-  const slideX = useRef(new Animated.Value(state.index * tabW)).current;
+  const slideX = useRef(new Animated.Value(initialX)).current;
 
   useEffect(() => {
-    Animated.spring(slideX, {
-      toValue: state.index * tabW,
+    const target = Number.isFinite(state.index * tabW) ? state.index * tabW : 0;
+    const anim = Animated.spring(slideX, {
+      toValue: target,
       useNativeDriver: true,
       speed: 22,
       bounciness: 10,
-    }).start();
-  }, [state.index]);
+    });
+    anim.start();
+    return () => anim.stop();   // 언마운트/리렌더 시 native 노드 깔끔히 정리
+  }, [state.index, tabW]);
 
   const icons = CUSTOMER_ICONS[state.routes[0]?.name] !== undefined
     ? CUSTOMER_ICONS

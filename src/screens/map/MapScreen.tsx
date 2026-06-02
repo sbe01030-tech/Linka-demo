@@ -192,20 +192,29 @@ export default function MapScreen() {
     })();
   }, []);
 
-  // ── Handle navigation params (expand sheet / set service type) ──
+  // 언마운트 시 진행 중인 sheet/detail 애니메이션 정지 — Android 네이티브 노드 정리
+  useEffect(() => {
+    return () => {
+      sheetAnim.stopAnimation();
+      detailAnim.stopAnimation();
+    };
+  }, [sheetAnim, detailAnim]);
+
+  // ── Handle navigation params (expand sheet / set service type / partner filter) ──
   // Use specific primitive deps to avoid infinite loop from setParams triggering re-renders
   useEffect(() => {
-    const p = route.params as { expanded?: boolean; serviceType?: SvcType } | undefined;
-    if (!p?.expanded && p?.serviceType === undefined) return;
-    if (p.serviceType !== undefined) setServiceType(p.serviceType);
+    const p = route.params as { expanded?: boolean; serviceType?: SvcType; partnerFilter?: PartnerFilter } | undefined;
+    if (!p?.expanded && p?.serviceType === undefined && p?.partnerFilter === undefined) return;
+    if (p.serviceType   !== undefined) setServiceType(p.serviceType);
+    if (p.partnerFilter !== undefined) setPartnerFilter(p.partnerFilter);
     if (p.expanded) {
       setIsExpanded(true);
       sheetAnim.setValue(0);
     }
     // Clear only the params we consumed so subsequent focuses don't re-trigger
-    (navigation as any).setParams({ expanded: undefined, serviceType: undefined });
+    (navigation as any).setParams({ expanded: undefined, serviceType: undefined, partnerFilter: undefined });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params?.expanded, route.params?.serviceType]);
+  }, [route.params?.expanded, route.params?.serviceType, route.params?.partnerFilter]);
 
   // ── Sheet expand/collapse ────────────────────────────────────
   const expandSheet = () => {

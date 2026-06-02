@@ -904,6 +904,9 @@ function DocModal({
     } else {
       Animated.timing(slideY, { toValue: SH, useNativeDriver: true, duration: 220 }).start();
     }
+    return () => {
+      slideY.stopAnimation();   // Android native 노드 race 방지
+    };
   }, [visible]);
 
   const closeLabel = lang === 'ko' ? '닫기' : lang === 'en' ? 'Close' : lang === 'ja' ? '閉じる' : lang === 'zh' ? '关闭' : 'Tutup';

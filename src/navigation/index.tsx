@@ -43,6 +43,8 @@ import TermsScreen          from '../screens/auth/TermsScreen';
 import ErrandBoardScreen   from '../screens/errand/ErrandBoardScreen';
 import ErrandCreateScreen  from '../screens/errand/ErrandCreateScreen';
 import ErrandDetailScreen  from '../screens/errand/ErrandDetailScreen';
+import ErrandApplyScreen   from '../screens/errand/ErrandApplyScreen';
+import KYCVerifyScreen     from '../screens/errand/KYCVerifyScreen';
 import DriverBoardScreen   from '../screens/driver/DriverBoardScreen';
 import DriverDetailScreen  from '../screens/driver/DriverDetailScreen';
 
@@ -120,6 +122,8 @@ export default function Navigation() {
             <Stack.Screen name="ErrandBoard"  component={ErrandBoardScreen}  options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="ErrandCreate" component={ErrandCreateScreen} options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="ErrandDetail" component={ErrandDetailScreen} options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ErrandApply"  component={ErrandApplyScreen}  options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="KYCVerify"    component={KYCVerifyScreen}    options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="DriverBoard"  component={DriverBoardScreen}  options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="DriverDetail" component={DriverDetailScreen} options={{ animation: 'slide_from_right' }} />
           </>
@@ -141,6 +145,8 @@ export default function Navigation() {
             <Stack.Screen name="ErrandBoard"   component={ErrandBoardScreen}   options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="ErrandCreate"  component={ErrandCreateScreen}  options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="ErrandDetail"  component={ErrandDetailScreen}  options={{ animation: 'slide_from_right' }} />
+            <Stack.Screen name="ErrandApply"   component={ErrandApplyScreen}   options={{ animation: 'slide_from_bottom' }} />
+            <Stack.Screen name="KYCVerify"     component={KYCVerifyScreen}     options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="DriverBoard"   component={DriverBoardScreen}   options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="DriverDetail"  component={DriverDetailScreen}  options={{ animation: 'slide_from_right' }} />
           </>

@@ -16,6 +16,7 @@ interface AuthState {
 const MOCK_USERS: User[] = [
   { id: '1', name: 'Bunda Wulandari', phone: '0812-3456-7890', role: 'customer', rating: 4.8 },
   { id: '2', name: 'Sari Dewi',       phone: '0812-3456-7891', role: 'helper',   rating: 5.0, totalJobs: 312, isVerified: true },
+  { id: '3', name: 'Rahmat Hidayat',  phone: '0812-3456-7892', role: 'driver',   rating: 4.9, totalJobs: 284, isVerified: true },
 ];
 
 export const useAuthStore = create<AuthState>((set) => ({

@@ -109,7 +109,17 @@ export default function SplashScreen({ navigation }: Props) {
       },
       3800
     );
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // 언마운트 시 진행 중인 native 애니메이션 노드 정리 (Android 크래시 방지)
+      nodeScales.forEach((v) => v.stopAnimation());
+      nodeOpacity.forEach((v) => v.stopAnimation());
+      edgeOpacity.forEach((v) => v.stopAnimation());
+      charOpacity.stopAnimation();
+      charY.stopAnimation();
+      textOpacity.stopAnimation();
+      textY.stopAnimation();
+    };
   }, []);
 
   return (

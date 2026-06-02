@@ -59,20 +59,76 @@ export interface Worker extends User {
   licenseClass?: string;                  // SIM A, SIM B1 등
 }
 
-export interface ErrandRequest {
+export type ErrandCategory =
+  | 'shopping'    // Belanja
+  | 'delivery'    // Antar/Terima paket
+  | 'queuing'     // Antre
+  | 'cleaning'    // Bersih-bersih ringan
+  | 'pestcontrol' // Tangkap serangga
+  | 'flyer'       // Bagi brosur
+  | 'moving'      // Pindah barang
+  | 'pet'         // Pet sitting / walk
+  | 'tutor'       // Les pendek
+  | 'other';
+
+export type ErrandPayType = 'perJob' | 'hourly' | 'daily';
+export type ErrandStatus  = 'open' | 'assigned' | 'completed' | 'cancelled';
+
+export interface ErrandPost {
   id: string;
+  authorId: string;
+  authorName: string;          // "Anonim" or display name
+  authorTemperature?: number;  // 작성자 온도 (있으면 표시)
   title: string;
   description: string;
-  location: string;
-  budget: number;
-  category: 'shopping' | 'delivery' | 'queuing' | 'other';
-  status: 'open' | 'accepted' | 'completed' | 'cancelled';
-  authorId: string;
-  authorName: string;
-  createdAt: string;
-  deadline?: string;
-  acceptedBy?: string;
+  photos: string[];            // image URIs
+  category: ErrandCategory;
+  payType: ErrandPayType;
+  amount: number;              // Rp
+  sameDayPayment: boolean;     // "당일지급" 배지
+  scheduledLabel: string;      // e.g. "Hari ini" / "Besok" / "Senin 2 Jun"
+  timeLabel: string;           // e.g. "Negotiable" / "10:00 - 12:00"
+  area: { name: string; lat: number; lng: number; radius: number };
+  views: number;
+  createdAt: string;           // relative label
+  status: ErrandStatus;
+  applicantIds: string[];
+  assignedTo?: string;
 }
+
+export interface ErrandApplicant {
+  id: string;
+  name: string;
+  photo?: string;
+  temperature: number;
+  appliedAt: string;           // "1초 전 활동" 같은 라벨
+  resume?: ErrandResume;
+}
+
+export interface ErrandResume {
+  photoUri?: string;
+  experiences: string[];       // free-text bullets
+  intro: string;               // 자기소개 본문
+  strengths: string[];         // 최대 2개 — 'tepat-waktu' 같은 코드
+  extras: string[];            // 'non-smoker', 'has-vehicle', etc.
+  education?: string;
+  certifications?: string[];
+}
+
+export interface KYCInfo {
+  isVerified: boolean;
+  nik?: string;                // 16-digit Indonesian ID
+  fullName?: string;           // sesuai KTP
+  dob?: string;
+  birthplace?: string;
+  gender?: 'male' | 'female';
+  ktpPhotoUri?: string;        // mock placeholder
+  selfieUri?: string;          // mock placeholder
+  verifiedAt?: string;
+}
+
+// 기존 ErrandRequest는 ErrandPost로 통합됨. 호환용 alias 유지.
+export type ErrandRequest = ErrandPost;
 
 export interface CommunityPost {
   id: string;
@@ -165,6 +221,8 @@ export type RootStackParamList = {
   ErrandBoard: undefined;
   ErrandCreate: undefined;
   ErrandDetail: { errandId: string };
+  ErrandApply: { errandId: string };
+  KYCVerify: { onDoneRoute?: keyof RootStackParamList; onDoneParams?: any };
   Review: { orderId: string; workerName: string; workerPhoto?: any };
   Booking: { workerId: string; workerName: string; workerPhoto?: any; pricePerHour: number; serviceType: ServiceType; pricePerDay?: number; driverServices?: DriverServiceKind[]; drivableTypes?: DrivableVehicleType[] };
   DriverBoard: undefined;
@@ -176,7 +234,7 @@ export type RootStackParamList = {
 export type CustomerTabParamList = {
   Home: undefined;
   Community: undefined;
-  Map: { expanded?: boolean; serviceType?: 'regular' | 'onetime' } | undefined;
+  Map: { expanded?: boolean; serviceType?: 'regular' | 'onetime'; partnerFilter?: 'helper' | 'driver' } | undefined;
   ChatList: undefined;
   Profile: undefined;
 };
