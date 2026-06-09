@@ -25,6 +25,11 @@ const seedPosts: ErrandPost[] = [
     id: 'e1',
     authorId: 'cust-1', authorName: 'Anonim', authorTemperature: 37.3,
     title: 'Tolong bunuh kecoa di kamar mandi ㅠㅠ',
+    titleI18n: {
+      ko: '화장실에 바퀴벌레 좀 잡아주세요 ㅠㅠ',
+      en: 'Please get rid of the cockroach in my bathroom ㅠㅠ',
+      id: 'Tolong bunuh kecoa di kamar mandi ㅠㅠ',
+    },
     description: '(Foto kedua ada kecoanya!)\nSudah disemprot Hit tapi ukurannya gede banget, takut buat dibuang...\nTolongin ya...',
     photos: [],
     category: 'pestcontrol',
@@ -38,6 +43,11 @@ const seedPosts: ErrandPost[] = [
     id: 'e2',
     authorId: 'cust-2', authorName: 'Anonim', authorTemperature: 41.5,
     title: 'Tolong belikan barang di Indomaret',
+    titleI18n: {
+      ko: 'Indomaret에서 물건 좀 사다 주세요',
+      en: 'Please buy some items at Indomaret',
+      id: 'Tolong belikan barang di Indomaret',
+    },
     description: 'Aqua 1.5L 2 botol, roti tawar gandum 1 bungkus, mie instan goreng 2 bungkus.\nLagi sakit jadi nggak bisa keluar rumah.',
     photos: [],
     category: 'shopping',
@@ -51,6 +61,11 @@ const seedPosts: ErrandPost[] = [
     id: 'e3',
     authorId: 'cust-3', authorName: 'Anonim', authorTemperature: 36.8,
     title: 'Ambilkan paket di Alfamart',
+    titleI18n: {
+      ko: 'Alfamart에서 택배 좀 찾아다 주세요',
+      en: 'Pick up my package at Alfamart',
+      id: 'Ambilkan paket di Alfamart',
+    },
     description: 'Paket J&T ada di Alfamart dekat rumah. Ukurannya kecil dan ringan.\nLangsung antar ke pintu apartemen aja.',
     photos: [],
     category: 'delivery',
@@ -64,6 +79,11 @@ const seedPosts: ErrandPost[] = [
     id: 'e4',
     authorId: 'cust-4', authorName: 'Anonim', authorTemperature: 42.1,
     title: 'Antrekan di restoran SCBD',
+    titleI18n: {
+      ko: 'SCBD 레스토랑 줄 대신 서주세요',
+      en: 'Wait in line at an SCBD restaurant',
+      id: 'Antrekan di restoran SCBD',
+    },
     description: 'Restoran viral di SCBD, biasanya antre 1,5–2 jam. Saya kabari kalau hampir sampai.\nOngkos transport + tip ada.',
     photos: [],
     category: 'queuing',
@@ -77,6 +97,11 @@ const seedPosts: ErrandPost[] = [
     id: 'e5',
     authorId: 'cust-5', authorName: 'Anonim', authorTemperature: 38.9,
     title: 'Bagi brosur di area Pondok Indah',
+    titleI18n: {
+      ko: 'Pondok Indah 지역 전단지 배포',
+      en: 'Hand out flyers around Pondok Indah',
+      id: 'Bagi brosur di area Pondok Indah',
+    },
     description: 'Promosi cafe baru — 500 brosur, sekitar 3 jam. Sudah disiapkan rute.\nBoleh dibawa sambil keliling pakai motor.',
     photos: [],
     category: 'flyer',
@@ -90,6 +115,11 @@ const seedPosts: ErrandPost[] = [
     id: 'e6',
     authorId: 'cust-6', authorName: 'Anonim', authorTemperature: 36.5,
     title: 'Pet sitting 2 hari (kucing)',
+    titleI18n: {
+      ko: '2일 펫 시팅 (고양이)',
+      en: '2-day pet sitting (cat)',
+      id: 'Pet sitting 2 hari (kucing)',
+    },
     description: 'Kucing 2 ekor, perlu kasih makan & main pagi sore. Saya keluar kota weekend ini.\nKunci akan dititipkan di security.',
     photos: [],
     category: 'pet',
@@ -191,6 +221,14 @@ export const CATEGORY_META: Record<ErrandCategory, { id: string; label: { id: st
   tutor:       { id: 'tutor',       label: { id: 'Les Singkat',      ko: '단기 과외',  en: 'Short Tutor' }, icon: 'school-outline',         bg: '#D2EAFF' },
   other:       { id: 'other',       label: { id: 'Lainnya',          ko: '기타',       en: 'Other'       }, icon: 'ellipsis-horizontal-outline', bg: '#EAEAEF' },
 };
+
+// 헬퍼: 글 제목 (번역 있으면 언어별, 없으면 원문 title)
+export function errandTitle(post: ErrandPost, lang: string): string {
+  if (post.titleI18n && (lang === 'ko' || lang === 'en' || lang === 'id')) {
+    return post.titleI18n[lang];
+  }
+  return post.title;
+}
 
 export function payLabel(payType: 'perJob' | 'hourly' | 'daily', amount: number, lang: 'ko' | 'en' | 'id'): string {
   const rp = `Rp ${amount.toLocaleString('id-ID')}`;

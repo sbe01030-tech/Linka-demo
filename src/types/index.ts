@@ -80,6 +80,7 @@ export interface ErrandPost {
   authorName: string;          // "Anonim" or display name
   authorTemperature?: number;  // 작성자 온도 (있으면 표시)
   title: string;
+  titleI18n?: { ko: string; en: string; id: string };  // 시드 글 제목 번역 (없으면 title 사용)
   description: string;
   photos: string[];            // image URIs
   category: ErrandCategory;
@@ -233,6 +234,7 @@ export type RootStackParamList = {
 
 export type CustomerTabParamList = {
   Home: undefined;
+  Explore: undefined;
   Community: undefined;
   Map: { expanded?: boolean; serviceType?: 'regular' | 'onetime'; partnerFilter?: 'helper' | 'driver' } | undefined;
   ChatList: undefined;

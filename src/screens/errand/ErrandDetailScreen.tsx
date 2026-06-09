@@ -15,7 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { RootStackParamList } from '../../types';
-import { useErrandStore, CATEGORY_META, payLabel } from '../../store/errandStore';
+import { useErrandStore, CATEGORY_META, payLabel, errandTitle } from '../../store/errandStore';
 import { useLanguageStore } from '../../store/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ErrandDetail'>;
@@ -86,7 +86,7 @@ export default function ErrandDetailScreen({ navigation, route }: Props) {
 
         {/* ── Title + time ── */}
         <View style={s.section}>
-          <Text style={s.title}>{post.title}</Text>
+          <Text style={s.title}>{errandTitle(post, lang)}</Text>
           <Text style={s.timeAgo}>{post.createdAt}</Text>
         </View>
 

@@ -13,7 +13,8 @@ const BRAND = Colors.accent;
 
 const CUSTOMER_ICONS: Record<string, string> = {
   Home:      'home',
-  Community: 'chatbubbles',
+  Explore:   'compass',
+  Community: 'chatbubbles',     // 탭에서 숨겨졌지만 매핑은 유지 (부활 대비)
   Map:       'search',
   ChatList:  'chatbubble-ellipses',
   Profile:   'person',

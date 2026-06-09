@@ -19,6 +19,7 @@ import RegisterScreen    from '../screens/auth/RegisterScreen';
 
 import HomeScreen         from '../screens/customer/HomeScreen';
 import CommunityScreen    from '../screens/community/CommunityScreen';
+import ExploreScreen      from '../screens/customer/ExploreScreen';
 import ProfileScreen      from '../screens/customer/ProfileScreen';
 import WorkerDetailScreen from '../screens/customer/WorkerDetailScreen';
 
@@ -71,10 +72,11 @@ function CustomerTabs() {
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home"      component={HomeScreen}      options={{ tabBarLabel: t.nav.home }} />
-      <Tab.Screen name="Community" component={CommunityScreen} options={{ tabBarLabel: t.community.title }} />
+      <Tab.Screen name="Explore"   component={ExploreScreen}   options={{ tabBarLabel: '탐색' }} />
       <Tab.Screen name="Map"       component={MapScreen}       options={{ tabBarLabel: t.nav.map }} />
       <Tab.Screen name="ChatList"  component={ChatListScreen}  options={{ tabBarLabel: t.nav.chat }} />
       <Tab.Screen name="Profile"   component={ProfileScreen}   options={{ tabBarLabel: t.nav.profile }} />
+      {/* 'Community' 탭은 시연 정리 차원에서 숨김 — 화면/라우트/타입은 보존, 필요 시 한 줄로 부활 가능 */}
     </Tab.Navigator>
   );
 }

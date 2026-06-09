@@ -15,7 +15,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { RootStackParamList, ErrandPost, ErrandCategory } from '../../types';
-import { useErrandStore, CATEGORY_META, payLabel } from '../../store/errandStore';
+import { useErrandStore, CATEGORY_META, payLabel, errandTitle } from '../../store/errandStore';
 import { useLanguageStore } from '../../store/languageStore';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -115,7 +115,7 @@ export default function ErrandBoardScreen() {
               onPress={() => navigation.navigate('ErrandDetail', { errandId: post.id })}
             >
               <View style={{ flex: 1 }}>
-                <Text style={s.recoItemTitle} numberOfLines={1}>{post.title}</Text>
+                <Text style={s.recoItemTitle} numberOfLines={1}>{errandTitle(post, lang)}</Text>
                 <Text style={s.recoItemMeta}>
                   {post.createdAt} · {payLabel(post.payType, post.amount, lang as any)}
                 </Text>
@@ -172,7 +172,7 @@ function ErrandCard({ post, lang, onPress }: { post: ErrandPost; lang: string; o
   return (
     <TouchableOpacity style={s.card} activeOpacity={0.85} onPress={onPress}>
       <View style={{ flex: 1, paddingRight: 12 }}>
-        <Text style={s.cardTitle} numberOfLines={2}>{post.title}</Text>
+        <Text style={s.cardTitle} numberOfLines={2}>{errandTitle(post, lang)}</Text>
 
         <View style={s.cardRow}>
           <Ionicons name="wallet-outline" size={14} color={Colors.gray} />
