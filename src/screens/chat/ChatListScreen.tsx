@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, Image,
@@ -8,78 +8,12 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
-import { W1, W2, W3, C1, C2, C3 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
+import { useChatStore } from '../../store/chatStore';
 import { useLanguageStore } from '../../store/languageStore';
-import { RootStackParamList, ChatThread } from '../../types';
+import { RootStackParamList } from '../../types';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
-
-// Mock chat threads for customer
-const CUSTOMER_CHATS: ChatThread[] = [
-  {
-    id: 'ch1',
-    name: 'Sari Dewi',
-    photo: W1,
-    role: 'helper',
-    lastMessage: 'Baik bu, saya akan datang jam 9 pagi ya',
-    time: '10:32',
-    unread: 2,
-    orderId: 'o1',
-  },
-  {
-    id: 'ch2',
-    name: 'Rina Wulandari',
-    photo: W2,
-    role: 'helper',
-    lastMessage: 'Sudah selesai bersih-bersih bu, terima kasih 🙏',
-    time: 'Kemarin',
-    unread: 0,
-    orderId: 'o2',
-  },
-  {
-    id: 'ch3',
-    name: 'Dewi Anggraeni',
-    photo: W3,
-    role: 'helper',
-    lastMessage: 'Besok saya bisa datang jam 8 pagi ya bu',
-    time: 'Sen',
-    unread: 0,
-  },
-];
-
-// Mock chat threads for worker
-const WORKER_CHATS: ChatThread[] = [
-  {
-    id: 'wch1',
-    name: 'Bunda Wulandari',
-    photo: C1,
-    role: 'customer',
-    lastMessage: 'Oke, ditunggu ya besok jam 9 pagi',
-    time: '10:32',
-    unread: 1,
-    orderId: 'wo1',
-  },
-  {
-    id: 'wch2',
-    name: 'Bunda Indah',
-    photo: C2,
-    role: 'customer',
-    lastMessage: 'Terima kasih banyak, rumah jadi bersih!',
-    time: 'Kemarin',
-    unread: 0,
-    orderId: 'wo2',
-  },
-  {
-    id: 'wch3',
-    name: 'Bunda Tari',
-    photo: C3,
-    role: 'customer',
-    lastMessage: 'Bisa mulai lebih awal tidak?',
-    time: 'Ming',
-    unread: 3,
-  },
-];
 
 export default function ChatListScreen() {
   const navigation = useNavigation<Nav>();
@@ -87,11 +21,31 @@ export default function ChatListScreen() {
   const { t } = useLanguageStore();
   const insets = useSafeAreaInsets();
 
+  const meId = user?.id ?? 'cust-me';
+  const threads = useChatStore((st) => st.threads);
+  const messagesByThread = useChatStore((st) => st.messagesByThread);
+
+  // 내가 낀 스레드만 → 상대방 기준 뷰모델
+  const chats = useMemo(() =>
+    threads
+      .filter((th) => th.customer.id === meId || th.helper.id === meId)
+      .map((th) => {
+        const other = th.customer.id === meId ? th.helper : th.customer;
+        const msgs = messagesByThread[th.id] ?? [];
+        const last = msgs[msgs.length - 1];
+        const unread = msgs.filter((m) => m.senderId !== meId && !m.read).length;
+        return {
+          id: th.id, name: other.name, photo: other.photo, role: other.role,
+          lastMessage: last?.text ?? '', time: last?.time ?? '', unread, orderId: th.orderId,
+        };
+      })
+      .sort((a, b) => b.time.localeCompare(a.time)),
+    [threads, messagesByThread, meId]);
+
   const isWorker = user?.role === 'helper';
-  const chats = isWorker ? WORKER_CHATS : CUSTOMER_CHATS;
   const totalUnread = chats.reduce((sum, c) => sum + c.unread, 0);
 
-  const openChat = (chat: ChatThread) => {
+  const openChat = (chat: typeof chats[number]) => {
     navigation.navigate('ChatDetail', {
       chatId: chat.id,
       name: chat.name,

@@ -104,11 +104,11 @@ export default function MonthlyAwardCard({ helper, driver, onPressHelper, onPres
 
         <View style={s.vDivider} />
 
-        {/* Driver */}
+        {/* Rising helper */}
         <TouchableOpacity style={s.winnerCol} onPress={onPressDriver} activeOpacity={0.82}>
-          <WinnerAvatar photo={driver.winnerPhoto} accent={Colors.tutorColor} icon="car" />
-          <Text style={[s.roleTag, { color: Colors.tutorColor }]}>
-            {tx(lang, '이 달의 드라이버', 'Driver', 'Sopir')}
+          <WinnerAvatar photo={driver.winnerPhoto} accent={Colors.helperColor} icon="ribbon" />
+          <Text style={[s.roleTag, { color: Colors.helperColor }]}>
+            {tx(lang, '이 달의 신인', 'Rising Star', 'Bintang Baru')}
           </Text>
           <Text style={s.winnerName} numberOfLines={1}>{driver.winnerName}</Text>
           <View style={[s.tempChip, { backgroundColor: Colors.accentLight, borderColor: Colors.accent + '30' }]}>

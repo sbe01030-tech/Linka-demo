@@ -8,6 +8,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../types';
 import { W1, W2, W3, W4 } from '../../constants/photos';
+import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { useBookingStore, toCustomerOrder } from '../../store/bookingStore';
+import { CUSTOMER_ME } from '../../store/chatStore';
 
 // 리뷰 완료된 주문 ID 추적 (ReviewScreen에서 공유)
 export const reviewedOrderIds = new Set<string>();
@@ -59,8 +62,13 @@ const MOCK_ORDERS = [
 
 export default function OrdersScreen() {
   const navigation = useNavigation<Nav>();
-  const { t } = useLanguageStore();
+  const { t, lang } = useLanguageStore();
+  const tx = (ko: string, en: string, id: string) => (lang === 'ko' ? ko : lang === 'en' ? en : id);
   const insets = useSafeAreaInsets();
+  const setBookingStatus = useBookingStore((st) => st.setStatus);
+  // 작업 완료 확인 사운드 (무음 모드에서도)
+  const doneSound = useAudioPlayer(require('../../../assets/gallery/Linka.mp3'));
+  React.useEffect(() => { setAudioModeAsync({ playsInSilentMode: true }).catch(() => {}); }, []);
   const [tab, setTab] = useState<'active' | 'history'>('active');
   const [orders, setOrders] = useState(MOCK_ORDERS);
   const [, forceUpdate] = useState(0);
@@ -84,12 +92,17 @@ export default function OrdersScreen() {
     { key: 'history' as const, label: t.orders.history },
   ];
 
+  // 공유 예약(고객이 방금 넣은 예약) + 기존 mock 합치기
+  const bookings = useBookingStore((st) => st.bookings);
+  const allOrders = [
+    ...bookings.filter((b) => b.customerId === CUSTOMER_ME.id).map(toCustomerOrder),
+    ...orders,
+  ];
   const list = tab === 'active'
-    ? orders.filter((o) => ['pending', 'confirmed', 'ongoing', 'awaiting_confirmation'].includes(o.status))
-    : orders.filter((o) => ['completed', 'cancelled'].includes(o.status));
+    ? allOrders.filter((o) => ['pending', 'confirmed', 'ongoing', 'awaiting_confirmation'].includes(o.status))
+    : allOrders.filter((o) => ['completed', 'cancelled'].includes(o.status));
 
-  const confirmCompletion = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
+  const confirmCompletion = (order: { id: string; workerName: string; workerPhoto?: any }) => {
     Alert.alert(
       t.orders.confirmTitle,
       t.orders.confirmMsg,
@@ -98,19 +111,14 @@ export default function OrdersScreen() {
         {
           text: t.orders.yesConfirm,
           onPress: () => {
-            setOrders((prev) =>
-              prev.map((o) => o.id === orderId ? { ...o, status: 'completed' as const, remaining: 0 } : o)
-            );
-            // 잔금 확인 즉시 리뷰 화면으로 이동
-            if (order) {
-              setTimeout(() => {
-                navigation.navigate('Review', {
-                  orderId: order.id,
-                  workerName: order.workerName,
-                  workerPhoto: order.workerPhoto,
-                });
-              }, 300);
-            }
+            try { doneSound.seekTo(0); doneSound.play(); } catch {} // 완료 사운드
+            // 공유 스토어 예약(bk-)이면 스토어 상태 변경, 아니면 mock 갱신
+            if (order.id.startsWith('bk-')) setBookingStatus(order.id, 'completed');
+            else setOrders((prev) => prev.map((o) => o.id === order.id ? { ...o, status: 'completed' as const, remaining: 0 } : o));
+            // 완료 확인 후 리뷰 화면으로
+            setTimeout(() => {
+              navigation.navigate('Review', { orderId: order.id, workerName: order.workerName, workerPhoto: order.workerPhoto });
+            }, 300);
           },
         },
       ]
@@ -157,6 +165,8 @@ export default function OrdersScreen() {
             const isAwaitingConfirmation = order.status === 'awaiting_confirmation';
             const isCompleted = order.status === 'completed';
             const isCancelled = order.status === 'cancelled';
+            // 작업 완료 확인 버튼 노출 (활성 상태)
+            const canConfirmDone = ['pending', 'confirmed', 'ongoing', 'awaiting_confirmation'].includes(order.status);
 
             return (
               <TouchableOpacity key={order.id} style={s.card} activeOpacity={0.95}>
@@ -200,36 +210,30 @@ export default function OrdersScreen() {
                   </View>
                 </View>
 
-                {/* Deposit breakdown */}
+                {/* 후불 결제 안내 + 금액 */}
                 <View style={s.depositBlock}>
                   <View style={s.depositRow}>
                     <View style={s.depositLabelRow}>
-                      <Ionicons name="shield-checkmark-outline" size={12} color={Colors.accent} />
-                      <Text style={s.depositLabel}>{t.orders.depositPaid}</Text>
+                      <Ionicons name={isCompleted ? 'checkmark-circle-outline' : 'time-outline'} size={12} color={Colors.accent} />
+                      <Text style={[s.depositLabel, { color: Colors.accent, fontWeight: '600' }]}>
+                        {isCancelled ? tx('취소됨', 'Cancelled', 'Dibatalkan')
+                          : isCompleted ? tx('결제 완료 · 후불', 'Paid · postpaid', 'Lunas · bayar nanti')
+                          : tx('후불 · 서비스 완료 후 결제', 'Pay after service', 'Bayar setelah selesai')}
+                      </Text>
                     </View>
-                    <Text style={s.depositPaid}>Rp {order.depositPaid.toLocaleString('id-ID')}</Text>
-                  </View>
-                  {order.remaining > 0 && (
-                    <View style={s.depositRow}>
-                      <Text style={s.depositLabel}>{t.orders.remainingEscrow}</Text>
-                      <Text style={s.depositRemaining}>Rp {order.remaining.toLocaleString('id-ID')}</Text>
-                    </View>
-                  )}
-                  <View style={[s.depositRow, { borderTopWidth: 1, borderTopColor: Colors.border, paddingTop: 8, marginTop: 4 }]}>
-                    <Text style={s.totalLabel}>{t.orders.total}</Text>
                     <Text style={s.totalPrice}>Rp {order.totalPrice.toLocaleString('id-ID')}</Text>
                   </View>
                 </View>
 
-                {/* Action buttons */}
-                {isAwaitingConfirmation && (
+                {/* 작업 완료 확인 버튼 */}
+                {canConfirmDone && (
                   <TouchableOpacity
                     style={s.confirmBtn}
-                    onPress={() => confirmCompletion(order.id)}
+                    onPress={() => confirmCompletion(order)}
                     activeOpacity={0.85}
                   >
                     <Ionicons name="checkmark-circle-outline" size={16} color={Colors.white} />
-                    <Text style={s.confirmBtnText}>{t.orders.confirmWork}</Text>
+                    <Text style={s.confirmBtnText}>{tx('작업 완료 확인', 'Confirm completion', 'Konfirmasi selesai')}</Text>
                   </TouchableOpacity>
                 )}
 

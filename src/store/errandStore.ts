@@ -153,6 +153,7 @@ interface ErrandState {
   getPost: (id: string) => ErrandPost | undefined;
   incrementView: (id: string) => void;
   applyToErrand: (errandId: string, applicantId: string) => void;
+  addApplicant: (errandId: string, applicant: ErrandApplicant) => void;
 
   // KYC
   setKYC: (info: Partial<KYCInfo>) => void;
@@ -194,6 +195,17 @@ export const useErrandStore = create<ErrandState>((set, get) => ({
       posts: s.posts.map((p) =>
         p.id === errandId && !p.applicantIds.includes(applicantId)
           ? { ...p, applicantIds: [...p.applicantIds, applicantId] }
+          : p
+      ),
+    })),
+
+  // 지원자 프로필까지 함께 저장 → 요청자(고객)가 실제 지원자 정보 확인 가능
+  addApplicant: (errandId, applicant) =>
+    set((s) => ({
+      applicants: { ...s.applicants, [applicant.id]: applicant },
+      posts: s.posts.map((p) =>
+        p.id === errandId && !p.applicantIds.includes(applicant.id)
+          ? { ...p, applicantIds: [...p.applicantIds, applicant.id] }
           : p
       ),
     })),

@@ -12,7 +12,7 @@
 import React, { useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  Animated, Dimensions, StatusBar,
+  Animated, Dimensions, StatusBar, Pressable,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,7 @@ import Svg, { Circle, Path, Line, Rect } from 'react-native-svg';
 import { Colors, Radius } from '../../constants/colors';
 import { RootStackParamList } from '../../types';
 import { useLanguageStore } from '../../store/languageStore';
+import { useAuthStore } from '../../store/authStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
 
@@ -97,6 +98,9 @@ function SignupCard({
 // ── 메인 ─────────────────────────────────────────────────────────
 export default function WelcomeScreen({ navigation }: Props) {
   const { lang } = useLanguageStore();
+  // 데모: 페이지 아무데나 터치 → 고객으로 로그인 → 홈
+  const quickStart = useAuthStore((s) => s.quickStart);
+  const enterHome = () => quickStart('customer');
   const opacity = useRef(new Animated.Value(0)).current;
   const slideY  = useRef(new Animated.Value(30)).current;
 
@@ -104,9 +108,10 @@ export default function WelcomeScreen({ navigation }: Props) {
     lang === 'ko' ? ko : lang === 'en' ? en : id;
 
   const chipsLabels = [
-    tx('가사·돌봄', 'Home Care', 'Rumah & Asuh'),
-    tx('드라이버', 'Driver', 'Sopir'),
-    tx('심부름', 'Errands', 'Titip'),
+    tx('청소', 'Cleaning', 'Bersih'),
+    tx('빨래', 'Laundry', 'Cuci'),
+    tx('세탁·다림질', 'Wash·Iron', 'Setrika'),
+    tx('설거지', 'Dishes', 'Piring'),
   ];
   useEffect(() => {
     Animated.parallel([
@@ -140,15 +145,14 @@ export default function WelcomeScreen({ navigation }: Props) {
         {/* ── 히어로 텍스트 ── */}
         <View style={s.heroBlock}>
           <Text style={s.headline}>
-            {tx('작은 연결.\n', 'Small links.\n', 'Koneksi kecil.\n')}
-            <Text style={s.headlineAccent}>{tx('따뜻한 세상', 'A warmer world', 'Dunia yang hangat')}</Text>
-            {tx('.', '.', '.')}
+            {tx('스트레스 받지 말고\n', 'Skip the stress\n', 'Tanpa stres\n')}
+            <Text style={s.headlineBrand}>Linka!</Text>
           </Text>
           <Text style={s.subText}>
             {tx(
-              '손이 닿는 거리의 도움.\n사람과 사람을, 하루와 하루를 잇다.',
-              'Help within arm’s reach.\nConnecting people, connecting days.',
-              'Bantuan dalam jangkauan tangan.\nMenghubungkan orang, menghubungkan hari.'
+              'Linka하는 순간, 집안일이 사라져요.\n가장 가까운 손길을 지금 연결하세요.',
+              'Linka, and the chores disappear.\nThe nearest helping hand, right now.',
+              'Sekali Linka, pekerjaan rumah beres.\nBantuan terdekat, sekarang juga.'
             )}
           </Text>
 
@@ -168,9 +172,9 @@ export default function WelcomeScreen({ navigation }: Props) {
             icon="home-outline"
             accentColor={BRAND}
             eyebrow={tx('고객으로 시작', 'CUSTOMER', 'PELANGGAN')}
-            headline={tx('맡기면, 나는 가벼워진다.',
-                         'Hand it over. Feel lighter.',
-                         'Serahkan. Jadi ringan.')}
+            headline={tx('집안일 끝, 내 시간 시작.',
+                         'Chores done. Time’s yours.',
+                         'Kerja beres, waktu jadi milikmu.')}
             onPress={() => navigation.navigate('Register', { initialRole: 'customer' })}
           />
           <SignupCard
@@ -181,15 +185,6 @@ export default function WelcomeScreen({ navigation }: Props) {
                          'Your hours become someone’s day.',
                          'Waktu Anda menjadi hari seseorang.')}
             onPress={() => navigation.navigate('Register', { initialRole: 'helper' })}
-          />
-          <SignupCard
-            icon="car-outline"
-            accentColor="#3B82F6"
-            eyebrow={tx('드라이버로 시작', 'DRIVER', 'SOPIR')}
-            headline={tx('더 빠르게. 더 안전하게.',
-                         'Faster. Safer.',
-                         'Lebih cepat. Lebih aman.')}
-            onPress={() => navigation.navigate('Register', { initialRole: 'driver' })}
           />
 
           {/* 로그인 링크 */}
@@ -204,6 +199,9 @@ export default function WelcomeScreen({ navigation }: Props) {
         </View>
 
       </Animated.View>
+
+      {/* 데모: 화면 아무데나 터치하면 홈으로 (가입 카드 위 전체를 덮는 투명 레이어) */}
+      <Pressable style={StyleSheet.absoluteFill} onPress={enterHome} />
     </View>
   );
 }
@@ -264,6 +262,13 @@ const s = StyleSheet.create({
     fontFamily: 'DMSans_800ExtraBold',
     color: BRAND,
   },
+  // 로고와 동일한 폰트(Nunito_900Black)로 'Linka!' 표기
+  headlineBrand: {
+    fontFamily: 'Nunito_900Black',
+    fontSize: 38,
+    color: BRAND,
+    letterSpacing: -0.5,
+  },
   subText: {
     fontSize: 14,
     color: Colors.gray,
@@ -274,6 +279,7 @@ const s = StyleSheet.create({
   // 칩
   chipRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 4,
   },

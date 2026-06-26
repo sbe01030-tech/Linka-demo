@@ -41,13 +41,6 @@ import NotificationsScreen    from '../screens/customer/NotificationsScreen';
 import OrdersScreen           from '../screens/customer/OrdersScreen';
 import WorkerSearchScreen from '../screens/customer/WorkerSearchScreen';
 import TermsScreen          from '../screens/auth/TermsScreen';
-import ErrandBoardScreen   from '../screens/errand/ErrandBoardScreen';
-import ErrandCreateScreen  from '../screens/errand/ErrandCreateScreen';
-import ErrandDetailScreen  from '../screens/errand/ErrandDetailScreen';
-import ErrandApplyScreen   from '../screens/errand/ErrandApplyScreen';
-import KYCVerifyScreen     from '../screens/errand/KYCVerifyScreen';
-import DriverBoardScreen   from '../screens/driver/DriverBoardScreen';
-import DriverDetailScreen  from '../screens/driver/DriverDetailScreen';
 
 import { RootStackParamList } from '../types';
 
@@ -66,23 +59,26 @@ function TabIcon({ focused, name }: { focused: boolean; name: any }) {
 
 function CustomerTabs() {
   const { t } = useLanguageStore();
+  const switchRole = useAuthStore((s) => s.switchRole);
   return (
     <Tab.Navigator
       tabBar={(props) => <SlidingTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home"      component={HomeScreen}      options={{ tabBarLabel: t.nav.home }} />
-      <Tab.Screen name="Explore"   component={ExploreScreen}   options={{ tabBarLabel: '탐색' }} />
       <Tab.Screen name="Map"       component={MapScreen}       options={{ tabBarLabel: t.nav.map }} />
       <Tab.Screen name="ChatList"  component={ChatListScreen}  options={{ tabBarLabel: t.nav.chat }} />
-      <Tab.Screen name="Profile"   component={ProfileScreen}   options={{ tabBarLabel: t.nav.profile }} />
-      {/* 'Community' 탭은 시연 정리 차원에서 숨김 — 화면/라우트/타입은 보존, 필요 시 한 줄로 부활 가능 */}
+      {/* 데모: 프로필 탭 = 워커 입장으로 즉시 전환 (로그아웃 없이) */}
+      <Tab.Screen name="Profile"   component={ProfileScreen}   options={{ tabBarLabel: t.nav.profile }}
+        listeners={{ tabPress: (e) => { e.preventDefault(); switchRole('helper'); } }} />
+      {/* '탐색'(Explore)·'Community' 탭은 숨김 — 화면/라우트/타입은 보존, 필요 시 한 줄로 부활 가능 */}
     </Tab.Navigator>
   );
 }
 
 function WorkerTabs() {
   const { t } = useLanguageStore();
+  const switchRole = useAuthStore((s) => s.switchRole);
   return (
     <Tab.Navigator
       tabBar={(props) => <SlidingTabBar {...props} />}
@@ -92,7 +88,9 @@ function WorkerTabs() {
       <Tab.Screen name="WorkerOrders"  component={WorkerOrdersScreen}  options={{ tabBarLabel: t.nav.jobs }} />
       <Tab.Screen name="WorkerMap"     component={MapScreen}           options={{ tabBarLabel: t.nav.map }} />
       <Tab.Screen name="WorkerChat"    component={ChatListScreen}      options={{ tabBarLabel: t.nav.chat }} />
-      <Tab.Screen name="WorkerProfile" component={WorkerProfileScreen} options={{ tabBarLabel: t.nav.profile }} />
+      {/* 데모: 프로필 탭 = 고객 입장으로 즉시 전환 */}
+      <Tab.Screen name="WorkerProfile" component={WorkerProfileScreen} options={{ tabBarLabel: t.nav.profile }}
+        listeners={{ tabPress: (e) => { e.preventDefault(); switchRole('customer'); } }} />
     </Tab.Navigator>
   );
 }
@@ -112,7 +110,7 @@ export default function Navigation() {
             <Stack.Screen name="Register"   component={RegisterScreen} />
             <Stack.Screen name="Terms"      component={TermsScreen}    options={{ animation: 'slide_from_right' }} />
           </>
-        ) : (user?.role === 'helper' || user?.role === 'driver') ? (
+        ) : (user?.role === 'helper') ? (
           <>
             <Stack.Screen name="WorkerTabs"   component={WorkerTabs} />
             <Stack.Screen name="ChatDetail"   component={ChatDetailScreen}  options={{ animation: 'slide_from_right' }} />
@@ -121,13 +119,6 @@ export default function Navigation() {
             <Stack.Screen name="CreatePost"   component={CreatePostScreen}  options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="PostDetail"   component={PostDetailScreen}  options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="Terms"        component={TermsScreen}       options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="ErrandBoard"  component={ErrandBoardScreen}  options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="ErrandCreate" component={ErrandCreateScreen} options={{ animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="ErrandDetail" component={ErrandDetailScreen} options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="ErrandApply"  component={ErrandApplyScreen}  options={{ animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="KYCVerify"    component={KYCVerifyScreen}    options={{ animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="DriverBoard"  component={DriverBoardScreen}  options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="DriverDetail" component={DriverDetailScreen} options={{ animation: 'slide_from_right' }} />
           </>
         ) : (
           <>
@@ -144,13 +135,6 @@ export default function Navigation() {
             <Stack.Screen name="CreatePost"   component={CreatePostScreen}   options={{ animation: 'slide_from_bottom' }} />
             <Stack.Screen name="PostDetail"   component={PostDetailScreen}   options={{ animation: 'slide_from_right' }} />
             <Stack.Screen name="Terms"         component={TermsScreen}         options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="ErrandBoard"   component={ErrandBoardScreen}   options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="ErrandCreate"  component={ErrandCreateScreen}  options={{ animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="ErrandDetail"  component={ErrandDetailScreen}  options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="ErrandApply"   component={ErrandApplyScreen}   options={{ animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="KYCVerify"     component={KYCVerifyScreen}     options={{ animation: 'slide_from_bottom' }} />
-            <Stack.Screen name="DriverBoard"   component={DriverBoardScreen}   options={{ animation: 'slide_from_right' }} />
-            <Stack.Screen name="DriverDetail"  component={DriverDetailScreen}  options={{ animation: 'slide_from_right' }} />
           </>
         )}
       </Stack.Navigator>

@@ -9,6 +9,8 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../../types';
 import { C1, C2, C3 } from '../../constants/photos';
+import { useBookingStore, toWorkerOrder } from '../../store/bookingStore';
+import { HELPER_ME } from '../../store/chatStore';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -63,7 +65,13 @@ export default function WorkerOrdersScreen() {
     .filter((o) => o.status === 'completed')
     .reduce((sum, o) => sum + o.earnings, 0);
 
-  const list = orders.filter((o) =>
+  // 공유 예약(고객이 넣은 예약) + 기존 mock 합치기
+  const bookings = useBookingStore((st) => st.bookings);
+  const allOrders = [
+    ...bookings.filter((b) => b.workerId === HELPER_ME.id).map(toWorkerOrder),
+    ...orders,
+  ];
+  const list = allOrders.filter((o) =>
     tab === 'upcoming'
       ? o.status === 'upcoming' || o.status === 'awaiting_customer'
       : o.status === 'completed'

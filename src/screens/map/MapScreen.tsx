@@ -14,13 +14,12 @@ import { useLanguageStore } from '../../store/languageStore';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, CustomerTabParamList } from '../../types';
-import { W1, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12, D7, D8, D9, D10, D11 } from '../../constants/photos';
+import { W1, W2, W3, W4, W5, W6, W7, W8, W9, W10, W11, W12 } from '../../constants/photos';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type SvcType       = 'regular' | 'onetime' | 'live-in';
 type ExpLevel      = 'all' | '1y' | '3y' | '5y';
 type SortBy        = 'rating' | 'price_low' | 'price_high' | 'reviews';
-type PartnerFilter = 'all' | 'helper' | 'driver';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 const EXPANDED_H = SCREEN_H * 0.72;
@@ -42,12 +41,15 @@ interface Partner {
 const imgSrc = (p: string | number | undefined): any =>
   typeof p === 'string' ? { uri: p } : p;
 
-// ── Demo cluster center (Kebayoran Baru, South Jakarta) ─────────
+// ── Demo cluster center (Jl. Imam Bonjol, Panunggangan Bar., Cibodas, Tangerang) ──
 // For internal preview: always shows the dense cluster regardless of GPS
-const DEMO_REGION = { latitude: -6.2488, longitude: 106.8052, latitudeDelta: 0.010, longitudeDelta: 0.010 };
+const DEMO_REGION = { latitude: -6.2150, longitude: 106.6440, latitudeDelta: 0.010, longitudeDelta: 0.010 };
 
-const MOCK_PARTNERS: Partner[] = [
-  { id:'p1',  name:'Sari Dewi',        firstName:'Sari',    lat:-6.2440, lng:106.8022, rating:5.0, pricePerHour:30000, isAvailable:true,  photo:W1,  location:'Kebayoran Baru', totalJobs:312, serviceFrequency:'regular', skills:['Beberes','Masak','Cuci'],      experienceYears:10, isVerified:true,  partnerType:'helper' },
+// 기존 자카르타 클러스터를 Tangerang Cibodas로 평행이동 (워커 상대 배치는 그대로 유지)
+const MAP_OFFSET = { lat: 0.0338, lng: -0.1612 };
+
+const RAW_PARTNERS: Partner[] = [
+  { id:'p1',  name:'Kartika Sari',     firstName:'Kartika', lat:-6.2440, lng:106.8022, rating:5.0, pricePerHour:30000, isAvailable:true,  photo:W11, location:'Kebayoran Baru', totalJobs:312, serviceFrequency:'regular', skills:['Beberes','Masak','Cuci'],      experienceYears:10, isVerified:true,  partnerType:'helper' },
   { id:'p2',  name:'Rina Wulandari',   firstName:'Rina',    lat:-6.2465, lng:106.8058, rating:4.9, pricePerHour:25000, isAvailable:true,  photo:W2,  location:'Kebayoran Baru', totalJobs:198, serviceFrequency:'regular', skills:['Masak Sehat','Beberes'],       experienceYears:7,  isVerified:true,  partnerType:'helper' },
   { id:'p3',  name:'Dewi Anggraeni',   firstName:'Dewi',    lat:-6.2492, lng:106.8072, rating:4.7, pricePerHour:28000, isAvailable:true,  photo:W3,  location:'Kemang',         totalJobs:143, serviceFrequency:'both',    skills:['Masak','Cuci'],                experienceYears:5,  isVerified:true,  partnerType:'helper' },
   { id:'p4',  name:'Fitri Handayani',  firstName:'Fitri',   lat:-6.2512, lng:106.8036, rating:4.9, pricePerHour:27000, isAvailable:true,  photo:W4,  location:'Pesanggrahan',   totalJobs:227, serviceFrequency:'regular', skills:['Setrika','Beberes'],           experienceYears:8,  isVerified:true,  partnerType:'helper' },
@@ -67,12 +69,20 @@ const MOCK_PARTNERS: Partner[] = [
   { id:'p18', name:'Novi Anggraini',   firstName:'Novi',    lat:-6.2518, lng:106.8014, rating:4.6, pricePerHour:22000, isAvailable:true,  photo:W4,  location:'Cilandak',       totalJobs:48,  serviceFrequency:'special', skills:['Deep Cleaning','Cuci'],        experienceYears:2,  isVerified:false, partnerType:'helper' },
   { id:'p19', name:'Desi Kurniawati',  firstName:'Desi',    lat:-6.2485, lng:106.8056, rating:4.8, pricePerHour:28000, isAvailable:true,  photo:W6,  location:'Kemang',         totalJobs:121, serviceFrequency:'both',    skills:['Masak','Setrika'],             experienceYears:6,  isVerified:true,  partnerType:'helper' },
   { id:'p20', name:'Ayu Puspita',      firstName:'Ayu',     lat:-6.2442, lng:106.8092, rating:4.9, pricePerHour:31000, isAvailable:false, photo:W2,  location:'Pondok Indah',   totalJobs:187, serviceFrequency:'regular', skills:['Masak Sehat','Beberes'],       experienceYears:9,  isVerified:true,  partnerType:'helper' },
-  // ── Drivers (고객 차량 운전 서비스) ───────────────────────────
-  { id:'d1',  name:'Rahmat Hidayat',   firstName:'Rahmat',  lat:-6.2444, lng:106.8050, rating:5.0, pricePerHour:55000,  isAvailable:true,  photo:D7,  location:'Kebayoran Baru', totalJobs:284, serviceFrequency:'both',    skills:['Sedan','SUV','MPV'],           experienceYears:8,  isVerified:true,  partnerType:'driver', driverServices:['designated','daily','airport'], licenseClass:'SIM A' },
-  { id:'d2',  name:'Budi Setiawan',    firstName:'Budi',    lat:-6.2478, lng:106.8032, rating:4.9, pricePerHour:50000,  isAvailable:true,  photo:D8,  location:'Menteng',        totalJobs:192, serviceFrequency:'regular', skills:['Sedan','SUV'],                 experienceYears:6,  isVerified:true,  partnerType:'driver', driverServices:['designated','hourly','commute'], licenseClass:'SIM A' },
-  { id:'d3',  name:'Joko Susanto',     firstName:'Joko',    lat:-6.2510, lng:106.8018, rating:4.8, pricePerHour:45000,  isAvailable:true,  photo:D9,  location:'Cilandak',       totalJobs:156, serviceFrequency:'both',    skills:['Sedan','SUV','MPV','Van'],     experienceYears:10, isVerified:true,  partnerType:'driver', driverServices:['daily','intercity','event'], licenseClass:'SIM A Umum' },
-  { id:'d4',  name:'Ari Wibowo',       firstName:'Ari',     lat:-6.2498, lng:106.8084, rating:4.9, pricePerHour:60000,  isAvailable:true,  photo:D10, location:'Kemang',         totalJobs:221, serviceFrequency:'both',    skills:['Sedan','SUV','MPV'],           experienceYears:7,  isVerified:true,  partnerType:'driver', driverServices:['designated','airport','event'], licenseClass:'SIM A' },
-  { id:'d5',  name:'Agus Setiawan',    firstName:'Agus',    lat:-6.2520, lng:106.8040, rating:4.9, pricePerHour:52000,  isAvailable:true,  photo:D11, location:'Fatmawati',      totalJobs:178, serviceFrequency:'both',    skills:['Sedan','MPV','Van'],           experienceYears:9,  isVerified:true,  partnerType:'driver', driverServices:['daily','intercity','airport'], licenseClass:'SIM A Umum' },
+];
+
+// Sari Dewi — 데모 워커 (지도 중심에 배치, 상세/예약은 id 'helper-me'로 연결)
+const DEMO_WORKER_PARTNER: Partner = {
+  id:'helper-me', name:'Sari Dewi', firstName:'Sari', lat:-6.2150, lng:106.6440,
+  rating:5.0, pricePerHour:35000, isAvailable:true, photo:W1,
+  location:'Cibodas, Tangerang', totalJobs:312, serviceFrequency:'regular',
+  skills:['Beberes','Masak','Cuci'], experienceYears:10, isVerified:true, partnerType:'helper',
+};
+
+// Tangerang Cibodas로 평행이동한 최종 파트너 목록 (데모 워커를 맨 앞에)
+const MOCK_PARTNERS: Partner[] = [
+  DEMO_WORKER_PARTNER,
+  ...RAW_PARTNERS.map((p) => ({ ...p, lat: p.lat + MAP_OFFSET.lat, lng: p.lng + MAP_OFFSET.lng, pricePerHour: Math.max(30000, p.pricePerHour) })),
 ];
 
 const MAP_STYLE = [
@@ -136,6 +146,14 @@ const ACTIVITY_CATS = [
 // flat list of all activity items — derived from ACTIVITY_CATS
 const ALL_ACTIVITY_ITEMS = ACTIVITY_CATS.flatMap((cat) => cat.items.map((i) => ({ ...i, cat: cat.id })));
 
+// ── 집안일 4개 카테고리 (지도 상단 필터 — 기존 Helper/Driver 토글 대체) ──
+const MAP_CATS = [
+  { id: 'clean',   icon: 'sparkles-outline' as const,   ko: '청소',       en: 'Cleaning', id_l: 'Bersih',   skills: ['Beberes', 'Deep Cleaning'] },
+  { id: 'laundry', icon: 'water-outline' as const,      ko: '빨래',       en: 'Laundry',  id_l: 'Cuci',     skills: ['Cuci', 'Laundry'] },
+  { id: 'iron',    icon: 'shirt-outline' as const,      ko: '세탁·다림질', en: 'Iron',     id_l: 'Setrika',  skills: ['Setrika'] },
+  { id: 'dish',    icon: 'restaurant-outline' as const, ko: '설거지',     en: 'Dishes',   id_l: 'Piring',   skills: ['Cuci', 'Masak', 'Masak Sehat'] },
+];
+
 export default function MapScreen() {
   const navigation = useNavigation<Nav>();
   const route      = useRoute<RouteProp<CustomerTabParamList, 'Map'>>();
@@ -161,7 +179,7 @@ export default function MapScreen() {
   const detailAnim  = useRef(new Animated.Value(0)).current;
 
   // ── Filter state ─────────────────────────────────────────────
-  const [partnerFilter, setPartnerFilter]      = useState<PartnerFilter>('all');
+  const [catFilter, setCatFilter]              = useState<string[]>([]); // 집안일 4개 카테고리
   const [serviceType, setServiceType]         = useState<SvcType | null>(null);
   const [selectedActivities, setSelectedAct]  = useState<string[]>([]);
   const [verifiedOnly, setVerifiedOnly]        = useState(false);
@@ -203,18 +221,18 @@ export default function MapScreen() {
   // ── Handle navigation params (expand sheet / set service type / partner filter) ──
   // Use specific primitive deps to avoid infinite loop from setParams triggering re-renders
   useEffect(() => {
-    const p = route.params as { expanded?: boolean; serviceType?: SvcType; partnerFilter?: PartnerFilter } | undefined;
-    if (!p?.expanded && p?.serviceType === undefined && p?.partnerFilter === undefined) return;
+    const p = route.params as { expanded?: boolean; serviceType?: SvcType; category?: string } | undefined;
+    if (!p?.expanded && p?.serviceType === undefined && p?.category === undefined) return;
     if (p.serviceType   !== undefined) setServiceType(p.serviceType);
-    if (p.partnerFilter !== undefined) setPartnerFilter(p.partnerFilter);
+    if (p.category) setCatFilter([p.category]); // 홈 카테고리 → 해당 필터 적용
     if (p.expanded) {
       setIsExpanded(true);
       sheetAnim.setValue(0);
     }
     // Clear only the params we consumed so subsequent focuses don't re-trigger
-    (navigation as any).setParams({ expanded: undefined, serviceType: undefined, partnerFilter: undefined });
+    (navigation as any).setParams({ expanded: undefined, serviceType: undefined, category: undefined });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route.params?.expanded, route.params?.serviceType, route.params?.partnerFilter]);
+  }, [route.params?.expanded, route.params?.serviceType, route.params?.category]);
 
   // ── Sheet expand/collapse ────────────────────────────────────
   const expandSheet = () => {
@@ -241,7 +259,10 @@ export default function MapScreen() {
   const filtered = useMemo(() => {
     let list = [...MOCK_PARTNERS];
 
-    if (partnerFilter !== 'all') list = list.filter((p) => p.partnerType === partnerFilter);
+    if (catFilter.length > 0) {
+      const skills = MAP_CATS.filter((c) => catFilter.includes(c.id)).flatMap((c) => c.skills);
+      list = list.filter((p) => skills.some((sk) => p.skills.includes(sk)));
+    }
 
     if (search) list = list.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.location.toLowerCase().includes(search.toLowerCase()));
 
@@ -267,7 +288,7 @@ export default function MapScreen() {
     else if (sortBy === 'reviews')     list.sort((a, b) => b.totalJobs - a.totalJobs);
 
     return list;
-  }, [search, partnerFilter, serviceType, availableOnly, verifiedOnly, expLevel, selectedActivities, sortBy]);
+  }, [search, catFilter, serviceType, availableOnly, verifiedOnly, expLevel, selectedActivities, sortBy]);
 
   const actActive  = selectedActivities.length > 0;
   const condActive = serviceType !== null;
@@ -406,15 +427,21 @@ export default function MapScreen() {
 
           {/* Filter chips */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.peekFilterRow}>
-            {/* Partner type toggle */}
-            <TouchableOpacity style={[s.peekToggleChip, partnerFilter === 'helper' && s.peekToggleOn]} onPress={() => setPartnerFilter((v) => v === 'helper' ? 'all' : 'helper')} activeOpacity={0.75}>
-              <Ionicons name="home-outline" size={11} color={partnerFilter === 'helper' ? Colors.white : Colors.helperColor} />
-              <Text style={[s.peekToggleText, partnerFilter === 'helper' && s.peekToggleTextOn]}>{tx('Helper','헬퍼','Helper')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={[s.peekToggleChip, partnerFilter === 'driver' && s.peekToggleOnTutor]} onPress={() => setPartnerFilter((v) => v === 'driver' ? 'all' : 'driver')} activeOpacity={0.75}>
-              <Ionicons name="car-outline" size={11} color={partnerFilter === 'driver' ? Colors.white : Colors.tutorColor} />
-              <Text style={[s.peekToggleText, partnerFilter === 'driver' && s.peekToggleTextOn]}>{tx('Driver','드라이버','Driver')}</Text>
-            </TouchableOpacity>
+            {/* 집안일 4개 카테고리 토글 */}
+            {MAP_CATS.map((c) => {
+              const on = catFilter.includes(c.id);
+              return (
+                <TouchableOpacity
+                  key={c.id}
+                  style={[s.peekToggleChip, on && s.peekToggleOn]}
+                  onPress={() => setCatFilter((prev) => prev.includes(c.id) ? prev.filter((x) => x !== c.id) : [...prev, c.id])}
+                  activeOpacity={0.75}
+                >
+                  <Ionicons name={c.icon} size={11} color={on ? Colors.white : Colors.accent} />
+                  <Text style={[s.peekToggleText, on && s.peekToggleTextOn]}>{tx(c.id_l, c.ko, c.en)}</Text>
+                </TouchableOpacity>
+              );
+            })}
             <View style={s.peekChipDivider} />
             <TouchableOpacity style={[s.peekChip, condActive && s.peekChipActive]} onPress={() => { setTmpSvc(serviceType); setShowCondModal(true); }} activeOpacity={0.75}>
               <Ionicons name="calendar-outline" size={12} color={condActive ? Colors.white : Colors.gray} />
@@ -498,7 +525,7 @@ export default function MapScreen() {
               }
               renderItem={({ item: p }) => (
                 <TouchableOpacity style={s.listCard} activeOpacity={0.92}
-                  onPress={() => { collapseSheet(); p.partnerType === 'driver' ? navigation.navigate('DriverDetail', { driverId: p.id }) : navigation.navigate('WorkerDetail', { workerId: p.id }); }}>
+                  onPress={() => { collapseSheet(); navigation.navigate('WorkerDetail', { workerId: p.id }); }}>
                   <View style={s.listAvatarWrap}>
                     <Image source={imgSrc(p.photo)} style={s.listAvatar} />
                     <View style={[s.listAvailDot, { backgroundColor: p.isAvailable ? Colors.success : Colors.grayLight }]} />
@@ -547,17 +574,10 @@ export default function MapScreen() {
                   <View style={[s.onlineDot, { backgroundColor: selected.isAvailable ? Colors.success : Colors.grayLight }]} />
                 </View>
                 <View style={s.sheetTagRow}>
-                  {selected.partnerType === 'driver' ? (
-                    <View style={[s.sheetTypeBadge, { backgroundColor: '#EDE9FE' }]}>
-                      <Ionicons name="car" size={11} color={Colors.tutorColor} />
-                      <Text style={[s.sheetTypeText, { color: Colors.tutorColor }]}>Driver</Text>
-                    </View>
-                  ) : (
-                    <View style={[s.sheetTypeBadge, { backgroundColor: Colors.helperLight }]}>
-                      <Ionicons name="home" size={11} color={Colors.helperColor} />
-                      <Text style={[s.sheetTypeText, { color: Colors.helperColor }]}>Helper</Text>
-                    </View>
-                  )}
+                  <View style={[s.sheetTypeBadge, { backgroundColor: Colors.helperLight }]}>
+                    <Ionicons name="home" size={11} color={Colors.helperColor} />
+                    <Text style={[s.sheetTypeText, { color: Colors.helperColor }]}>Helper</Text>
+                  </View>
                   <Text style={s.sheetLocation}>{selected.location}</Text>
                 </View>
               </View>
@@ -590,11 +610,7 @@ export default function MapScreen() {
               onPress={() => {
                 if (!selected.isAvailable) return;
                 hideDetail();
-                if (selected.partnerType === 'driver') {
-                  navigation.navigate('DriverDetail', { driverId: selected.id });
-                } else {
-                  navigation.navigate('WorkerDetail', { workerId: selected.id });
-                }
+                navigation.navigate('WorkerDetail', { workerId: selected.id });
               }}
             >
               <Text style={s.bookBtnText}>

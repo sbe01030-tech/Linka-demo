@@ -18,10 +18,10 @@ import { reviewedOrderIds } from './OrdersScreen';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Review'>;
 
-// ── 온도 변화량 설정 ──────────────────────────────────────────────
-const POS_DELTA = 0.3;   // 긍정 태그 1개당
-const NEG_DELTA = -0.5;  // 부정 태그 1개당
-const TEXT_BONUS = 0.2;  // 성의있는 글 작성 시
+// ── Linka Point 변화량 설정 (100점 만점) ─────────────────────────
+const POS_DELTA = 5;    // 긍정 태그 1개당 (점)
+const NEG_DELTA = -8;   // 부정 태그 1개당 (점)
+const TEXT_BONUS = 3;   // 성의있는 글 작성 시 (점)
 
 // ── 리뷰 반영 스토어 (세션 내 공유) ──────────────────────────────
 // 실제 서비스에서는 서버 저장, 여기서는 클라이언트 mock
@@ -131,15 +131,15 @@ export default function ReviewScreen({ navigation, route }: Props) {
   const [showNeg,  setShowNeg]  = useState(false);
   const [text,     setText]     = useState('');
 
-  // 온도 변화 계산
+  // Linka Point 변화 계산 (정수 점)
   const delta = useMemo(() => {
     let d = positive.length * POS_DELTA + negative.length * NEG_DELTA;
     if (text.trim().length > 20) d += TEXT_BONUS;
-    return Math.round(d * 10) / 10;
+    return Math.round(d);
   }, [positive, negative, text]);
 
   const mood: 'happy' | 'neutral' | 'sad' =
-    delta > 0.5 ? 'happy' : delta < -0.3 ? 'sad' : 'neutral';
+    delta > 0 ? 'happy' : delta < 0 ? 'sad' : 'neutral';
 
   const toggle = (id: string, list: string[], setList: (v: string[]) => void) => {
     setList(list.includes(id) ? list.filter(x => x !== id) : [...list, id]);
@@ -160,7 +160,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
     targetTempChanges.set(orderId, delta);
     Alert.alert(
       t.linkaTemp.thanksTitle,
-      `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}°C\n${t.linkaTemp.thanksSub}`,
+      `${delta >= 0 ? '+' : ''}${delta} Linka Point\n${t.linkaTemp.thanksSub}`,
       [{ text: 'OK', onPress: () => navigation.goBack() }]
     );
   };
@@ -168,8 +168,8 @@ export default function ReviewScreen({ navigation, route }: Props) {
   const tx = (ko: string, en: string, id: string) =>
     lang === 'ko' ? ko : lang === 'en' ? en : id;
 
-  const deltaColor = delta > 0 ? '#EF4444' : delta < 0 ? '#60A5FA' : Colors.grayLight;
-  const deltaLabel = delta >= 0 ? `+${delta.toFixed(1)}°C` : `${delta.toFixed(1)}°C`;
+  const deltaColor = delta > 0 ? Colors.accent : delta < 0 ? '#EF4444' : Colors.grayLight;
+  const deltaLabel = delta >= 0 ? `+${delta}점` : `${delta}점`;
 
   return (
     <KeyboardAvoidingView
@@ -182,8 +182,8 @@ export default function ReviewScreen({ navigation, route }: Props) {
           <Ionicons name="chevron-back" size={24} color={Colors.dark} />
         </TouchableOpacity>
         <View>
-          <Text style={s.headerTitle}>{t.linkaTemp.giveTemp}</Text>
-          <Text style={s.headerSub}>{t.linkaTemp.tagline}</Text>
+          <Text style={s.headerTitle}>{tx('Linka Point 주기', 'Give Linka Point', 'Beri Linka Point')}</Text>
+          <Text style={s.headerSub}>{tx('100점 만점으로 평가해요', 'Rate out of 100', 'Nilai dari 100')}</Text>
         </View>
         <View style={{ width: 36 }} />
       </View>
@@ -212,7 +212,10 @@ export default function ReviewScreen({ navigation, route }: Props) {
               <Text style={[s.deltaText, { color: deltaColor }]}>{deltaLabel}</Text>
             </View>
           </View>
-          <Thermometer temp={36.5 + Math.max(delta, 0) * 5} />
+          <View style={s.pointCoin}>
+            <Text style={s.pointCoinNum}>{delta >= 0 ? `+${delta}` : `${delta}`}</Text>
+            <Text style={s.pointCoinUnit}>Linka Point</Text>
+          </View>
         </View>
 
         {/* 긍정 태그 */}
@@ -221,7 +224,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
             <Text style={s.sectionTitle}>
               {tx('좋았던 점', 'What was great', 'Yang baik')}
             </Text>
-            <Text style={s.sectionHint}>+{POS_DELTA}°C {tx('/ 개', '/ each', '/ per')}</Text>
+            <Text style={s.sectionHint}>+{POS_DELTA}점 {tx('/ 개', '/ each', '/ per')}</Text>
           </View>
           <View style={s.tagWrap}>
             {POS_TAGS.map((tag) => {
@@ -280,7 +283,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
             {text.trim().length > 20 && (
               <View style={s.bonusBadge}>
                 <Ionicons name="add" size={10} color="#16A34A" />
-                <Text style={s.bonusText}>{TEXT_BONUS}°C</Text>
+                <Text style={s.bonusText}>+{TEXT_BONUS}점</Text>
               </View>
             )}
           </View>
@@ -303,7 +306,7 @@ export default function ReviewScreen({ navigation, route }: Props) {
           onPress={submit}
           activeOpacity={0.85}
         >
-          <Ionicons name="thermometer" size={16} color={Colors.white} />
+          <Ionicons name="star" size={16} color={Colors.white} />
           <Text style={s.submitBtnText}>{t.linkaTemp.submitReview}</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -330,12 +333,15 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 16,
     marginHorizontal: 20, marginTop: 20,
     paddingHorizontal: 16, paddingVertical: 16,
-    backgroundColor: '#FFFBEB', borderRadius: Radius.lg,
-    borderWidth: 1, borderColor: '#F59E0B30',
+    backgroundColor: '#F0FBF5', borderRadius: Radius.lg,
+    borderWidth: 1, borderColor: '#00C85333',
   },
   heroLeft:   { },
   heroCenter: { flex: 1, gap: 4 },
-  heroGreeting: { fontSize: 12, color: '#B45309', fontWeight: '600' },
+  heroGreeting: { fontSize: 12, color: '#00A846', fontWeight: '600' },
+  pointCoin: { width: 62, height: 62, borderRadius: 31, alignItems: 'center', justifyContent: 'center', backgroundColor: '#E7FBF0', borderWidth: 1.5, borderColor: Colors.accent },
+  pointCoinNum: { fontSize: 20, fontWeight: '800', color: Colors.primaryDark },
+  pointCoinUnit: { fontSize: 8, fontWeight: '700', color: Colors.accent, marginTop: 1 },
   heroWorker:   { fontSize: 18, fontWeight: '800', color: Colors.dark },
   deltaBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 3,
@@ -359,7 +365,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 13, paddingVertical: 8,
     backgroundColor: Colors.white,
   },
-  tagActivePos: { backgroundColor: '#FEF3C7', borderColor: '#F59E0B' },
+  tagActivePos: { backgroundColor: '#E7FBF0', borderColor: Colors.accent },
   tagActiveNeg: { backgroundColor: '#DBEAFE', borderColor: '#60A5FA' },
   tagText:       { fontSize: 13, color: Colors.dark, fontWeight: '500' },
   tagTextActive: { fontWeight: '700' },

@@ -438,7 +438,6 @@ export default function RegisterScreen({ navigation, route }: Props) {
             {([
               { value: 'customer' as UserRole, icon: 'search-outline', label: tr.roleCustomerLabel, sub: tr.roleCustomerSub, highlight: false },
               { value: 'helper'   as UserRole, icon: 'home-outline',   label: tr.roleHelperLabel,   sub: tr.roleHelperSub,   highlight: true  },
-              { value: 'driver'   as UserRole, icon: 'car-outline',    label: tr.roleDriverLabel,   sub: tr.roleDriverSub,   highlight: false },
             ] as const).map((opt) => (
               <TouchableOpacity
                 key={opt.value}

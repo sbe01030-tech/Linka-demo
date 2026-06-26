@@ -1,37 +1,37 @@
 /**
- * SE Asian portrait photos (Pexels)
- * Assigned to specific worker/customer roles.
+ * Portrait photos — 전부 로컬 번들 에셋 (네트워크 의존 제거).
+ * 원본은 Pexels에서 받아 assets/portraits/ 에 저장. require → URI 문자열로 변환해
+ * 기존 `{uri: ...}` 렌더 사이트와 그대로 호환되고, 두 시뮬레이터 동기화(JSON)도 가능.
  */
-
-const px = (id: number) =>
-  `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop`;
+import { Image } from 'react-native';
+const localUri = (mod: number): string => Image.resolveAssetSource(mod).uri;
 
 // ── Workers (ART / helpers) ──────────────────────────────────
-export const W1  = px(33401794);  // kebaya putih, kota  — Sari Dewi
-export const W2  = px(33401792);  // kebaya putih, samping — Rina Wulandari
-export const W3  = px(5987082);   // casual, alam         — Dewi Anggraeni
-export const W4  = px(13815817);  // batik, bambu          — Fitri Handayani
-export const W5  = px(13945649);  // smart casual          — Indah Lestari
-export const W6  = px(29437184);  // hijab merah, bendera  — Nur Aini Susanti
-export const W7  = px(29343880);  // hijab putih, bendera  — Siti Rahayu
-export const W8  = px(35247296);  // kebaya, outdoor       — Wulandari Putri
+export const W1  = localUri(require('../../assets/portraits/w1.jpg'));   // Sari Dewi
+export const W2  = localUri(require('../../assets/portraits/w2.jpg'));   // Rina Wulandari
+export const W3  = localUri(require('../../assets/portraits/w3.jpg'));   // Dewi Anggraeni
+export const W4  = localUri(require('../../assets/portraits/w4.jpg'));   // Fitri Handayani
+export const W5  = localUri(require('../../assets/portraits/w5.jpg'));   // Indah Lestari
+export const W6  = localUri(require('../../assets/portraits/w6.jpg'));   // Nur Aini Susanti
+export const W7  = localUri(require('../../assets/portraits/w7.jpg'));   // Siti Rahayu
+export const W8  = localUri(require('../../assets/portraits/w8.jpg'));   // Wulandari Putri
 
 // ── Extra workers / map partners ────────────────────────────
-export const W9  = px(1124714);   // traditional, Jawa
-export const W10 = px(36382832);  // casual green, bambu
-export const W11 = px(36490973);  // caping, senyum
-export const W12 = px(36459949);  // ao dai merah marun
+export const W9  = localUri(require('../../assets/portraits/w9.jpg'));
+export const W10 = localUri(require('../../assets/portraits/w10.jpg'));
+export const W11 = localUri(require('../../assets/portraits/w11.jpg'));
+export const W12 = localUri(require('../../assets/portraits/w12.jpg'));
 
 // ── Customers / reviewers ───────────────────────────────────
-export const C1  = px(8582641);   // ao dai, bunga kuning
-export const C2  = px(36146089);  // ao dai pink floral
-export const C3  = px(29244028);  // ao dai biru, caping
-export const C4  = px(13119680);  // non la merah
-export const C5  = px(12770337);  // non la emas, tutup mata
-export const C6  = px(29451034);  // street style, urban
+export const C1  = localUri(require('../../assets/portraits/c1.jpg'));
+export const C2  = localUri(require('../../assets/portraits/c2.jpg'));
+export const C3  = localUri(require('../../assets/portraits/c3.jpg'));
+export const C4  = localUri(require('../../assets/portraits/c4.jpg'));
+export const C5  = localUri(require('../../assets/portraits/c5.jpg'));
+export const C6  = localUri(require('../../assets/portraits/c6.jpg'));
 
 // ── Male customer ────────────────────────────────────────────
-export const MALE1 = px(33549701); // bapak tradisional Jawa
+export const MALE1 = localUri(require('../../assets/portraits/male1.jpg'));
 
 // ── Drivers (local assets, male Indonesian drivers) ─────────
 // 로컬 이미지 — Image source에 직접 전달 가능 (number 타입)
@@ -46,6 +46,18 @@ export const D8  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-5
 export const D9  = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-22 009.jpeg');
 export const D10 = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-38 001.jpeg');
 export const D11 = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-38 002.jpeg');
+
+// ── 데모 고정 인물 (로컬 에셋) ───────────────────────────────
+// 보내는 고객 = 이성기 대표님 (사람 3명 이미지)
+export const SEONGKI_PHOTO = localUri(require('../../assets/people/seongki.png'));
+// 워커 = Max Park (박재현 이미지)
+export const MAXPARK_PHOTO = localUri(require('../../assets/people/maxpark.jpg'));
+
+// 워커 프로필 갤러리 — 청소 비포/애프터 (사용자가 assets/gallery/ba*.jpg 교체)
+export const BA1 = localUri(require('../../assets/gallery/ba1.jpg'));
+export const BA2 = localUri(require('../../assets/gallery/ba2.jpg'));
+export const BA3 = localUri(require('../../assets/gallery/ba3.jpg'));
+export const BA4 = localUri(require('../../assets/gallery/ba4.jpg'));
 
 // ── Stack avatars (count bar) ────────────────────────────────
 export const AVATAR_STACK = [W1, W4, C1];

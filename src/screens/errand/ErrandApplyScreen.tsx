@@ -19,6 +19,7 @@ import { Colors, Radius } from '../../constants/colors';
 import { RootStackParamList } from '../../types';
 import { useErrandStore } from '../../store/errandStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { HELPER_ME } from '../../store/chatStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ErrandApply'>;
 
@@ -53,16 +54,17 @@ export default function ErrandApplyScreen({ navigation, route }: Props) {
   const post     = useErrandStore((s) => s.posts.find((p) => p.id === errandId));
   const resume   = useErrandStore((s) => s.resume);
   const setResume = useErrandStore((s) => s.setResume);
-  const applyToErrand = useErrandStore((s) => s.applyToErrand);
+  const addApplicant = useErrandStore((s) => s.addApplicant);
   const kyc      = useErrandStore((s) => s.kyc);
 
   const [intro, setIntro]         = useState(resume?.intro ?? '');
   const [strengths, setStrengths] = useState<string[]>(resume?.strengths ?? []);
   const [extras, setExtras]       = useState<string[]>(resume?.extras ?? []);
+  const [agreed, setAgreed]       = useState(false);
   const [showDone, setShowDone]   = useState(false);
 
   const introOk = intro.trim().length >= 15;
-  const canSubmit = introOk;
+  const canSubmit = introOk && agreed;
 
   const toggle = (arr: string[], val: string, max?: number): string[] => {
     if (arr.includes(val)) return arr.filter((v) => v !== val);
@@ -71,15 +73,24 @@ export default function ErrandApplyScreen({ navigation, route }: Props) {
   };
 
   const submit = () => {
-    if (!canSubmit) {
+    if (!introOk) {
       Alert.alert(tx('확인', 'Wait', 'Tunggu'), tx('자기소개는 15자 이상 적어주세요.', 'Intro must be 15+ characters.', 'Perkenalan minimal 15 karakter.'));
       return;
     }
+    if (!agreed) {
+      Alert.alert(tx('확인', 'Wait', 'Tunggu'), tx('필수 약관에 동의해 주세요.', 'Please agree to the required consent.', 'Mohon setujui persetujuan wajib.'));
+      return;
+    }
     setResume({ photoUri: undefined, experiences: [], intro, strengths, extras });
-    // 본인 지원자 id 가공 — name 기반 (실제 user id 없어서 mock)
-    const myApplicantId = `me-${kyc.fullName ?? 'user'}`;
-    // 시드 applicants에 없으면 직접 추가는 store에 함수 없음 — applicants는 readonly 시드 + push 안 함, OK.
-    applyToErrand(errandId, myApplicantId);
+    // 지원자 프로필을 함께 저장 → 요청자(고객)가 ErrandDetail에서 실제 지원자로 확인
+    addApplicant(errandId, {
+      id: HELPER_ME.id,
+      name: HELPER_ME.name,
+      photo: HELPER_ME.photo,
+      temperature: 38.5,
+      appliedAt: tx('방금 전', 'just now', 'baru saja'),
+      resume: { photoUri: undefined, experiences: [], intro, strengths, extras },
+    });
     setShowDone(true);
   };
 
@@ -93,7 +104,7 @@ export default function ErrandApplyScreen({ navigation, route }: Props) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 130 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <Text style={s.bigTitle}>
           {tx('이어서, 알바 이력서를\n작성해 주세요', 'Now, fill out\nyour applicant profile', 'Lanjutkan dengan\nprofil pelamar')}
         </Text>
@@ -168,13 +179,15 @@ export default function ErrandApplyScreen({ navigation, route }: Props) {
           </View>
         </View>
 
-        {/* Consent */}
-        <View style={s.consentRow}>
-          <Ionicons name="checkmark" size={16} color={Colors.gray} />
+        {/* Consent — 탭 가능한 필수 체크박스 */}
+        <TouchableOpacity style={s.consentRow} activeOpacity={0.7} onPress={() => setAgreed((a) => !a)}>
+          <View style={[s.checkbox, agreed && s.checkboxOn]}>
+            {agreed && <Ionicons name="checkmark" size={14} color={Colors.white} />}
+          </View>
           <Text style={s.consentText}>
             {tx('(필수) 개인정보 제3자 제공 동의', '(Required) Personal data sharing consent', '(Wajib) Persetujuan pembagian data')}
           </Text>
-        </View>
+        </TouchableOpacity>
         <Text style={[s.consentLink]}>
           {tx('개인정보처리 관련 고지사항', 'Privacy notice', 'Pemberitahuan privasi')}
         </Text>
@@ -183,7 +196,6 @@ export default function ErrandApplyScreen({ navigation, route }: Props) {
       <View style={[s.bottomBar, { paddingBottom: insets.bottom + 12 }]}>
         <TouchableOpacity
           style={[s.primaryBtn, !canSubmit && s.primaryBtnDisabled]}
-          disabled={!canSubmit}
           activeOpacity={0.88}
           onPress={submit}
         >
@@ -271,7 +283,13 @@ const s = StyleSheet.create({
   tagChipTextActive: { color: Colors.white, fontWeight: '600' },
 
   consentRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  consentText: { fontSize: 13, color: Colors.dark, fontWeight: '500' },
+  checkbox: {
+    width: 22, height: 22, borderRadius: 6,
+    borderWidth: 1.5, borderColor: Colors.borderMid,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.white,
+  },
+  checkboxOn: { backgroundColor: Colors.accent, borderColor: Colors.accent },
+  consentText: { flex: 1, fontSize: 13, color: Colors.dark, fontWeight: '500' },
   consentLink: { fontSize: 12, color: Colors.gray, marginTop: 4, marginLeft: 24, textDecorationLine: 'underline' },
 
   bottomBar: {

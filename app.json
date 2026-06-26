@@ -50,7 +50,8 @@
           "locationAlwaysAndWhenInUsePermission": "Linka needs location access to show nearby partners.",
           "locationWhenInUsePermission": "Linka needs location access to show nearby partners."
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "extra": {
       "eas": {

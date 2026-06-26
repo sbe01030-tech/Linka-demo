@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, Image,
+  TouchableOpacity, Image, Modal, Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -16,7 +16,7 @@ import { useLanguageStore } from '../../store/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Notifications'>;
 
-type NotifType = 'booking_accepted' | 'booking_rejected' | 'helper_arrived' | 'review_request' | 'promo' | 'system';
+type NotifType = 'booking_accepted' | 'booking_rejected' | 'helper_arrived' | 'review_request' | 'promo' | 'system' | 'ramadan';
 
 interface Notif {
   id: string;
@@ -31,6 +31,19 @@ interface Notif {
 type NotifContent = { titleKo: string; titleEn: string; titleId: string; bodyKo: string; bodyEn: string; bodyId: string; timeKo: string; timeEn: string; timeId: string; };
 
 const MOCK_NOTIFS: (Notif & NotifContent)[] = [
+  {
+    id: 'n0',
+    type: 'ramadan',
+    title: '', body: '', time: '',
+    titleKo: '라마단 추가 보수 책정 안내',
+    titleEn: 'Set your Ramadan additional pay',
+    titleId: 'Atur tambahan upah Ramadan',
+    bodyKo: '다가오는 라마단 기간(2026.2.17–3.18)에 대한 추가 보수를 책정해주세요. 미리 합의하면 매칭이 원활해져요.',
+    bodyEn: 'Please set your additional pay for the upcoming Ramadan period (Feb 17 – Mar 18, 2026). Agreeing early makes matching smoother.',
+    bodyId: 'Mohon tetapkan tambahan upah untuk periode Ramadan (17 Feb – 18 Mar 2026). Kesepakatan lebih awal memperlancar pemesanan.',
+    timeKo: '방금 전', timeEn: 'Just now', timeId: 'Baru saja',
+    read: false,
+  },
   {
     id: 'n1',
     type: 'booking_accepted',
@@ -106,6 +119,7 @@ const TYPE_META: Record<NotifType, { icon: string; color: string; bg: string }> 
   review_request:   { icon: 'star',                 color: '#F59E0B',           bg: '#FFFBEB' },
   promo:            { icon: 'gift',                 color: '#8B5CF6',           bg: '#F5F3FF' },
   system:           { icon: 'information-circle',   color: Colors.grayLight,    bg: Colors.section },
+  ramadan:          { icon: 'moon',                 color: '#D97706',           bg: '#FEF3C7' },
 };
 
 export default function NotificationsScreen({ navigation }: Props) {
@@ -123,6 +137,8 @@ export default function NotificationsScreen({ navigation }: Props) {
   });
 
   const [notifs, setNotifs] = useState(MOCK_NOTIFS.map(localize));
+  // 상세 팝업
+  const [selected, setSelected] = useState<Notif | null>(null);
 
   // lang 바뀌면 re-localize
   React.useEffect(() => {
@@ -152,7 +168,12 @@ export default function NotificationsScreen({ navigation }: Props) {
       <TouchableOpacity
         key={notif.id}
         style={[s.card, !notif.read && s.cardUnread]}
-        onPress={() => markRead(notif.id)}
+        onPress={() => {
+          markRead(notif.id);
+          // 데모: '예약 확정' 알림은 팝업 대신 '내 예약 목록'으로 이동
+          if (notif.type === 'booking_accepted') navigation.navigate('Orders');
+          else setSelected(notif);
+        }}
         activeOpacity={0.85}
       >
         {/* 아이콘 / 사진 */}
@@ -232,6 +253,49 @@ export default function NotificationsScreen({ navigation }: Props) {
           </View>
         )}
       </ScrollView>
+
+      {/* 상세 팝업 */}
+      <Modal
+        visible={!!selected}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelected(null)}
+      >
+        <Pressable style={s.modalBackdrop} onPress={() => setSelected(null)}>
+          <Pressable style={s.modalCard} onPress={(e) => e.stopPropagation()}>
+            {selected && (() => {
+              const meta = TYPE_META[selected.type];
+              return (
+                <>
+                  {/* 아이콘 + 사진 */}
+                  <View style={s.modalIconWrap}>
+                    {selected.photo ? (
+                      <>
+                        <Image source={{ uri: selected.photo }} style={s.modalPhoto} />
+                        <View style={[s.modalTypeBadge, { backgroundColor: meta.bg }]}>
+                          <Ionicons name={meta.icon as any} size={14} color={meta.color} />
+                        </View>
+                      </>
+                    ) : (
+                      <View style={[s.modalIconCircle, { backgroundColor: meta.bg }]}>
+                        <Ionicons name={meta.icon as any} size={30} color={meta.color} />
+                      </View>
+                    )}
+                  </View>
+
+                  <Text style={s.modalTitle}>{selected.title}</Text>
+                  <Text style={s.modalTime}>{selected.time}</Text>
+                  <Text style={s.modalBody}>{selected.body}</Text>
+
+                  <TouchableOpacity style={s.modalCloseBtn} onPress={() => setSelected(null)} activeOpacity={0.85}>
+                    <Text style={s.modalCloseBtnText}>{tx('확인', 'Got it', 'Mengerti')}</Text>
+                  </TouchableOpacity>
+                </>
+              );
+            })()}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -286,4 +350,48 @@ const s = StyleSheet.create({
   empty: { alignItems: 'center', paddingTop: 80, gap: 12, paddingHorizontal: 40 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: Colors.dark },
   emptySub:   { fontSize: 13, color: Colors.gray, textAlign: 'center', lineHeight: 20 },
+
+  // 상세 팝업
+  modalBackdrop: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 28,
+  },
+  modalCard: {
+    width: '100%', backgroundColor: Colors.white,
+    borderRadius: Radius.xl,
+    paddingHorizontal: 24, paddingTop: 28, paddingBottom: 20,
+    alignItems: 'center',
+    ...Shadow.md,
+  },
+  modalIconWrap: { position: 'relative', marginBottom: 16 },
+  modalPhoto: { width: 64, height: 64, borderRadius: 32 },
+  modalIconCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  modalTypeBadge: {
+    position: 'absolute', bottom: -3, right: -3,
+    width: 26, height: 26, borderRadius: 13,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: Colors.white,
+  },
+  modalTitle: {
+    fontSize: 17, fontWeight: '700', color: Colors.dark,
+    textAlign: 'center', lineHeight: 24,
+  },
+  modalTime: {
+    fontSize: 12, color: Colors.grayLight, marginTop: 4, marginBottom: 14,
+  },
+  modalBody: {
+    fontSize: 14, color: Colors.gray, lineHeight: 22,
+    textAlign: 'center', marginBottom: 22,
+  },
+  modalCloseBtn: {
+    alignSelf: 'stretch',
+    paddingVertical: 12,
+    backgroundColor: Colors.accent,
+    borderRadius: Radius.pill,
+    alignItems: 'center',
+  },
+  modalCloseBtnText: {
+    fontSize: 14, fontWeight: '700', color: Colors.white,
+  },
 });

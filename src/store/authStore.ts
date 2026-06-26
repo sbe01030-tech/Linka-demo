@@ -8,16 +8,21 @@ interface AuthState {
   login: (phone: string, password: string) => Promise<void>;
   register: (name: string, phone: string, password: string, role: UserRole) => Promise<void>;
   quickStart: (role: UserRole) => void;
+  switchRole: (role: UserRole) => void; // 데모: 로그아웃 없이 고객↔워커 전환
   logout: () => void;
   setUser: (user: User) => void;
 }
 
 // Mock data untuk development
 const MOCK_USERS: User[] = [
-  { id: '1', name: 'Bunda Wulandari', phone: '0812-3456-7890', role: 'customer', rating: 4.8 },
-  { id: '2', name: 'Sari Dewi',       phone: '0812-3456-7891', role: 'helper',   rating: 5.0, totalJobs: 312, isVerified: true },
-  { id: '3', name: 'Rahmat Hidayat',  phone: '0812-3456-7892', role: 'driver',   rating: 4.9, totalJobs: 284, isVerified: true },
+  { id: '1', name: '이성기 대표님', phone: '0812-3456-7890', role: 'customer', rating: 4.8 },
+  { id: '2', name: 'Sari Dewi',    phone: '0812-3456-7891', role: 'helper',   rating: 5.0, totalJobs: 312, isVerified: true },
 ];
+
+// 역할별 고정 id — 로그아웃→재로그인(역할 전환)에도 신원 유지 (채팅/요청 공유용)
+// 초기 모델: 고객 / 가사도우미 두 갈래
+const roleId = (role: UserRole): string =>
+  role === 'customer' ? 'cust-me' : 'helper-me';
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
@@ -29,14 +34,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     // Simulate API call
     await new Promise((r) => setTimeout(r, 1000));
     const found = MOCK_USERS.find((u) => u.phone === phone) ?? MOCK_USERS[0];
-    set({ user: { ...found, phone }, isLoggedIn: true, isLoading: false });
+    set({ user: { ...found, id: roleId(found.role), phone }, isLoggedIn: true, isLoading: false });
   },
 
   register: async (name: string, phone: string, _password: string, role: UserRole) => {
     set({ isLoading: true });
     await new Promise((r) => setTimeout(r, 1000));
     const newUser: User = {
-      id: Date.now().toString(),
+      id: roleId(role),
       name,
       phone,
       role,
@@ -46,18 +51,30 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   quickStart: (role: UserRole) => {
-    const defaultName =
-      role === 'customer' ? 'Bunda'
-      : role === 'driver' ? 'Driver'
-      : 'Helper';
     const guestUser: User = {
-      id: Date.now().toString(),
-      name: defaultName,
+      id: roleId(role),
+      name: role === 'customer' ? '이성기 대표님' : 'Sari Dewi',
       phone: '',
       role,
-      isVerified: false,
+      isVerified: true,
+      rating: role === 'helper' ? 5.0 : 4.8,
+      totalJobs: role === 'helper' ? 312 : undefined,
     };
     set({ user: guestUser, isLoggedIn: true });
+  },
+
+  // 데모: 프로필 탭 누르면 로그아웃 없이 즉시 역할 전환
+  switchRole: (role: UserRole) => {
+    const u: User = {
+      id: roleId(role),
+      name: role === 'customer' ? '이성기 대표님' : 'Sari Dewi',
+      phone: '',
+      role,
+      isVerified: true,
+      rating: role === 'helper' ? 5.0 : 4.8,
+      totalJobs: role === 'helper' ? 312 : undefined,
+    };
+    set({ user: u, isLoggedIn: true });
   },
 
   logout: () => set({ user: null, isLoggedIn: false }),

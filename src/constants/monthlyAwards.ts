@@ -18,19 +18,20 @@ export const HELPER_OF_MONTH: MonthlyAward = {
   reason: '지난달 32건 완료 · 모든 리뷰에서 긍정 태그',
 };
 
-export const DRIVER_OF_MONTH: MonthlyAward = {
+// 이 달의 신인 헬퍼 (2번째 컬럼 — 드라이버 자리 대체)
+export const HELPER_RISING_OF_MONTH: MonthlyAward = {
   period: CURRENT_PERIOD,
-  role: 'driver',
-  winnerId: 'd1',
-  winnerName: 'Rahmat Hidayat',
+  role: 'helper',
+  winnerId: 'w6',
+  winnerName: 'Rani Oktaviani',
   winnerPhoto: W7,
-  temperature: 72.3,
-  reason: '안전 운행 100% · 공항·행사 기사로 가장 많은 픽업',
+  temperature: 79.5,
+  reason: '입주 첫 달 24건 완료 · 재예약률 1위',
 };
 
 /** 받는 사람이 좋아할 수준의 은은한 배지 */
 export function getMonthlyAwardBadge(workerId: string): MonthlyAward | null {
   if (workerId === HELPER_OF_MONTH.winnerId) return HELPER_OF_MONTH;
-  if (workerId === DRIVER_OF_MONTH.winnerId) return DRIVER_OF_MONTH;
+  if (workerId === HELPER_RISING_OF_MONTH.winnerId) return HELPER_RISING_OF_MONTH;
   return null;
 }

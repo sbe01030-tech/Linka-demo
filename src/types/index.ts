@@ -161,10 +161,15 @@ export interface BookingRequest {
 
 export interface ChatMessage {
   id: string;
-  from: 'me' | 'other';
+  senderId: string;          // 보낸 사람 id — 역할 전환에도 공유되도록 (필수)
+  from?: 'me' | 'other';     // (구) 호환용 — 렌더는 senderId 기준
   text: string;
   time: string;
   read: boolean;
+  // 원문 언어 (있으면 '번역하기' 버튼 노출 대상)
+  lang?: 'id' | 'ko' | 'en';
+  // 번역 결과 (시드 폴백 — 라이브 번역 실패 시 사용)
+  translation?: { ko?: string; en?: string; id?: string };
 }
 
 export interface ChatThread {
@@ -236,7 +241,7 @@ export type CustomerTabParamList = {
   Home: undefined;
   Explore: undefined;
   Community: undefined;
-  Map: { expanded?: boolean; serviceType?: 'regular' | 'onetime'; partnerFilter?: 'helper' | 'driver' } | undefined;
+  Map: { expanded?: boolean; serviceType?: 'regular' | 'onetime'; partnerFilter?: 'helper' | 'driver'; category?: string } | undefined;
   ChatList: undefined;
   Profile: undefined;
 };

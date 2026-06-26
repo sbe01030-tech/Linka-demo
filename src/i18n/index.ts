@@ -238,6 +238,8 @@ export interface Translations {
     typeMessage: string;
     online: string;
     chatBtn: string;
+    translate: string;
+    showOriginal: string;
   };
 
   // Service type labels
@@ -487,8 +489,8 @@ const id: Translations = {
     skip: 'Lewati',
   },
   auth: {
-    welcome: 'Selamat Datang!',
-    signIn: 'Masuk ke akun Anda',
+    welcome: 'Tinggal Linka!',
+    signIn: 'Masuk dan langsung mulai',
     createAccount: 'Buat Akun',
     phone: 'Nomor HP',
     phonePlaceholder: '08xxxxxxxxxx',
@@ -676,6 +678,8 @@ const id: Translations = {
     typeMessage: 'Ketik pesan...',
     online: 'Online',
     chatBtn: 'Chat',
+    translate: 'Terjemahkan',
+    showOriginal: 'Lihat asli',
   },
   services: {
     art: 'ART',
@@ -892,8 +896,8 @@ const en: Translations = {
     skip: 'Skip',
   },
   auth: {
-    welcome: 'Welcome!',
-    signIn: 'Sign in to your account',
+    welcome: 'Just Linka it!',
+    signIn: 'Log in and get started',
     createAccount: 'Create Account',
     phone: 'Phone Number',
     phonePlaceholder: '08xxxxxxxxxx',
@@ -1080,6 +1084,8 @@ const en: Translations = {
     typeMessage: 'Type a message...',
     online: 'Online',
     chatBtn: 'Chat',
+    translate: 'Translate',
+    showOriginal: 'Show original',
   },
   workerDetail: {
     about: 'About',
@@ -1296,8 +1302,8 @@ const ko: Translations = {
     skip: '건너뛰기',
   },
   auth: {
-    welcome: '환영합니다!',
-    signIn: '계정에 로그인하세요',
+    welcome: '너도나도 Linka!',
+    signIn: '로그인하고 바로 시작하세요',
     createAccount: '계정 만들기',
     phone: '휴대폰 번호',
     phonePlaceholder: '08xxxxxxxxxx',
@@ -1484,6 +1490,8 @@ const ko: Translations = {
     typeMessage: '메시지를 입력하세요...',
     online: '온라인',
     chatBtn: '채팅',
+    translate: '번역하기',
+    showOriginal: '원문 보기',
   },
   workerDetail: {
     about: '소개',
@@ -1888,6 +1896,8 @@ const zh: Translations = {
     typeMessage: '输入消息...',
     online: '在线',
     chatBtn: '聊天',
+    translate: '翻译',
+    showOriginal: '查看原文',
   },
   workerDetail: {
     about: '简介',
@@ -2292,6 +2302,8 @@ const ja: Translations = {
     typeMessage: 'メッセージを入力...',
     online: 'オンライン',
     chatBtn: 'チャット',
+    translate: '翻訳',
+    showOriginal: '原文を表示',
   },
   workerDetail: {
     about: '紹介',

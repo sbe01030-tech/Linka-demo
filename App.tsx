@@ -18,9 +18,25 @@ import {
   DMSans_700Bold,
   DMSans_800ExtraBold,
 } from '@expo-google-fonts/dm-sans';
+import { useEffect } from 'react';
 import Navigation from './src/navigation';
+import { fetchState } from './src/store/sync';
+import { useChatStore } from './src/store/chatStore';
+import { useBookingStore } from './src/store/bookingStore';
 
 export default function App() {
+  // 데모 동기화: 로컬 서버(sync-server.js)를 1.5초마다 폴링 →
+  // 다른 시뮬레이터가 보낸 메시지/예약을 스토어에 병합. 서버 없으면 조용히 무시.
+  useEffect(() => {
+    const id = setInterval(async () => {
+      const remote = await fetchState();
+      if (!remote) return;
+      useChatStore.getState().mergeRemote(remote);
+      useBookingStore.getState().mergeRemote(remote.bookings ?? []);
+    }, 1500);
+    return () => clearInterval(id);
+  }, []);
+
   const [fontsLoaded] = useFonts({
     Nunito_400Regular,
     Nunito_600SemiBold,

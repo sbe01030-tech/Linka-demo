@@ -18,6 +18,7 @@ import { TexturedCircle } from '../../components/icons/TexturedCircle';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { AVATAR_STACK, W1, W2, W3, W4, W5, W6 } from '../../constants/photos';
 import { useAuthStore } from '../../store/authStore';
+import { useDemoStore } from '../../store/demoStore';
 import { useLanguageStore } from '../../store/languageStore';
 import { LangCode } from '../../i18n';
 import { RootStackParamList, CommunityPost } from '../../types';
@@ -99,18 +100,42 @@ interface MockWorker {
 }
 
 const MOCK_WORKERS: MockWorker[] = [
-  { id:'w1', name:'Renny Ivonnie',   photo:W1, location:'Kebayoran Baru', rating:4.6, pricePerHour:25000, totalJobs:112, isAvailable:true,  skills:['Cuci','Belanja','Deep Clean'],   isVerified:true, temperature:49.4 },
-  { id:'w2', name:'Brilian Zabrina', photo:W2, location:'Senopati',       rating:4.7, pricePerHour:15000, totalJobs:132, isAvailable:true,  skills:['Cuci','Masak','Belanja'],        isVerified:true, temperature:64.1 },
-  { id:'w3', name:'Fitri Yatun',     photo:W3, location:'Cilandak',       rating:4.7, pricePerHour:20000, totalJobs:208, isAvailable:false, skills:['Beberes','Asuh Anak','Belanja'], isVerified:true, temperature:64.8 },
-  { id:'w4', name:'Sarinah Sohari',  photo:W4, location:'Pondok Indah',   rating:4.9, pricePerHour:15000, totalJobs:86,  isAvailable:true,  skills:['Asuh Anak','Belanja','Lansia'],  isVerified:true, temperature:52.5 },
-  { id:'w5', name:'Yeni',            photo:W5, location:'Kemang',         rating:5.0, pricePerHour:25000, totalJobs:108, isAvailable:true,  skills:['Deep Clean','Asuh Anak','Masak'], isVerified:true, temperature:55.9 },
-  { id:'w6', name:'Rani Oktaviani',  photo:W6, location:'Menteng',        rating:4.5, pricePerHour:30000, totalJobs:247, isAvailable:true,  skills:['Cuci','Belanja','Masak'],        isVerified:true, temperature:68.8 },
+  { id:'w1', name:'Sari Dewi',       photo:W1, location:'Kebayoran Baru', rating:5.0, pricePerHour:35000, totalJobs:312, isAvailable:true,  skills:['Masak','Cuci','Beberes'],        isVerified:true, temperature:88.0 },
+  { id:'w7', name:'Renny Ivonnie',   photo:W2, location:'Senopati',       rating:4.6, pricePerHour:30000, totalJobs:112, isAvailable:true,  skills:['Cuci','Belanja','Deep Clean'],   isVerified:true, temperature:49.4 },
+  { id:'w2', name:'Brilian Zabrina', photo:W3, location:'Senopati',       rating:4.7, pricePerHour:32000, totalJobs:132, isAvailable:true,  skills:['Cuci','Masak','Belanja'],        isVerified:true, temperature:64.1 },
+  { id:'w3', name:'Fitri Yatun',     photo:W4, location:'Cilandak',       rating:4.7, pricePerHour:31000, totalJobs:208, isAvailable:false, skills:['Beberes','Asuh Anak','Belanja'], isVerified:true, temperature:64.8 },
+  { id:'w4', name:'Sarinah Sohari',  photo:W5, location:'Pondok Indah',   rating:4.9, pricePerHour:33000, totalJobs:86,  isAvailable:true,  skills:['Asuh Anak','Belanja','Lansia'],  isVerified:true, temperature:52.5 },
+  { id:'w5', name:'Yeni',            photo:W6, location:'Kemang',         rating:5.0, pricePerHour:34000, totalJobs:108, isAvailable:true,  skills:['Deep Clean','Asuh Anak','Masak'], isVerified:true, temperature:55.9 },
+  { id:'w6', name:'Rani Oktaviani',  photo:W1, location:'Menteng',        rating:4.5, pricePerHour:30000, totalJobs:247, isAvailable:true,  skills:['Cuci','Belanja','Masak'],        isVerified:true, temperature:68.8 },
 ];
 
-// ── Mock drivers (고객 차량 운전 서비스) ──────────────────────────
-import { MOCK_DRIVERS, DRIVER_SERVICE_META } from '../../constants/mockDrivers';
-import { HELPER_OF_MONTH, DRIVER_OF_MONTH } from '../../constants/monthlyAwards';
+// ── 드라이버 목데이터를 가사 헬퍼 카드로 재활용 (초기 모델: 가사도우미 단일 직군) ──
+import { MOCK_DRIVERS } from '../../constants/mockDrivers';
+import { HELPER_OF_MONTH, HELPER_RISING_OF_MONTH } from '../../constants/monthlyAwards';
 import MonthlyAwardCard from '../../components/common/MonthlyAwardCard';
+
+// 로컬 require(number) / URL(string) 모두 Image source로 변환
+const imgSrc = (p: any) => (typeof p === 'string' ? { uri: p } : p);
+
+// 드라이버 사진/이름을 재활용한 추가 헬퍼 목록 (상세는 실제 헬퍼 프로필로 연결)
+const HOME_SKILL_SETS = [
+  ['Beberes', 'Masak'], ['Cuci', 'Setrika'], ['Deep Clean', 'Belanja'],
+  ['Masak', 'Asuh Anak'], ['Beberes', 'Cuci'], ['Setrika', 'Masak'],
+  ['Belanja', 'Beberes'], ['Cuci', 'Deep Clean'],
+];
+const REAL_WORKER_IDS = ['w1', 'w2', 'w3', 'w4', 'w5', 'w6'];
+const EXTRA_HELPERS = MOCK_DRIVERS.slice(0, 8).map((d, i) => ({
+  id: REAL_WORKER_IDS[i % REAL_WORKER_IDS.length],
+  name: d.firstName,
+  photo: d.photo,
+  location: d.location,
+  rating: d.rating,
+  pricePerHour: Math.max(30000, d.pricePerHour),
+  totalJobs: d.totalJobs,
+  isAvailable: d.isAvailable,
+  skills: HOME_SKILL_SETS[i % HOME_SKILL_SETS.length],
+  isVerified: d.isVerified,
+}));
 
 // ── Mock ads ──────────────────────────────────────────────────────
 const ADS = [
@@ -163,6 +188,18 @@ function MascotFace({ size = 36 }: { size?: number }) {
   );
 }
 
+// 예약하기 4개 집안일 카테고리 (메인 중점)
+const BOOK_CATS = [
+  { id: 'clean',   icon: 'sparkles',   bg: '#E7FBF0', tint: '#00B24A', ko: '청소',        en: 'Cleaning',  idl: 'Bersih',      dko: '거실·주방·화장실', den: 'Rooms · kitchen',  did: 'Ruang · dapur' },
+  { id: 'laundry', icon: 'water',      bg: '#E9F2FF', tint: '#2E7DF6', ko: '빨래',        en: 'Laundry',   idl: 'Cuci',        dko: '세탁·널기·개기',   den: 'Wash · dry · fold', did: 'Cuci · jemur' },
+  { id: 'iron',    icon: 'shirt',      bg: '#EFEAFF', tint: '#7A6CF0', ko: '세탁·다림질',  en: 'Wash·Iron', idl: 'Setrika',     dko: '드라이·다림질',    den: 'Dry clean · iron',  did: 'Setrika' },
+  { id: 'dish',    icon: 'restaurant', bg: '#FFF1E6', tint: '#F2922B', ko: '설거지',      en: 'Dishes',    idl: 'Cuci Piring', dko: '주방 정리·뒷정리', den: 'Kitchen cleanup',   did: 'Beres dapur' },
+];
+
+// 평점·누적 주문 기반 Linka Point (100점 만점, 목업)
+const linkaPoint = (rating = 4.5, jobs = 0) =>
+  Math.min(100, Math.round(72 + (rating - 4.5) * 16 + Math.sqrt(jobs) * 0.9));
+
 export default function HomeScreen() {
   const navigation  = useNavigation<Nav>();
   const { user }    = useAuthStore();
@@ -179,6 +216,17 @@ export default function HomeScreen() {
     }, 10000);
     return () => clearInterval(timer);
   }, []);
+
+  // 데모: 워커가 수락한 상태에서 고객으로 돌아오면 → 알림탭으로 자동 이동
+  const confirmNotif = useDemoStore((st) => st.confirmNotif);
+  const setConfirmNotif = useDemoStore((st) => st.setConfirmNotif);
+  React.useEffect(() => {
+    if (!confirmNotif) return;
+    setConfirmNotif(false);
+    const id = setTimeout(() => navigation.navigate('Notifications'), 350);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [confirmNotif]);
 
   const firstName = user?.name?.split(' ')[0] ?? 'Bunda';
   const MOCK_POSTS = getPreviewPosts(lang);
@@ -209,27 +257,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* ── Service type buttons ── */}
-      <View style={s.svcBtnWrap}>
-        <TouchableOpacity
-          style={s.svcBtn}
-          onPress={() => (navigation as any).navigate('Map', { expanded: true, serviceType: 'regular' })}
-          activeOpacity={0.75}
-        >
-          <Ionicons name="calendar-outline" size={15} color={Colors.accent} />
-          <Text style={s.svcBtnText}>{t.homeNew.serviceRegular}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={s.svcBtn}
-          onPress={() => (navigation as any).navigate('Map', { expanded: true, serviceType: 'onetime' })}
-          activeOpacity={0.75}
-        >
-          <Ionicons name="flash-outline" size={15} color={Colors.accent} />
-          <Text style={s.svcBtnText}>{t.homeNew.serviceSpecial}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ── Find nearby helper banner ── */}
+      {/* ── Find nearby helper banner (맨 위) ── */}
       <TouchableOpacity
         style={s.nearbyBanner}
         activeOpacity={0.88}
@@ -239,80 +267,31 @@ export default function HomeScreen() {
           <View style={s.nearbyIconWrap}>
             <Ionicons name="location" size={18} color={Colors.white} />
           </View>
-          <View>
-            <Text style={s.nearbyTitle}>
-              {lang === 'ko' ? '내 주변의 손길' : lang === 'en' ? 'Help near you' : 'Bantuan di sekitar'}
-            </Text>
-            <Text style={s.nearbySub}>
-              {lang === 'ko' ? '지도 위에서 바로 만나보세요.'
-                : lang === 'en' ? 'Meet them right on the map.'
-                : 'Temui di peta, saat itu juga.'}
-            </Text>
-          </View>
+          <Text style={s.nearbyTitle}>
+            {lang === 'ko' ? '내 주변 워커 찾기' : lang === 'en' ? 'Find helpers near you' : 'Cari helper di sekitar'}
+          </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={Colors.accent} />
       </TouchableOpacity>
 
-      {/* ── Category grid — 0: 새 PNG 아이콘 (v2) ── */}
-      <View style={s.catSection}>
-        <View style={s.catGrid}>
-          {CATEGORIES.map((cat) => {
-            const isDriver = cat.id.startsWith('driver_');
-            const onPress = () => {
-              if (cat.id === 'errand') { (navigation as any).navigate('ErrandBoard'); return; }
-              if (isDriver)            { (navigation as any).navigate('Map', { expanded: true, partnerFilter: 'driver' }); return; }
-              (navigation as any).navigate('Map', { expanded: true, partnerFilter: 'helper' });
-            };
-            const v2Src = V2_ICONS[cat.id];
-            return (
-              <TouchableOpacity
-                key={`Z-${cat.id}`}
-                style={s.catItem}
-                activeOpacity={0.75}
-                onPress={onPress}
-              >
-                <View style={s.catIconStage}>
-                  <TexturedCircle size={69} color="#00C85312" style={s.catIconBg} />
-                  <View style={s.catIconShiftCentered}>
-                    {v2Src
-                      ? <Image source={v2Src} style={s.catFaceIcon} resizeMode="contain" />
-                      : <CategoryCharacter category={cat.id as CatCharKey} size={52} />
-                    }
-                  </View>
-                </View>
-                <Text style={s.catLabel}>{cat.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
+      {/* ── 예약하기 (집안일 4 카테고리 · 메인 중점) ── */}
+      <View style={s.bookSection}>
+        <View style={s.bookGrid}>
+          {BOOK_CATS.map((c) => (
+            <TouchableOpacity
+              key={c.id}
+              style={s.bookCard}
+              activeOpacity={0.8}
+              onPress={() => (navigation as any).navigate('Map', { expanded: true, category: c.id })}
+            >
+              <View style={[s.bookIconWrap, { backgroundColor: c.bg + 'B3' }]}>
+                <Ionicons name={c.icon as any} size={31} color={c.tint} />
+              </View>
+              <Text style={s.bookCardLabel} numberOfLines={1}>{lang === 'ko' ? c.ko : lang === 'en' ? c.en : c.idl}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
-
-      {/* ── Errand section ── */}
-      <TouchableOpacity
-        style={s.errandBanner}
-        activeOpacity={0.88}
-        onPress={() => (navigation as any).navigate('ErrandBoard')}
-      >
-        <View style={s.errandLeft}>
-          <View style={s.errandIconWrap}>
-            <Ionicons name="bicycle" size={20} color={Colors.white} />
-          </View>
-          <View>
-            <Text style={s.errandTitle}>
-              {lang === 'ko' ? '심부름 요청하기' : lang === 'en' ? 'Request an Errand' : 'Minta Bantuan Jasa'}
-            </Text>
-            <Text style={s.errandSub}>
-              {lang === 'ko' ? '장보기·배달·줄서기 등 심부름을 맡겨보세요' : lang === 'en' ? 'Shopping, delivery, queuing & more' : 'Belanja, antar, antre & lainnya'}
-            </Text>
-          </View>
-        </View>
-        <View style={s.errandRight}>
-          <Text style={s.errandCount}>
-            {lang === 'ko' ? '헬퍼 12명 대기중' : lang === 'en' ? '12 helpers ready' : '12 helper siap'}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color={Colors.white} />
-        </View>
-      </TouchableOpacity>
 
       {/* ── Recommended workers ── */}
       <View style={s.workerSection}>
@@ -322,9 +301,9 @@ export default function HomeScreen() {
               {lang === 'ko' ? '추천 헬퍼' : lang === 'en' ? 'TOP HELPERS' : 'HELPER PILIHAN'}
             </Text>
             <Text style={s.sectionHeadline}>
-              {lang === 'ko' ? '이웃처럼 가까운,\n가족처럼 편안한.'
-                : lang === 'en' ? 'Close as neighbors.\nEasy as family.'
-                : 'Sedekat tetangga,\nsenyaman keluarga.'}
+              {lang === 'ko' ? '믿고 맡기는 헬퍼'
+                : lang === 'en' ? 'Helpers you trust'
+                : 'Helper terpercaya'}
             </Text>
           </View>
           <TouchableOpacity onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
@@ -357,8 +336,8 @@ export default function HomeScreen() {
                 ))}
               </View>
               <View style={s.workerPriceRow}>
-                <Ionicons name="thermometer" size={11} color="#EF4444" />
-                <Text style={s.workerRating}>{w.temperature.toFixed(1)}°</Text>
+                <Ionicons name="star" size={11} color={Colors.accent} />
+                <Text style={s.workerRating}>{linkaPoint(w.rating, w.totalJobs)}</Text>
                 <Text style={s.workerPriceDot}>·</Text>
                 <Text style={s.workerPrice}>Rp {(w.pricePerHour / 1000).toFixed(0)}rb</Text>
                 <Text style={s.workerPriceUnit}>/jam</Text>
@@ -416,62 +395,57 @@ export default function HomeScreen() {
         </ScrollView>
       </View>
 
-      {/* ── Recommended drivers ── */}
-      <View style={s.tutorSection}>
+      {/* ── 새로 들어온 헬퍼 (추천 헬퍼와 동일 레이아웃) ── */}
+      <View style={s.workerSection}>
         <View style={s.sectionHeader}>
           <View style={{ flex: 1 }}>
-            <Text style={[s.sectionEyebrow, { color: Colors.tutorColor }]}>
-              {lang === 'ko' ? '추천 드라이버' : lang === 'en' ? 'TOP DRIVERS' : 'SOPIR PILIHAN'}
+            <Text style={[s.sectionEyebrow, { color: Colors.helperColor }]}>
+              {lang === 'ko' ? '새로 들어온 헬퍼' : lang === 'en' ? 'NEW HELPERS' : 'HELPER BARU'}
             </Text>
             <Text style={s.sectionHeadline}>
-              {lang === 'ko' ? '안전한 길.\n편안한 이동.'
-                : lang === 'en' ? 'Safer road.\nEasier ride.'
-                : 'Jalan aman.\nPerjalanan nyaman.'}
+              {lang === 'ko' ? '방금 합류한 헬퍼'
+                : lang === 'en' ? 'Newly joined'
+                : 'Baru bergabung'}
             </Text>
           </View>
-          <TouchableOpacity onPress={() => (navigation as any).navigate('Map', { expanded: true, partnerFilter: 'driver' })}>
+          <TouchableOpacity onPress={() => (navigation as any).navigate('Map', { expanded: true })}>
             <Text style={s.seeAll}>{t.homeNew.seeAll}</Text>
           </TouchableOpacity>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tutorScroll}>
-          {MOCK_DRIVERS.map((driver) => {
-            const topService = driver.services[0];
-            const meta = DRIVER_SERVICE_META[topService];
-            return (
-              <TouchableOpacity
-                key={driver.id}
-                style={s.tutorCard}
-                activeOpacity={0.88}
-                onPress={() => (navigation as any).navigate('DriverDetail', { driverId: driver.id })}
-              >
-                <Image source={typeof driver.photo === "string" ? { uri: driver.photo } : driver.photo} style={s.tutorPhoto} />
-                {driver.isVerified && (
-                  <View style={s.tutorVerifyBadge}>
-                    <Ionicons name="checkmark-circle" size={14} color={Colors.accent} />
-                  </View>
-                )}
-                <Text style={s.tutorName} numberOfLines={1}>{driver.firstName}</Text>
-                <View style={[s.tutorGradeBadge, { backgroundColor: meta.bg, flexDirection: 'row', alignItems: 'center', gap: 3 }]}>
-                  <Ionicons name={meta.icon as any} size={10} color={meta.color} />
-                  <Text style={[s.tutorGradeText, { color: meta.color }]}>{driver.licenseClass}</Text>
-                </View>
-                <View style={s.tutorSubjectsRow}>
-                  {driver.drivableTypes.slice(0, 2).map((t) => (
-                    <View key={t} style={s.tutorSubjectTag}>
-                      <Text style={s.tutorSubjectText} numberOfLines={1}>{t.toUpperCase()}</Text>
-                    </View>
-                  ))}
-                </View>
-                <View style={s.tutorPriceRow}>
-                  <Ionicons name="thermometer-outline" size={11} color="#F59E0B" />
-                  <Text style={s.tutorRating}>{driver.temperature.toFixed(1)}°</Text>
-                  <Text style={s.tutorPriceDot}>·</Text>
-                  <Text style={s.tutorPrice}>Rp {(driver.pricePerHour / 1000).toFixed(0)}rb</Text>
-                  <Text style={s.tutorPriceUnit}>/jam</Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.workerScroll}>
+          {EXTRA_HELPERS.map((w, i) => (
+            <TouchableOpacity
+              key={`${w.id}-${i}`}
+              style={s.workerCard}
+              activeOpacity={0.88}
+              onPress={() => navigation.navigate('WorkerDetail', { workerId: w.id })}
+            >
+              <View style={s.workerPhotoWrap}>
+                <Image source={imgSrc(w.photo)} style={s.workerPhoto} />
+                <View style={[s.workerAvailDot, { backgroundColor: w.isAvailable ? Colors.success : Colors.grayLight }]} />
+              </View>
+              <View style={s.workerNameRow}>
+                <Text style={s.workerName} numberOfLines={1}>{w.name.split(' ')[0]}</Text>
+                {w.isVerified && <Ionicons name="checkmark-circle" size={12} color={Colors.accent} />}
+              </View>
+              <View style={s.workerLocRow}>
+                <Ionicons name="location-outline" size={10} color={Colors.grayLight} />
+                <Text style={s.workerLoc} numberOfLines={1}>{w.location}</Text>
+              </View>
+              <View style={s.workerSkillsRow}>
+                {w.skills.slice(0, 2).map((sk) => (
+                  <View key={sk} style={s.workerSkillTag}><Text style={s.workerSkillText}>{sk}</Text></View>
+                ))}
+              </View>
+              <View style={s.workerPriceRow}>
+                <Ionicons name="star" size={11} color={Colors.accent} />
+                <Text style={s.workerRating}>{linkaPoint(w.rating, w.totalJobs)}</Text>
+                <Text style={s.workerPriceDot}>·</Text>
+                <Text style={s.workerPrice}>Rp {(w.pricePerHour / 1000).toFixed(0)}rb</Text>
+                <Text style={s.workerPriceUnit}>/jam</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
@@ -483,9 +457,9 @@ export default function HomeScreen() {
               {t.homeNew.popularPosts.toString().toUpperCase()}
             </Text>
             <Text style={s.sectionHeadline}>
-              {lang === 'ko' ? '오늘의 고민.\n내일의 답.'
-                : lang === 'en' ? 'Today’s questions.\nTomorrow’s answers.'
-                : 'Pertanyaan hari ini.\nJawaban esok.'}
+              {lang === 'ko' ? '이웃들의 이야기'
+                : lang === 'en' ? 'Neighbor stories'
+                : 'Cerita tetangga'}
             </Text>
           </View>
           <TouchableOpacity onPress={() => (navigation as any).navigate('Community')}>
@@ -528,10 +502,10 @@ export default function HomeScreen() {
       <View style={s.mvpBackdrop}>
         <MonthlyAwardCard
           helper={HELPER_OF_MONTH}
-          driver={DRIVER_OF_MONTH}
+          driver={HELPER_RISING_OF_MONTH}
           lang={lang}
           onPressHelper={() => navigation.navigate('WorkerDetail', { workerId: HELPER_OF_MONTH.winnerId })}
-          onPressDriver={() => (navigation as any).navigate('DriverDetail', { driverId: DRIVER_OF_MONTH.winnerId })}
+          onPressDriver={() => navigation.navigate('WorkerDetail', { workerId: HELPER_RISING_OF_MONTH.winnerId })}
         />
       </View>
 
@@ -569,43 +543,43 @@ export default function HomeScreen() {
             </View>
           </TouchableOpacity>
 
-          {/* 드라이버 */}
+          {/* 안심 보장 — 검증된 헬퍼 */}
           <TouchableOpacity
             style={s.topicCard}
             activeOpacity={0.85}
-            onPress={() => (navigation as any).navigate('DriverBoard')}
+            onPress={() => (navigation as any).navigate('Map', { expanded: true })}
           >
             <View style={s.topicBlobClip}>
               <Svg width="100%" height="100%" viewBox="0 0 170 170" preserveAspectRatio="xMidYMid slice">
-                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.35} />
-                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.tutorColor} strokeWidth={1.8} opacity={0.4} />
+                <Circle cx="-10" cy="-10" r="48" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.35} />
+                <Circle cx="170" cy="160" r="50" fill="none" stroke={Colors.accent} strokeWidth={1.8} opacity={0.4} />
               </Svg>
             </View>
-            <View style={[s.topicIconLarge, { backgroundColor: Colors.tutorLight }]}>
-              <Ionicons name="car" size={26} color={Colors.tutorColor} />
+            <View style={[s.topicIconLarge, { backgroundColor: Colors.accentLight }]}>
+              <Ionicons name="shield-checkmark" size={26} color={Colors.accent} />
             </View>
-            <Text style={[s.topicEyebrow, { color: Colors.tutorColor }]}>
-              {lang === 'ko' ? '드라이버' : lang === 'en' ? 'DRIVER' : 'SOPIR'}
+            <Text style={[s.topicEyebrow, { color: Colors.accent }]}>
+              {lang === 'ko' ? '안심 보장' : lang === 'en' ? 'VERIFIED' : 'TERJAMIN'}
             </Text>
             <Text style={s.topicHeadline} numberOfLines={2}>
-              {lang === 'ko' ? '운전은 잠시 내려두고,\n편히 쉬세요.'
-                : lang === 'en' ? 'Set the wheel down.\nJust sit back.'
-                : 'Turunkan setir.\nSantai saja.'}
+              {lang === 'ko' ? '검증된 헬퍼만,\n안심하고 맡기세요.'
+                : lang === 'en' ? 'Verified helpers.\nPeace of mind.'
+                : 'Helper terverifikasi.\nTenang dan aman.'}
             </Text>
-            <View style={[s.topicLivePill, { backgroundColor: Colors.tutorLight }]}>
-              <View style={[s.topicLiveDot, { backgroundColor: Colors.tutorColor }]} />
-              <Text style={[s.topicLiveText, { color: Colors.tutorColor }]}>
-                {lang === 'ko' ? '지금 8명' : lang === 'en' ? '8 online' : '8 aktif'}
+            <View style={[s.topicLivePill, { backgroundColor: Colors.accentLight }]}>
+              <View style={[s.topicLiveDot, { backgroundColor: Colors.accent }]} />
+              <Text style={[s.topicLiveText, { color: Colors.accent }]}>
+                {lang === 'ko' ? '신원 인증 100%' : lang === 'en' ? '100% verified' : '100% terverifikasi'}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
 
-        {/* 심부름 — 아래쪽 가로 길게 */}
+        {/* 첫 예약 할인 — 아래쪽 가로 길게 */}
         <TouchableOpacity
           style={s.topicWideCard}
           activeOpacity={0.85}
-          onPress={() => (navigation as any).navigate('ErrandBoard')}
+          onPress={() => (navigation as any).navigate('Map', { expanded: true })}
         >
           <View style={s.topicBlobClip}>
             <Svg width="100%" height="100%" viewBox="0 0 360 90" preserveAspectRatio="xMidYMid slice">
@@ -614,24 +588,24 @@ export default function HomeScreen() {
             </Svg>
           </View>
           <View style={[s.topicIconLarge, { backgroundColor: Colors.accentLight, marginBottom: 0 }]}>
-            <Ionicons name="bicycle" size={26} color={Colors.accent} />
+            <Ionicons name="pricetag" size={24} color={Colors.accent} />
           </View>
           <View style={{ flex: 1, marginLeft: 14 }}>
             <View style={s.topicWideTitleRow}>
               <Text style={[s.topicEyebrow, { color: Colors.accent, marginBottom: 0 }]}>
-                {lang === 'ko' ? '심부름' : lang === 'en' ? 'ERRANDS' : 'TITIP'}
+                {lang === 'ko' ? '첫 예약 혜택' : lang === 'en' ? 'FIRST BOOKING' : 'PESAN PERTAMA'}
               </Text>
               <View style={[s.topicLivePill, { backgroundColor: Colors.accentLight, marginTop: 0 }]}>
                 <View style={[s.topicLiveDot, { backgroundColor: Colors.accent }]} />
                 <Text style={[s.topicLiveText, { color: Colors.accent }]}>
-                  {lang === 'ko' ? '요청 4건' : lang === 'en' ? '4 new' : '4 baru'}
+                  {lang === 'ko' ? '20% 할인' : lang === 'en' ? '20% off' : 'Diskon 20%'}
                 </Text>
               </View>
             </View>
             <Text style={[s.topicHeadline, { marginTop: 4, fontSize: 15 }]} numberOfLines={1}>
-              {lang === 'ko' ? '바쁜 순간에, 더 빠른 손.'
-                : lang === 'en' ? 'Busy moments. Faster hands.'
-                : 'Saat sibuk, tangan cepat.'}
+              {lang === 'ko' ? '지금 바로, 첫 예약하세요.'
+                : lang === 'en' ? 'Book your first now.'
+                : 'Pesan pertama sekarang.'}
             </Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={Colors.grayLight} />
@@ -659,6 +633,35 @@ export default function HomeScreen() {
 
 // ── Styles ─────────────────────────────────────────────────────
 const s = StyleSheet.create({
+  // 섹션 공통 — 타이틀(eyebrow + headline)
+  secHead: { marginBottom: 16, paddingHorizontal: 4 },
+  // 예약하기 (4 카테고리 · 메인 중점) — 추천 섹션과 동일한 밴드 결
+  bookSection: {
+    backgroundColor: Colors.white, marginTop: 8,
+    paddingTop: 20, paddingBottom: 22, paddingHorizontal: 20,
+    borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
+  },
+  bookGrid: { flexDirection: 'row', justifyContent: 'space-between' },
+  bookCard: { flex: 1, alignItems: 'center', gap: 8 },
+  bookIconWrap: { width: 70, height: 70, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
+  bookCardLabel: { fontSize: 12.5, fontWeight: '700', color: Colors.dark, letterSpacing: -0.2 },
+  // 요청하기 (비중 30%) — 동일한 밴드 결
+  reqSection: {
+    backgroundColor: Colors.white, marginTop: 8,
+    paddingTop: 20, paddingBottom: 22, paddingHorizontal: 20,
+    borderTopWidth: 1, borderBottomWidth: 1, borderColor: Colors.border,
+  },
+  reqCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 13,
+    backgroundColor: Colors.white, borderRadius: 18, paddingVertical: 15, paddingHorizontal: 16,
+    borderWidth: 1, borderColor: '#BFEBD2',
+  },
+  reqIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' },
+  reqTitle: { fontSize: 15, fontWeight: '800', color: Colors.dark, letterSpacing: -0.2 },
+  reqSub: { fontSize: 12, color: Colors.grayLight, marginTop: 2 },
+  reqPill: { backgroundColor: Colors.accentLight, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
+  reqPillText: { fontSize: 11, fontWeight: '800', color: Colors.accent },
+
   root: { flex: 1, backgroundColor: '#F5F5F5' },
 
   // Header
@@ -808,14 +811,14 @@ const s = StyleSheet.create({
   nearbyBanner: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     backgroundColor: Colors.white,
-    marginHorizontal: 8, marginTop: 5, marginBottom: 1,
+    marginHorizontal: 8, marginTop: 6, marginBottom: 2,
     borderRadius: Radius.lg,
-    paddingHorizontal: 14, paddingVertical: 13,
+    paddingHorizontal: 14, paddingVertical: 8,
     borderWidth: 1, borderColor: Colors.border,
   },
-  nearbyLeft:    { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  nearbyIconWrap:{ width: 36, height: 36, borderRadius: 18, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' },
-  nearbyTitle:   { fontSize: 13, fontWeight: '700', color: Colors.dark, marginBottom: 2 },
+  nearbyLeft:    { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  nearbyIconWrap:{ width: 32, height: 32, borderRadius: 16, backgroundColor: Colors.accent, alignItems: 'center', justifyContent: 'center' },
+  nearbyTitle:   { fontSize: 13, fontWeight: '700', color: Colors.dark },
   nearbySub:     { fontSize: 11, color: Colors.gray },
 
   // Count bar

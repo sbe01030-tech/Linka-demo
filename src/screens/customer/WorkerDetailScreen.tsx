@@ -9,10 +9,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { getMonthlyAwardBadge } from '../../constants/monthlyAwards';
 import { MvpMiniBadge } from '../../components/common/MonthlyAwardCard';
-import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3 } from '../../constants/photos';
+import TransText from '../../components/common/TransText';
+import { W1, W2, W3, W4, W5, W6, W7, W8, C1, C2, C3, BA1, BA2, BA3, BA4 } from '../../constants/photos';
 
-// 워커가 SNS처럼 본인 프로필 꾸미는 톤 — 6장 (WorkerProfileScreen 동일)
-const GALLERY_PHOTOS: string[] = [W1, W2, W4, W5, W6, W7];
+// 워커 프로필 갤러리 — 청소 비포/애프터 4장
+const GALLERY_PHOTOS: string[] = [BA1, BA2, BA3, BA4];
 // 기본 커버 (워커가 따로 설정 안 한 경우 — W3 사용. WorkerProfileScreen 기본값과 동일)
 const DEFAULT_COVER = W3;
 import { RootStackParamList, Worker } from '../../types';
@@ -20,12 +21,42 @@ import { useLanguageStore } from '../../store/languageStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WorkerDetail'>;
 
-/** 평점과 누적 주문 기반 Linka 온도 추정치 (목업) */
-const computeTemp = (rating: number, totalJobs: number) =>
-  Math.max(36.5, Math.min(99, 36.5 + (rating - 4.5) * 18 + Math.sqrt(totalJobs) * 1.5));
+/** 평점과 누적 주문 기반 Linka Point 추정치 (100점 만점, 목업) */
+const computeLinkaPoint = (rating: number, totalJobs: number) =>
+  Math.min(100, Math.round(72 + (rating - 4.5) * 16 + Math.sqrt(totalJobs) * 0.9));
+
+/** 사용량(누적 활동) 기반 레벨 — 점수만으로 부족한 평가를 보완 */
+const LEVELS = [
+  { lv: 1, name: '새싹',   min: 0 },
+  { lv: 2, name: '성실',   min: 50 },
+  { lv: 3, name: '숙련',   min: 150 },
+  { lv: 4, name: '베테랑', min: 300 },
+  { lv: 5, name: '마스터', min: 600 },
+];
+const levelOf = (jobs: number) => {
+  let i = 0;
+  for (let k = 0; k < LEVELS.length; k++) if (jobs >= LEVELS[k].min) i = k;
+  const cur = LEVELS[i], next = LEVELS[i + 1];
+  const isMax = !next;
+  const progress = isMax ? 1 : (jobs - cur.min) / (next.min - cur.min);
+  return {
+    lv: cur.lv, name: cur.name, isMax,
+    progress: Math.max(0.05, Math.min(1, progress)),
+    remaining: isMax ? 0 : next.min - jobs,
+  };
+};
 
 // Same mock data as HomeScreen
 const MOCK_WORKERS: Worker[] = [
+  {
+    id: 'helper-me', name: 'Sari Dewi', phone: '0812-3456-7891', role: 'helper', serviceType: 'helper',
+    serviceFrequency: 'regular',
+    photo: W1,
+    pricePerHour: 30000, pricePerDay: 200000,
+    location: 'Cibodas, Tangerang', bio: 'ART berpengalaman 10 tahun. Bisa masak, cuci, setrika, dan beberes. Teliti, jujur, dan tepat waktu.',
+    skills: ['Beberes', 'Masak', 'Cuci', 'Setrika'],
+    isAvailable: true, rating: 5.0, totalJobs: 312, isVerified: true, experienceYears: 10,
+  },
   {
     id: 'w1', name: 'Sari Dewi', phone: '0812-3456-7890', role: 'helper', serviceType: 'helper',
     serviceFrequency: 'regular',
@@ -39,7 +70,7 @@ const MOCK_WORKERS: Worker[] = [
     id: 'w2', name: 'Rina Wulandari', phone: '0813-4567-8901', role: 'helper', serviceType: 'helper',
     serviceFrequency: 'regular',
     photo: W2,
-    pricePerHour: 25000, pricePerDay: 160000,
+    pricePerHour: 30000, pricePerDay: 160000,
     location: 'Cilandak, Jakarta Selatan', bio: 'Spesialis masak menu sehat harian dan bersih-bersih. Sudah 7 tahun pengalaman, jujur dan tepat waktu.',
     skills: ['Masak Sehat', 'Beberes', 'Cuci'],
     isAvailable: true, rating: 4.9, totalJobs: 198, isVerified: true, experienceYears: 7,
@@ -48,7 +79,7 @@ const MOCK_WORKERS: Worker[] = [
     id: 'w3', name: 'Dewi Anggraeni', phone: '0816-7890-1234', role: 'helper', serviceType: 'helper',
     serviceFrequency: 'both',
     photo: W3,
-    pricePerHour: 28000, pricePerDay: 180000,
+    pricePerHour: 33000, pricePerDay: 180000,
     location: 'Kemang, Jakarta Selatan', bio: 'Berpengalaman di keluarga dengan anak kecil. Sabar & telaten. Bisa masak, cuci, dan jaga anak.',
     skills: ['Masak', 'Cuci', 'Perawatan Anak'],
     isAvailable: true, rating: 4.7, totalJobs: 156, isVerified: true, experienceYears: 5,
@@ -57,7 +88,7 @@ const MOCK_WORKERS: Worker[] = [
     id: 'w4', name: 'Fitri Handayani', phone: '0815-6789-0123', role: 'helper', serviceType: 'helper',
     serviceFrequency: 'regular',
     photo: W4,
-    pricePerHour: 27000, pricePerDay: 175000,
+    pricePerHour: 31000, pricePerDay: 175000,
     location: 'Fatmawati, Jakarta Selatan', bio: 'Teliti dan jujur. Sudah kerja di 3 keluarga expat. Bisa masak Western & Indonesia.',
     skills: ['Masak', 'Setrika', 'Beberes'],
     isAvailable: true, rating: 4.9, totalJobs: 227, isVerified: true, experienceYears: 8,
@@ -84,7 +115,7 @@ const MOCK_WORKERS: Worker[] = [
     id: 'w7', name: 'Siti Rahayu', phone: '0819-0123-4567', role: 'helper', serviceType: 'helper',
     serviceFrequency: 'regular',
     photo: W7,
-    pricePerHour: 22000, pricePerDay: 140000,
+    pricePerHour: 32000, pricePerDay: 140000,
     location: 'Ciputat, Tangerang Selatan', bio: 'ART tinggal atau harian. Pengalaman 5 tahun, suka bekerja dengan anak-anak.',
     skills: ['Masak', 'Cuci', 'Jaga Anak', 'Setrika'],
     isAvailable: true, rating: 4.6, totalJobs: 178, isVerified: false, experienceYears: 5,
@@ -147,25 +178,47 @@ const MOCK_WORKERS: Worker[] = [
 ];
 
 const MOCK_REVIEWS = [
-  { id: 'r1', name: 'Bunda Wulan', photo: C1, rating: 5, text: 'Mbak Sari sangat teliti dan bersih sekali masakannya. Pasti akan dipanggil lagi!', date: '2 hari lalu' },
-  { id: 'r2', name: 'Bunda Hana',  photo: C2, rating: 5, text: 'Tepat waktu dan rumah jadi bersih banget. Anak-anak juga suka!', date: '1 minggu lalu' },
-  { id: 'r3', name: 'Bunda Tari',  photo: C3, rating: 4, text: 'Ramah dan profesional. Masakannya enak, keluarga puas.', date: '2 minggu lalu' },
+  { id: 'r1', name: 'Bunda Wulan', photo: C1, rating: 5, text: 'Mbak Sari sangat teliti dan bersih sekali masakannya. Pasti akan dipanggil lagi!', textKo: '사리 씨는 정말 꼼꼼하고 요리도 아주 깔끔해요. 다음에 꼭 또 부를 거예요!', date: '2 hari lalu' },
+  { id: 'r2', name: 'Bunda Hana',  photo: C2, rating: 5, text: 'Tepat waktu dan rumah jadi bersih banget. Anak-anak juga suka!', textKo: '시간 약속도 잘 지키고 집이 정말 깨끗해졌어요. 아이들도 좋아해요!', date: '1 minggu lalu' },
+  { id: 'r3', name: 'Bunda Tari',  photo: C3, rating: 4, text: 'Ramah dan profesional. Masakannya enak, keluarga puas.', textKo: '친절하고 프로페셔널해요. 음식도 맛있어서 가족 모두 만족했어요.', date: '2 minggu lalu' },
 ];
+
+// 기술(스킬) 한국어 라벨
+const SKILL_KO: Record<string, string> = {
+  'Masak': '요리', 'Masak Sehat': '건강식 요리', 'Masak Acara': '행사 요리', 'Masak Indonesia': '인니 요리',
+  'Cuci': '빨래', 'Setrika': '다림질', 'Beberes': '청소',
+  'Deep Cleaning': '대청소', 'Deep Clean': '대청소', 'Catering': '케이터링',
+  'Laundry': '빠른 세탁', 'Laundry Kilat': '빠른 세탁',
+  'Jaga Anak': '아이 돌봄', 'Asuh Anak': '아이 돌봄', 'Perawatan Anak': '아이 돌봄',
+  'Belanja': '장보기', 'Lansia': '어르신 돌봄',
+};
+
+// 워커 소개글 한국어 목번역 (id 기준)
+const BIO_KO: Record<string, string> = {
+  'helper-me': '10년 경력의 가사도우미입니다. 요리·빨래·다림질·청소 모두 가능하고, 꼼꼼하고 정직하며 시간 약속을 잘 지킵니다.',
+  'w1': '10년 경력의 가사도우미입니다. 인도네시아식·서양식 요리, 빨래, 다림질, 청소 모두 가능해요. 어린 자녀가 있는 가정 경험이 많습니다.',
+  'w2': '매일 건강식 요리와 청소 전문이에요. 7년 경력에 정직하고 시간 약속을 잘 지킵니다.',
+  'w3': '어린아이가 있는 가정 경험이 많아요. 인내심 있고 꼼꼼합니다. 요리·빨래·아이 돌봄 가능해요.',
+  'w4': '꼼꼼하고 정직합니다. 외국인 가정 3곳에서 일한 경험이 있고, 서양식·인도네시아식 요리가 가능해요.',
+  'w5': '입주 청소·리노베이션 후 청소 전문입니다. 빠르고 깔끔하게 해드려요.',
+  'w6': '가족 행사용 케이터링·요리 전문이에요. 결혼식·모임·생일 메뉴까지 가능합니다.',
+  'w7': '입주 또는 출퇴근 가사도우미입니다. 5년 경력이고 아이들과 함께 일하는 걸 좋아해요.',
+  'w8': '다림질·빠른 세탁 전문이에요. 하루 안에 옷을 깔끔하게 마무리해 드립니다.',
+};
 
 
 export default function WorkerDetailScreen({ navigation, route }: Props) {
   const { workerId } = route.params;
-  const { t } = useLanguageStore();
+  const { t, lang } = useLanguageStore();
+  const tx = (ko: string, en: string, id: string) => (lang === 'ko' ? ko : lang === 'en' ? en : id);
   const insets = useSafeAreaInsets();
   const worker = MOCK_WORKERS.find((w) => w.id === workerId) ?? MOCK_WORKERS[0];
   const [duration, setDuration] = useState(4);
 
-  const depositRate = 0.3; // 30% deposit
   const totalPrice  = worker.pricePerHour * duration;
-  const deposit     = Math.ceil(totalPrice * depositRate / 1000) * 1000;
-  const remaining   = totalPrice - deposit;
 
   const isTutor = worker.serviceType === 'tutor';
+  const lvl = levelOf(worker.totalJobs ?? 0);
 
   const handleBook = () => {
     navigation.navigate('Booking', {
@@ -251,6 +304,10 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
               <Ionicons name="star" size={11} color={Colors.accent} />
               <Text style={s.pillText}>{worker.rating} rating</Text>
             </View>
+            <View style={[s.pill, { backgroundColor: Colors.accentLight, borderColor: '#BFEBD2' }]}>
+              <Ionicons name="ribbon-outline" size={11} color={Colors.accent} />
+              <Text style={[s.pillText, { color: Colors.primaryDark }]}>Lv.{lvl.lv} {lvl.name}</Text>
+            </View>
             <View style={[s.pill, { backgroundColor: worker.isAvailable ? '#F0FDF4' : Colors.section }]}>
               <View style={[s.availDot, { backgroundColor: worker.isAvailable ? Colors.success : Colors.grayLight }]} />
               <Text style={[s.pillText, { color: worker.isAvailable ? Colors.success : Colors.grayLight }]}>
@@ -264,17 +321,34 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
         <View style={s.statsCard}>
           {[
             { label: t.workerDetail.jobsDone, value: `${worker.totalJobs}` },
-            { label: 'Suhu Linka',            value: `${computeTemp(worker.rating ?? 4.5, worker.totalJobs ?? 0).toFixed(1)}°C`, isTemp: true },
+            { label: 'Linka Point',           value: `${computeLinkaPoint(worker.rating ?? 4.5, worker.totalJobs ?? 0)}`, isTemp: true },
             { label: t.workerDetail.expYears, value: `${worker.experienceYears}` },
           ].map((stat, i, arr) => (
             <React.Fragment key={stat.label}>
               <View style={s.statCol}>
-                <Text style={[s.statValue, stat.isTemp && { color: '#EF4444' }]}>{stat.value}</Text>
+                <Text style={[s.statValue, stat.isTemp && { color: Colors.accent }]}>{stat.value}</Text>
                 <Text style={s.statLabel}>{stat.label}</Text>
               </View>
               {i < arr.length - 1 && <View style={s.statDivider} />}
             </React.Fragment>
           ))}
+        </View>
+
+        {/* Level — 사용량 기반 (점수 보완) */}
+        <View style={s.levelRow}>
+          <View style={s.levelHead}>
+            <View style={s.levelLabel}>
+              <Ionicons name="ribbon" size={13} color={Colors.accent} />
+              <Text style={s.levelLv}>Lv.{lvl.lv}</Text>
+              <Text style={s.levelName}>{lvl.name}</Text>
+            </View>
+            <Text style={s.levelRemain}>
+              {lvl.isMax ? '최고 레벨' : `다음 레벨까지 ${lvl.remaining}건`}
+            </Text>
+          </View>
+          <View style={s.levelTrack}>
+            <View style={[s.levelFill, { width: `${Math.round(lvl.progress * 100)}%` }]} />
+          </View>
         </View>
 
         {/* Verification badges */}
@@ -303,7 +377,7 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
         {/* About */}
         <View style={s.section}>
           <Text style={s.sectionTitle}>{t.workerDetail.about}</Text>
-          <Text style={s.bioText}>{worker.bio}</Text>
+          <TransText original={worker.bio} translated={BIO_KO[worker.id]} target="ko" textStyle={s.bioText} />
         </View>
 
         {/* Subjects / Skills */}
@@ -312,7 +386,9 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
           <View style={s.skillsWrap}>
             {(isTutor ? worker.subjects : worker.skills)?.map((item) => (
               <View key={item} style={[s.skillPill, isTutor && s.tutorPill]}>
-                <Text style={[s.skillText, isTutor && s.tutorPillText]}>{item}</Text>
+                <Text style={[s.skillText, isTutor && s.tutorPillText]}>
+                  {!isTutor && lang === 'ko' ? (SKILL_KO[item] ?? item) : item}
+                </Text>
               </View>
             ))}
           </View>
@@ -372,20 +448,17 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
 
             <View style={s.calcDivider} />
 
-            {/* Deposit breakdown */}
+            {/* 후불 결제 + 취소 수수료 안내 */}
             <View style={s.depositInfo}>
-              <Ionicons name="shield-checkmark-outline" size={14} color={Colors.accent} />
-              <Text style={s.depositInfoText}>{t.workerDetail.escrowSystem}</Text>
+              <Ionicons name="time-outline" size={14} color={Colors.accent} />
+              <Text style={s.depositInfoText}>{tx('후불 결제 · 서비스 완료 후 결제', 'Pay after service is done', 'Bayar setelah layanan selesai')}</Text>
             </View>
-            <View style={s.calcRow}>
-              <Text style={s.calcLabel}>{t.workerDetail.depositNow}</Text>
-              <Text style={[s.calcVal, { color: Colors.accent }]}>Rp {deposit.toLocaleString('id-ID')}</Text>
-            </View>
-            <View style={s.calcRow}>
-              <Text style={s.calcLabel}>{t.workerDetail.remainingAfter}</Text>
-              <Text style={s.calcVal}>Rp {remaining.toLocaleString('id-ID')}</Text>
-            </View>
-            <Text style={s.depositNote}>{t.workerDetail.escrowNote}</Text>
+            <Text style={[s.depositNote, { fontWeight: '700', color: Colors.darkMid, marginTop: 8 }]}>
+              {tx('취소 수수료 안내', 'Cancellation policy', 'Kebijakan pembatalan')}
+            </Text>
+            <Text style={s.depositNote}>{tx('• 방문 24시간 전까지: 무료 취소', '• Up to 24h before: free', '• Sampai 24 jam sebelum: gratis')}</Text>
+            <Text style={s.depositNote}>{tx('• 24시간 이내: 예상 금액의 30%', '• Within 24h: 30% of estimate', '• Dalam 24 jam: 30%')}</Text>
+            <Text style={s.depositNote}>{tx('• 방문 후 취소: 50%', '• After arrival: 50%', '• Setelah tiba: 50%')}</Text>
           </View>
         </View>
 
@@ -412,7 +485,7 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
                   </View>
                 </View>
               </View>
-              <Text style={s.reviewText}>{rv.text}</Text>
+              <TransText original={rv.text} translated={rv.textKo} target="ko" textStyle={s.reviewText} />
             </View>
           ))}
         </View>
@@ -433,7 +506,7 @@ export default function WorkerDetailScreen({ navigation, route }: Props) {
           disabled={!worker.isAvailable}
         >
           <Text style={s.bookBtnText}>
-            {worker.isAvailable ? `${t.workerDetail.bookNow} · Rp ${deposit.toLocaleString('id-ID')} DP` : t.workerDetail.notAvailable}
+            {worker.isAvailable ? t.workerDetail.bookNow : t.workerDetail.notAvailable}
           </Text>
         </TouchableOpacity>
       </View>
@@ -547,6 +620,16 @@ const s = StyleSheet.create({
   statDivider: { width: 1, backgroundColor: Colors.border, marginVertical: 4 },
   statValue:   { fontSize: 20, fontWeight: '700', color: Colors.dark },
   statLabel:   { fontSize: 11, color: Colors.gray },
+
+  // 레벨 (사용량 기반) — 절제된 진행바
+  levelRow:    { marginHorizontal: 20, marginTop: 16 },
+  levelHead:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  levelLabel:  { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  levelLv:     { fontSize: 13, fontWeight: '800', color: Colors.primaryDark },
+  levelName:   { fontSize: 13, fontWeight: '600', color: Colors.gray },
+  levelRemain: { fontSize: 11, color: Colors.grayLight },
+  levelTrack:  { height: 6, borderRadius: 3, backgroundColor: Colors.section, overflow: 'hidden' },
+  levelFill:   { height: 6, borderRadius: 3, backgroundColor: Colors.accent },
 
   section: { paddingHorizontal: 20, paddingTop: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: Colors.dark, marginBottom: 12 },

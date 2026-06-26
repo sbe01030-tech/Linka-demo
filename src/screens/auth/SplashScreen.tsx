@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, Animated, Dimensions,
+  View, Text, StyleSheet, Animated, Dimensions, Pressable,
 } from 'react-native';
 import Svg, { Line, Rect, Circle, Ellipse, Path } from 'react-native-svg';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -44,7 +44,8 @@ const EDGES = [
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 
 export default function SplashScreen({ navigation }: Props) {
-  const { isLoggedIn, user } = useAuthStore();
+  // 데모: 자동 전환 없음. 화면 터치 시 Welcome(워커/유저로 시작) 페이지로 이동
+  const enter = () => navigation.navigate('Welcome');
 
   // Per-node animated values
   const nodeScales   = useRef(NODES.map(() => new Animated.Value(0))).current;
@@ -100,17 +101,8 @@ export default function SplashScreen({ navigation }: Props) {
       }),
     ]).start();
 
-    // Navigate after animation completes
-    const timer = setTimeout(
-      () => {
-        if (!isLoggedIn) navigation.replace('Welcome');
-        else if (user?.role === 'helper' || user?.role === 'tutor') navigation.replace('WorkerTabs');
-        else navigation.replace('CustomerTabs');
-      },
-      3800
-    );
+    // 데모: 자동 전환 타이머 없음 — 애니메이션만 재생 후 정지 상태 유지
     return () => {
-      clearTimeout(timer);
       // 언마운트 시 진행 중인 native 애니메이션 노드 정리 (Android 크래시 방지)
       nodeScales.forEach((v) => v.stopAnimation());
       nodeOpacity.forEach((v) => v.stopAnimation());
@@ -123,7 +115,7 @@ export default function SplashScreen({ navigation }: Props) {
   }, []);
 
   return (
-    <View style={s.root}>
+    <Pressable style={s.root} onPress={enter}>
 
       {/* ── White circle nodes ── */}
       {NODES.map((node, i) => {
@@ -195,7 +187,7 @@ export default function SplashScreen({ navigation }: Props) {
         <Text style={s.logo}>Linka</Text>
         <Text style={s.taglineRow}>Links Make Life</Text>
       </Animated.View>
-    </View>
+    </Pressable>
   );
 }
 

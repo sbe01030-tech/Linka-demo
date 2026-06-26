@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
   TextInput, KeyboardAvoidingView, Platform, Image, Alert,
@@ -9,37 +9,77 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { RootStackParamList, ChatMessage } from '../../types';
 import { useLanguageStore } from '../../store/languageStore';
+import { useAuthStore } from '../../store/authStore';
+import { useChatStore, ChatThreadRec, CUSTOMER_ME, HELPER_ME } from '../../store/chatStore';
+import { translateText, TargetLang } from '../../utils/translate';
+import { DEMO_CHAT_MSG, DEMO_TRANSLATIONS } from '../../constants/demoStrings';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ChatDetail'>;
 
-const MOCK_MESSAGES: ChatMessage[] = [
-  { id: 'm1', from: 'other', text: 'Halo, saya sudah terima pesanan Anda. Ada yang perlu saya siapkan?', time: '09:00', read: true },
-  { id: 'm2', from: 'me',    text: 'Halo! Tolong datang tepat waktu ya, jam 8 pagi', time: '09:02', read: true },
-  { id: 'm3', from: 'other', text: 'Siap, saya akan pastikan hadir tepat waktu. Apakah ada permintaan khusus?', time: '09:03', read: true },
-  { id: 'm4', from: 'me',    text: 'Tidak ada, yang penting bersih dan rapi ya', time: '09:05', read: true },
-  { id: 'm5', from: 'other', text: 'Tentu! Saya sudah 5 tahun pengalaman. Tidak perlu khawatir 😊', time: '09:06', read: true },
-  { id: 'm6', from: 'other', text: 'Baik bu, saya akan datang jam 8 pagi ya', time: '10:32', read: false },
-];
+const EMPTY: ChatMessage[] = [];
 
 export default function ChatDetailScreen({ navigation, route }: Props) {
-  const { name, photo, role } = route.params;
-  const { t } = useLanguageStore();
+  const { chatId, name, photo, role } = route.params;
+  const { t, lang } = useLanguageStore();
   const insets = useSafeAreaInsets();
-  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_MESSAGES);
+
+  const user = useAuthStore((s) => s.user);
+  const meId = user?.id ?? 'cust-me';
+  const myRole = user?.role ?? 'customer';
+  const myName = user?.name ?? '나';
+
+  const messages = useChatStore((s) => s.messagesByThread[chatId] ?? EMPTY);
+  const ensureThread = useChatStore((s) => s.ensureThread);
+  const sendMessage  = useChatStore((s) => s.sendMessage);
+  const markRead     = useChatStore((s) => s.markRead);
+
+  // 스레드 없으면 생성 + 읽음 처리.
+  // 어느 진입점이든 상대를 데모 고정 신원(헬퍼=helper-me / 고객=cust-me)으로 잡아
+  // 역할 전환 시 같은 스레드를 양쪽에서 보게 함.
+  useEffect(() => {
+    // 데모 고정 신원으로 대화방 구성 → 양쪽 기기에서 이름/사진(이성기↔Sari Dewi)이 일관되게 보임
+    const rec: ChatThreadRec = { id: chatId, customer: CUSTOMER_ME, helper: HELPER_ME };
+    ensureThread(rec);
+    markRead(chatId, meId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId]);
+
   const [input, setInput] = useState('');
+  // 번역: 기본=번역본 표시. originalIds에 든 메시지만 원문으로 봄.
+  const [originalIds, setOriginalIds]   = useState<Set<string>>(new Set());
+  const [translations, setTranslations] = useState<Record<string, string>>({});
+  const [loadingIds, setLoadingIds]     = useState<Set<string>>(new Set());
   const listRef = useRef<FlatList>(null);
+
+  // 메시지 언어 감지 → KO↔ID 번역 (한글이면 인니어로, 아니면 한국어로)
+  const targetFor = (text: string): TargetLang => (/[가-힣]/.test(text) ? 'id' : 'ko');
+
+  // 받은 메시지는 자동으로 미리 번역해 두기 (기본이 번역본이므로)
+  useEffect(() => {
+    messages.forEach((m) => {
+      if (m.senderId === meId) return;
+      if (translations[m.id] || loadingIds.has(m.id)) return;
+      const target = targetFor(m.text);
+      // 시드 번역 또는 데모 목번역이 있으면 즉시 사용 (라이브 호출로 인한 버벅임 방지)
+      const mock = m.translation?.[target] ?? DEMO_TRANSLATIONS[m.text]?.[target];
+      if (mock) { setTranslations((prev) => ({ ...prev, [m.id]: mock })); return; }
+      setLoadingIds((prev) => new Set(prev).add(m.id));
+      translateText(m.text, target).then((res) => {
+        setLoadingIds((prev) => { const n = new Set(prev); n.delete(m.id); return n; });
+        if (res) setTranslations((prev) => ({ ...prev, [m.id]: res }));
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
+
+  // 원문 ↔ 번역본 토글
+  const toggleOriginal = (m: ChatMessage) =>
+    setOriginalIds((prev) => { const n = new Set(prev); n.has(m.id) ? n.delete(m.id) : n.add(m.id); return n; });
 
   const send = () => {
     const text = input.trim();
     if (!text) return;
-    const msg: ChatMessage = {
-      id: `m${Date.now()}`,
-      from: 'me',
-      text,
-      time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-      read: false,
-    };
-    setMessages((prev) => [...prev, msg]);
+    sendMessage(chatId, meId, text);
     setInput('');
     setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
   };
@@ -91,10 +131,16 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
         contentContainerStyle={s.messageContent}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
         renderItem={({ item, index }) => {
-          const isMe = item.from === 'me';
+          const isMe = item.senderId === meId;
           const showTime =
             index === messages.length - 1 ||
             messages[index + 1]?.time !== item.time;
+          const tr = translations[item.id];
+          const isTranslating = loadingIds.has(item.id);
+          const showingOriginal = originalIds.has(item.id);
+          // 기본=번역본. 번역본이 있고 원문보기 토글이 아니면 번역본 표시.
+          const displayText = (tr && !showingOriginal) ? tr : item.text;
+          const canShowTranslate = !isMe && (tr || isTranslating); // 번역본 있을 때만 토글 노출
           return (
             <View style={[s.bubbleWrap, isMe && s.bubbleWrapMe]}>
               {!isMe && (
@@ -108,12 +154,34 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
                   )}
                 </View>
               )}
-              <View style={[s.bubble, isMe ? s.bubbleMe : s.bubbleOther]}>
-                <Text style={[s.bubbleText, isMe && s.bubbleTextMe]}>{item.text}</Text>
+              <View style={s.bubbleCol}>
+                <View style={[s.bubble, isMe ? s.bubbleMe : s.bubbleOther]}>
+                  <Text style={[s.bubbleText, isMe && s.bubbleTextMe]}>
+                    {displayText}
+                  </Text>
+                </View>
+                {/* 기본은 번역본 표시 · 토글로 원문 보기 */}
+                {canShowTranslate && (
+                  <TouchableOpacity
+                    style={s.translateBtn}
+                    onPress={() => toggleOriginal(item)}
+                    activeOpacity={0.7}
+                    disabled={isTranslating}
+                  >
+                    <Ionicons
+                      name={showingOriginal ? 'language' : 'language-outline'}
+                      size={11}
+                      color={Colors.gray}
+                    />
+                    <Text style={s.translateBtnText}>
+                      {isTranslating ? '...' : showingOriginal ? t.chat.translate : t.chat.showOriginal}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                {showTime && (
+                  <Text style={[s.bubbleTime, isMe && s.bubbleTimeMe]}>{item.time}</Text>
+                )}
               </View>
-              {showTime && (
-                <Text style={[s.bubbleTime, isMe && s.bubbleTimeMe]}>{item.time}</Text>
-              )}
             </View>
           );
         }}
@@ -130,6 +198,7 @@ export default function ChatDetailScreen({ navigation, route }: Props) {
           placeholderTextColor={Colors.grayLight}
           value={input}
           onChangeText={setInput}
+          onFocus={() => { if (!input && myRole === 'customer') setInput(DEMO_CHAT_MSG); }}
           multiline
           returnKeyType="send"
           onSubmitEditing={send}
@@ -197,9 +266,13 @@ const s = StyleSheet.create({
   },
   bubbleAvatarLetter: { fontSize: 11, fontWeight: '700', color: Colors.accent },
 
+  // bubble + 번역 버튼 + 시간을 하나의 컬럼으로 묶음
+  bubbleCol: { maxWidth: '72%', flexShrink: 1 },
+
   bubble: {
-    maxWidth: '72%', borderRadius: Radius.lg,
+    borderRadius: Radius.lg,
     paddingHorizontal: 14, paddingVertical: 10,
+    alignSelf: 'flex-start',
   },
   bubbleOther: {
     backgroundColor: Colors.white,
@@ -209,12 +282,23 @@ const s = StyleSheet.create({
   bubbleMe: {
     backgroundColor: Colors.accent,
     borderBottomRightRadius: 4,
+    alignSelf: 'flex-end',
   },
   bubbleText:   { fontSize: 14, color: Colors.dark, lineHeight: 20 },
   bubbleTextMe: { color: Colors.white },
 
   bubbleTime:   { fontSize: 10, color: Colors.grayLight, alignSelf: 'flex-end', marginTop: 2 },
   bubbleTimeMe: { alignSelf: 'flex-start' },
+
+  // 번역 버튼 — 작고, 회색 톤, 배경 없음 (튀지 않게)
+  translateBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 3,
+    paddingTop: 4, paddingHorizontal: 6,
+    alignSelf: 'flex-start',
+  },
+  translateBtnText: {
+    fontSize: 11, color: Colors.gray, fontWeight: '500',
+  },
 
   inputBar: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 8,

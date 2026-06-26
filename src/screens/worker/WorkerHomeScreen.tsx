@@ -9,6 +9,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors, Radius, Shadow } from '../../constants/colors';
 import { useAuthStore } from '../../store/authStore';
 import { useLanguageStore } from '../../store/languageStore';
+import { useBookingStore } from '../../store/bookingStore';
+import { HELPER_ME } from '../../store/chatStore';
+import TransText from '../../components/common/TransText';
+import { useDemoStore } from '../../store/demoStore';
+import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
 
 // ── Mock order requests ─────────────────────────────────────────
 const MOCK_REQUESTS = [
@@ -52,6 +57,41 @@ export default function WorkerHomeScreen() {
   const insets = useSafeAreaInsets();
   const [isOnline, setIsOnline] = useState(true);
   const [requests, setRequests] = useState(MOCK_REQUESTS);
+
+  // 수락 사운드 (무음 모드에서도 재생)
+  const acceptSound = useAudioPlayer(require('../../../assets/gallery/Linka.mp3'));
+  React.useEffect(() => { setAudioModeAsync({ playsInSilentMode: true }).catch(() => {}); }, []);
+  const playAcceptSound = () => { try { acceptSound.seekTo(0); acceptSound.play(); } catch {} };
+
+  // 고객이 보낸 실제 예약(공유 스토어) → 대시보드 '수신 요청'에 표시
+  const bookings = useBookingStore((st) => st.bookings);
+  const setStatus = useBookingStore((st) => st.setStatus);
+  const liveRequests = bookings
+    .filter((b) => b.workerId === HELPER_ME.id && b.status === 'pending')
+    .map((b) => ({
+      id: b.id,
+      customerName: b.customerName,
+      customerPhoto: b.customerPhoto,
+      date: b.date,
+      startTime: b.startTime,
+      duration: b.duration,
+      address: b.address,
+      totalPrice: b.totalPrice,
+      depositAmount: b.depositPaid,
+      services: b.serviceLabel ? b.serviceLabel.split(/[,·]/).map((x) => x.trim()).filter(Boolean) : ['Layanan'],
+      notes: b.notes ?? '',
+    }));
+  const incoming = [...liveRequests, ...requests];
+
+  // 수락/거절 — 실제 예약(bk-)이면 스토어 상태 변경, mock이면 로컬에서 제거
+  const dismissReq = (id: string, accepted: boolean) => {
+    if (accepted) playAcceptSound(); // 수락 사운드
+    if (id.startsWith('bk-')) {
+      setStatus(id, accepted ? 'confirmed' : 'cancelled');
+      // 데모: 수락 시 → 고객으로 돌아오면 알림탭 자동 진입
+      if (accepted) useDemoStore.getState().setConfirmNotif(true);
+    } else setRequests((prev) => prev.filter((r) => r.id !== id));
+  };
 
   const firstName = user?.name?.split(' ')[0] ?? '';
   const isDriver  = user?.role === 'driver';
@@ -125,10 +165,6 @@ export default function WorkerHomeScreen() {
         <View style={s.heroLeft}>
           <Text style={s.heroLabel}>{t.workerHome.todayEarnings}</Text>
           <Text style={s.heroValue}>Rp 210.000</Text>
-          <View style={s.heroTrend}>
-            <Ionicons name="trending-up" size={12} color="rgba(255,255,255,0.8)" />
-            <Text style={s.heroTrendText}>+Rp 30rb vs kemarin</Text>
-          </View>
         </View>
         <View style={s.heroRight}>
           <View style={s.heroStat}>
@@ -183,13 +219,13 @@ export default function WorkerHomeScreen() {
           <Text style={s.sectionTitle}>{t.workerHome.incomingRequests}</Text>
           {isOnline && (
             <View style={s.badge}>
-              <Text style={s.badgeText}>{requests.length}</Text>
+              <Text style={s.badgeText}>{incoming.length}</Text>
             </View>
           )}
         </View>
 
         {isOnline ? (
-          requests.map((req) => (
+          incoming.map((req) => (
             <View key={req.id} style={s.requestCard}>
               {/* Customer row */}
               <View style={s.reqTop}>
@@ -221,9 +257,12 @@ export default function WorkerHomeScreen() {
                   <Text style={s.detailText} numberOfLines={1}>{req.address}</Text>
                 </View>
                 {req.notes ? (
-                  <View style={s.detailRow}>
-                    <Ionicons name="chatbubble-ellipses-outline" size={13} color={Colors.grayLight} />
-                    <Text style={s.detailText}>{req.notes}</Text>
+                  <View style={[s.detailRow, { alignItems: 'flex-start' }]}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={13} color={Colors.grayLight} style={{ marginTop: 2 }} />
+                    <View style={{ flex: 1 }}>
+                      {/* 워커 입장: 고객의 한국어 요청을 인도네시아어로 자동 번역 + 원문보기 */}
+                      <TransText original={req.notes} target="id" textStyle={s.detailText} tint={Colors.grayLight} />
+                    </View>
                   </View>
                 ) : null}
               </View>
@@ -254,7 +293,7 @@ export default function WorkerHomeScreen() {
                         {
                           text: lang === 'ko' ? '거절' : lang === 'en' ? 'Reject' : 'Tolak',
                           style: 'destructive',
-                          onPress: () => setRequests((prev) => prev.filter((r) => r.id !== req.id)),
+                          onPress: () => dismissReq(req.id, false),
                         },
                       ],
                     )
@@ -276,8 +315,7 @@ export default function WorkerHomeScreen() {
                       [
                         {
                           text: 'OK',
-                          onPress: () =>
-                            setRequests((prev) => prev.filter((r) => r.id !== req.id)),
+                          onPress: () => dismissReq(req.id, true),
                         },
                       ],
                     )
@@ -359,30 +397,28 @@ const s = StyleSheet.create({
   toggleTitle: { fontSize: 14, fontWeight: '700', color: Colors.dark },
   toggleSub:   { fontSize: 12, color: Colors.gray, marginTop: 1 },
 
-  // ── Earnings hero ──
+  // ── Earnings hero (심플 화이트 카드) ──
   heroCard: {
     marginHorizontal: 16, marginTop: 10,
-    backgroundColor: AMBER,
-    borderRadius: Radius.xl,
-    padding: 20,
+    backgroundColor: Colors.white,
+    borderRadius: Radius.lg,
+    paddingHorizontal: 18, paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    ...Shadow.md,
+    borderWidth: 2, borderColor: Colors.accent + '55',
   },
   heroLeft: { flex: 1 },
-  heroLabel: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.75)', marginBottom: 4 },
-  heroValue: { fontSize: 28, fontWeight: '800', color: Colors.white, letterSpacing: -0.5 },
-  heroTrend: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 6 },
-  heroTrendText: { fontSize: 11, color: 'rgba(255,255,255,0.8)', fontWeight: '500' },
+  heroLabel: { fontSize: 12, fontWeight: '600', color: Colors.gray, marginBottom: 4 },
+  heroValue: { fontSize: 25, fontWeight: '800', color: Colors.dark, letterSpacing: -0.5 },
   heroRight: {
     flexDirection: 'row', alignItems: 'center', gap: 16,
     paddingLeft: 16,
-    borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.3)',
+    borderLeftWidth: 1, borderLeftColor: Colors.border,
   },
   heroStat:       { alignItems: 'center', gap: 3 },
-  heroStatValue:  { fontSize: 16, fontWeight: '700', color: Colors.white },
-  heroStatLabel:  { fontSize: 10, color: 'rgba(255,255,255,0.7)' },
-  heroStatDivider:{ width: 1, height: 28, backgroundColor: 'rgba(255,255,255,0.3)' },
+  heroStatValue:  { fontSize: 16, fontWeight: '700', color: Colors.dark },
+  heroStatLabel:  { fontSize: 10, color: Colors.grayLight },
+  heroStatDivider:{ width: 1, height: 28, backgroundColor: Colors.border },
 
   // ── Sections ──
   section: { paddingHorizontal: 16, paddingTop: 20, gap: 12 },
