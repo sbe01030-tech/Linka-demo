@@ -48,8 +48,8 @@ export const D10 = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-5
 export const D11 = require('../../assets/drivers/KakaoTalk_Photo_2026-04-24-13-52-38 002.jpeg');
 
 // ── 데모 고정 인물 (로컬 에셋) ───────────────────────────────
-// 보내는 고객 = 김도형 대표님 (Kim.png). 기존 seongki.png는 보존(나중에 재사용 가능)
-export const SEONGKI_PHOTO = localUri(require('../../assets/people/Kim.png'));
+// 보내는 고객 = Jacob Ea (Ea.png). 기존 seongki.png / Kim.png 보존(나중에 재사용 가능)
+export const SEONGKI_PHOTO = localUri(require('../../assets/people/Ea.png'));
 // 워커 = Max Park (박재현 이미지)
 export const MAXPARK_PHOTO = localUri(require('../../assets/people/maxpark.jpg'));
 

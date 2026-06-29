@@ -15,7 +15,7 @@ interface AuthState {
 
 // Mock data untuk development
 const MOCK_USERS: User[] = [
-  { id: '1', name: '김도형 대표님', phone: '0812-3456-7890', role: 'customer', rating: 4.8 },
+  { id: '1', name: 'Jacob Ea', phone: '0812-3456-7890', role: 'customer', rating: 4.8 },
   { id: '2', name: 'Sari Dewi',    phone: '0812-3456-7891', role: 'helper',   rating: 5.0, totalJobs: 312, isVerified: true },
 ];
 
@@ -53,7 +53,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   quickStart: (role: UserRole) => {
     const guestUser: User = {
       id: roleId(role),
-      name: role === 'customer' ? '김도형 대표님' : 'Sari Dewi',
+      name: role === 'customer' ? 'Jacob Ea' : 'Sari Dewi',
       phone: '',
       role,
       isVerified: true,
@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   switchRole: (role: UserRole) => {
     const u: User = {
       id: roleId(role),
-      name: role === 'customer' ? '김도형 대표님' : 'Sari Dewi',
+      name: role === 'customer' ? 'Jacob Ea' : 'Sari Dewi',
       phone: '',
       role,
       isVerified: true,
