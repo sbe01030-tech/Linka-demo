@@ -18,8 +18,8 @@ import { pushMessage, pushThread } from './sync';
 
 export interface ChatParticipant { id: string; name: string; photo?: any; role: 'customer' | 'helper' | 'tutor' | 'driver' }
 
-// 데모 고정 신원: 고객 = 이성기 대표님 / 워커 = Sari Dewi
-export const CUSTOMER_ME: ChatParticipant = { id: 'cust-me', name: '이성기 대표님', photo: SEONGKI_PHOTO, role: 'customer' };
+// 데모 고정 신원: 고객 = 김도형 대표님 / 워커 = Sari Dewi
+export const CUSTOMER_ME: ChatParticipant = { id: 'cust-me', name: '김도형 대표님', photo: SEONGKI_PHOTO, role: 'customer' };
 export const HELPER_ME:   ChatParticipant = { id: 'helper-me', name: 'Sari Dewi', photo: W1, role: 'helper' };
 
 // 예시 대화 상대 — 워커(Max) 쪽 다른 고객들 / 고객(이성기) 쪽 다른 헬퍼들
@@ -43,7 +43,7 @@ const now = () => {
 };
 
 // ── 시드 대화 ──────────────────────────────────────────────────
-//  메인:  이성기 대표님(고객) ↔ Sari Dewi(워커)  — 양쪽 기기에서 보임
+//  메인:  김도형 대표님(고객) ↔ Sari Dewi(워커)  — 양쪽 기기에서 보임
 //  워커 예시: 다른 고객 2명 ↔ Max (워커 기기에서만 보임)
 //  고객 예시: 이성기 ↔ 다른 헬퍼 2명 (고객 기기에서만 보임)
 const seedThreads: ChatThreadRec[] = [
